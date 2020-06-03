@@ -3,8 +3,8 @@
 
 ```
 -API
- --api文档采用swagger
- --实例作业的添加，删除，修改
+ -api文档采用swagger
+ -实例作业的添加，删除，修改
  
 -Mgr
  -检查Pending状态作业
