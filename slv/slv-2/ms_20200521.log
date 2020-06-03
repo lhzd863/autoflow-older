@@ -1,0 +1,28 @@
+[j]2020/05/21 22:46:15 Register node 122.51.161.53, 12313
+[j]2020/05/21 22:46:15 Post http://122.51.161.53:12307/api/v1/slave/add?accesstoken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjMzMDY0NzQzOTYsImlzcyI6ImF6eiJ9.6AfjNv08aXIYNeR9D4P66fx1HYErDDmD4icPR1bCPgY: read tcp 192.168.1.189:54418->122.51.161.53:12307: read: connection reset by peer
+[j]2020/05/21 22:46:15 register slave fail.
+[j]2020/05/21 22:51:15 Register node 122.51.161.53, 12313
+[j]2020/05/21 22:56:15 Register node 122.51.161.53, 12313
+[j]2020/05/21 22:57:04 Register node 122.51.161.53, 12313
+[j]2020/05/21 22:57:04 Post http://122.51.161.53:12307/api/v1/slave/add?accesstoken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjMzMDY0NzQzOTYsImlzcyI6ImF6eiJ9.6AfjNv08aXIYNeR9D4P66fx1HYErDDmD4icPR1bCPgY: read tcp 192.168.1.189:58658->122.51.161.53:12307: read: connection reset by peer
+[j]2020/05/21 22:57:04 register slave fail.
+[j]2020/05/21 23:02:04 Register node 122.51.161.53, 12313
+[j]2020/05/21 23:02:04 Post http://122.51.161.53:12307/api/v1/slave/add?accesstoken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjMzMDY0NzQzOTYsImlzcyI6ImF6eiJ9.6AfjNv08aXIYNeR9D4P66fx1HYErDDmD4icPR1bCPgY: read tcp 192.168.1.189:59784->122.51.161.53:12307: read: connection reset by peer
+[j]2020/05/21 23:02:04 register slave fail.
+[j]2020/05/21 23:07:04 Register node 122.51.161.53, 12313
+[j]2020/05/21 23:12:04 Register node 122.51.161.53, 12313
+[j]2020/05/21 23:13:51 Register node 122.51.161.53, 12313
+[j]2020/05/21 23:13:51 Post http://122.51.161.53:12307/api/v1/slave/add?accesstoken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjMzMDY0NzQzOTYsImlzcyI6ImF6eiJ9.6AfjNv08aXIYNeR9D4P66fx1HYErDDmD4icPR1bCPgY: read tcp 192.168.1.189:34806->122.51.161.53:12307: read: connection reset by peer
+[j]2020/05/21 23:13:51 register slave fail.
+[j]2020/05/21 23:18:51 Register node 122.51.161.53, 12313
+[j]2020/05/21 23:23:51 Register node 122.51.161.53, 12313
+[j]2020/05/21 23:28:51 Register node 122.51.161.53, 12313
+[j]2020/05/21 23:33:51 Register node 122.51.161.53, 12313
+[j]2020/05/21 23:38:51 Register node 122.51.161.53, 12313
+[j]2020/05/21 23:43:51 Register node 122.51.161.53, 12313
+[j]2020/05/21 23:48:51 Register node 122.51.161.53, 12313
+[j]2020/05/21 23:49:37 Register node 122.51.161.53, 12313
+[j]2020/05/21 23:49:37 Post http://122.51.161.53:12307/api/v1/slave/add?accesstoken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjMzMDY0NzQzOTYsImlzcyI6ImF6eiJ9.6AfjNv08aXIYNeR9D4P66fx1HYErDDmD4icPR1bCPgY: read tcp 192.168.1.189:44554->122.51.161.53:12307: read: connection reset by peer
+[j]2020/05/21 23:49:37 register slave fail.
+[j]2020/05/21 23:54:37 Register node 122.51.161.53, 12313
+[j]2020/05/21 23:59:37 Register node 122.51.161.53, 12313
