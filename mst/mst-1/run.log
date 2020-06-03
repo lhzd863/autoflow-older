@@ -1,7 +1,0 @@
-# github.com/lhzd863/autoflow/mst
-../flowMgr.go:227:10: m.Lock undefined (type *FlowMgr has no field or method Lock)
-../flowMgr.go:228:16: m.Unlock undefined (type *FlowMgr has no field or method Unlock)
-../flowMgr.go:229:9: undefined: streamarr
-../flowMgr.go:230:16: undefined: streamarr
-../flowMgr.go:231:33: undefined: streamarr
-../flowMgr.go:232:22: undefined: streamarr
