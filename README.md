@@ -1,6 +1,16 @@
 # autoflow
-## 功能
+## 依赖
+```
+-github.com/satori/go.uuid
+-google.golang.org/grpc
+-github.com/emicklei/go-restful
+-go.etcd.io/bbolt
+-jwt
+-workpool
 
+```
+
+## 功能
 ```
 -API
  -api文档采用swagger
