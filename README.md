@@ -2,7 +2,7 @@
 
 ## 简介
 
-autoflow数据批量分布式作业调度系,支持批量调度之间无干扰，元数据相互对立，使用元数据能够快速恢复一个相同运行环境，系统间通信采用restful进行交互，数据采用json方式进行存储，节点和节点直接消息采用protobuffer。系统采用服务端和客户端相分离方式，只有同时使用服务端和客户端才能完成整套调度系统搭建。服务端元数据存储采用bbolt无需安装，配置相关参数可以直接使用，客户端在[vue-element-admin](https://github.com/PanJiaChen/vue-element-admin) 基础上开发完成。
+autoflow数据批量分布式作业调度系,支持批量调度之间无干扰，元数据相互对立，使用元数据能够快速恢复一个相同运行环境，系统间通信采用[go-restful](https://github.com/emicklei/go-restful)进行交互，数据采用json方式进行存储，节点和节点直接消息采用protobuffer。系统采用服务端和客户端相分离方式，只有同时使用服务端和客户端才能完成整套调度系统搭建。服务端元数据存储采用bbolt无需安装，配置相关参数可以直接使用，客户端在[vue-element-admin](https://github.com/PanJiaChen/vue-element-admin) 基础上开发完成。
 
 ## 依赖
 ```
