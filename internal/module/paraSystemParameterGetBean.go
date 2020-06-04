@@ -1,5 +1,5 @@
 package module
 
 type MetaParaSystemParameterGetBean struct {
-        Key            string `json:"key"`
+	Key string `json:"key"`
 }

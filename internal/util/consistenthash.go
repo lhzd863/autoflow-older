@@ -130,6 +130,3 @@ func (c *Consistent) Remove(node *Node) {
 	}
 	c.sortHashRing()
 }
-
-
-

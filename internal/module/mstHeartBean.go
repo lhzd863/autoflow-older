@@ -9,6 +9,6 @@ type MetaMstHeartBean struct {
 	UpdateTime string        `json:"updatetime"`
 	FlowNum    string        `json:"flownum"`
 	Duration   string        `json:"duration"`
-        ProcessNum string        `json:"processnum"`
+	ProcessNum string        `json:"processnum"`
 	Lst        []interface{} `json:"lst"`
 }

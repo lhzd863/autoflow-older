@@ -19,4 +19,3 @@ func (e *ClientErr) Description() string {
 func NewClientErr(err string, description string) *ClientErr {
 	return &ClientErr{err, description}
 }
-

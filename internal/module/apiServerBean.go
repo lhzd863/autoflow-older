@@ -14,5 +14,5 @@ type MetaApiServerBean struct {
 	MstMinPort    int64  `yaml:"mstminport"`
 	ApiServerIp   string `yaml:"apiserverip"`
 	ApiServerPort string `yaml:"apiserverport"`
-        AccessToken   string `yaml:"accesstoken"`
+	AccessToken   string `yaml:"accesstoken"`
 }

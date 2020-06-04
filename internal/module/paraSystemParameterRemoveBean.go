@@ -1,5 +1,5 @@
 package module
 
 type MetaParaSystemParameterRemoveBean struct {
-        Key            string `json:"key"`
+	Key string `json:"key"`
 }

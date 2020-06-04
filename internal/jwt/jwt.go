@@ -84,7 +84,7 @@ func Encode(jwt interface{}, key []byte, algorithm string) ([]byte, error) {
 func Decode(encoded []byte, claims interface{}, key []byte) error {
 	segments := bytes.Split(encoded, separator)
 
-	// segments is currently slices make copies so functions like 
+	// segments is currently slices make copies so functions like
 	// base64url_decode will not overwrite later portions
 	for k, v := range segments {
 		newBytes := make([]byte, len(v))
@@ -134,4 +134,3 @@ func Decode(encoded []byte, claims interface{}, key []byte) error {
 	}
 	return nil
 }
-

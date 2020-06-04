@@ -3,9 +3,9 @@ package util
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strings"
-        "log"
 )
 
 func Post() {
@@ -69,11 +69,9 @@ func Put() {
 	fmt.Println(string(body))
 }
 
-
-
-func Delete(job string,instance string) {
-	url := "http://172.18.18.99:9091/metrics/job/"+job+"/instance/"+instance
-        log.Println(url)
+func Delete(job string, instance string) {
+	url := "http://172.18.18.99:9091/metrics/job/" + job + "/instance/" + instance
+	log.Println(url)
 	req, _ := http.NewRequest("DELETE", url, nil)
 	res, _ := http.DefaultClient.Do(req)
 	defer res.Body.Close()
@@ -81,4 +79,3 @@ func Delete(job string,instance string) {
 	fmt.Println(res)
 	fmt.Println(string(body))
 }
-

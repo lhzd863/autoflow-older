@@ -1,7 +1,7 @@
 package module
 
 type MetaParaFlowJobTimeWindowAddBean struct {
-        FlowId      string `json:"flowid"`
+	FlowId      string `json:"flowid"`
 	Sys         string `json:"sys"`
 	Job         string `json:"job"`
 	Allow       string `json:"allow"`

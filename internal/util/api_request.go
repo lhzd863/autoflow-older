@@ -1,11 +1,11 @@
 package util
 
 import (
-        "net"
-        "time"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"strings"
+	"time"
 )
 
 //post

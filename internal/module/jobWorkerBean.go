@@ -1,7 +1,7 @@
 package module
 
 type MetaJobWorkerBean struct {
-        Id          string        `json:"id"`
+	Id          string        `json:"id"`
 	FlowId      string        `json:"flowid"`
 	Sys         string        `json:"sys"`
 	Job         string        `json:"job"`
@@ -17,5 +17,5 @@ type MetaJobWorkerBean struct {
 	MasterPort  string        `json:"mport"`
 	SlaveIp     string        `json:"sip"`
 	SlavePort   string        `json:"sport"`
-        Cmd         []interface{} `json:"cmd"`
+	Cmd         []interface{} `json:"cmd"`
 }

@@ -7,5 +7,5 @@ type MetaFlowStatusBean struct {
 	Port           string `json:"port"`
 	WorkPoolStatus string `json:"workpoolstatus"`
 	MyWorkCnt      string `json:"myworkcnt"`
-        Enable         string `json:"enable"`
+	Enable         string `json:"enable"`
 }

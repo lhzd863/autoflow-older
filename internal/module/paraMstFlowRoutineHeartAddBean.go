@@ -10,6 +10,6 @@ type MetaParaMstFlowRoutineHeartAddBean struct {
 	StartTime  string        `json:"starttime"`
 	UpdateTime string        `json:"updatetime"`
 	Duration   string        `json:"duration"`
-        JobNum     string        `json:"jobnum"`
-        Lst        []interface{} `json:"lst"`
+	JobNum     string        `json:"jobnum"`
+	Lst        []interface{} `json:"lst"`
 }

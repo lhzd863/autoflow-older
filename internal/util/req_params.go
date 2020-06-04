@@ -41,5 +41,3 @@ func (r *ReqParams) GetAll(key string) ([]string, error) {
 	}
 	return v, nil
 }
-
-

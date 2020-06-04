@@ -71,15 +71,15 @@ func New(numberOfRoutines int, queueCapacity int32) *WorkPool {
 }
 
 func (workPool *WorkPool) AddRoutine(workRoutine int) (err error) {
-        workPool.shutdownWaitGroup.Add(1)
-        go workPool.workRoutine(workRoutine)
-        return nil
+	workPool.shutdownWaitGroup.Add(1)
+	go workPool.workRoutine(workRoutine)
+	return nil
 }
 
 func (workPool *WorkPool) SubRoutine(workRoutine int) (err error) {
-        atomic.AddInt32(&workPool.activeRoutines, -1)
-        workPool.shutdownWorkChannel <- struct{}{}
-        return nil
+	atomic.AddInt32(&workPool.activeRoutines, -1)
+	workPool.shutdownWorkChannel <- struct{}{}
+	return nil
 }
 
 // Shutdown will release resources and shutdown all processing.
@@ -218,4 +218,3 @@ func (workPool *WorkPool) queueRoutine() {
 		}
 	}
 }
-

@@ -12,5 +12,5 @@ type MetaJobLogBean struct {
 	EndTime   string   `json:"endtime"`
 	Content   []string `json:"content"`
 	ExitCode  string   `json:"exitcode"`
-        Cmd       string   `json:"cmd"`
+	Cmd       string   `json:"cmd"`
 }

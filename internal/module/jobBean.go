@@ -3,12 +3,12 @@ package module
 type MetaJobBean struct {
 	Sys            string `json:"sys"`
 	Job            string `json:"job"`
-        RunContext     string `json:"runcontext"`
-        Status         string `json:"status"`
-        StartTime      string `json:"starttime"`
-        EndTime        string `json:"endtime"`
-        JobType        string `json:"jobtype"`
-        Description    string `json:"description"`
+	RunContext     string `json:"runcontext"`
+	Status         string `json:"status"`
+	StartTime      string `json:"starttime"`
+	EndTime        string `json:"endtime"`
+	JobType        string `json:"jobtype"`
+	Description    string `json:"description"`
 	Enable         string `json:"enable"`
 	SServer        string `json:"sserver"`
 	Sip            string `json:"sip"`
@@ -16,7 +16,7 @@ type MetaJobBean struct {
 	MServer        string `json:"mserver"`
 	Mip            string `json:"mip"`
 	Mport          string `json:"mport"`
-        RoutineId      string `json:"routineid"`
+	RoutineId      string `json:"routineid"`
 	TimeWindow     string `json:"timewindow"`
 	RetryCnt       string `json:"retrycnt"`
 	Alert          string `json:"alert"`

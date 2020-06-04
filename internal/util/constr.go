@@ -36,5 +36,5 @@ const (
 	BATCH_LOG  = "batch.log"
 	//
 	SLV_SLEEP_TIME = "slv.sleep.time"
-        MST_SLEEP_TIME = "mst.sleep.time"
+	MST_SLEEP_TIME = "mst.sleep.time"
 )

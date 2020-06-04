@@ -1,5 +1,5 @@
 package module
 
 type MetaParaFlowJobListBean struct {
-        FlowId         string `json:"flowid"`
+	FlowId string `json:"flowid"`
 }

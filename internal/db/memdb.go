@@ -11,9 +11,9 @@ type MemDB struct {
 }
 
 func NewMemDB() *MemDB {
-        return &MemDB{
-                MemMap: make(map[string]interface{}),
-        }
+	return &MemDB{
+		MemMap: make(map[string]interface{}),
+	}
 }
 
 func (r *MemDB) Add(k string, v interface{}) {

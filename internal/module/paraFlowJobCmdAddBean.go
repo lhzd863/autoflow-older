@@ -1,7 +1,7 @@
 package module
 
 type MetaParaFlowJobCmdAddBean struct {
-        FlowId      string `json:"flowid"`
+	FlowId      string `json:"flowid"`
 	Sys         string `json:"sys"`
 	Job         string `json:"job"`
 	Type        string `json:"type"`

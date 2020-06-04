@@ -1,5 +1,5 @@
 package module
 
 type MetaParaMstFlowRoutineHeartRemoveBean struct {
-	Id         string        `json:"id"`
+	Id string `json:"id"`
 }
