@@ -6,9 +6,9 @@ autoflow数据批量分布式作业调度系,支持批量调度之间无干扰�
 
 ## 依赖
 
-- [github.com/satori/go.uuid](https://github.com/satori/Go.uuid) 唯一ID生成
+- [go.uuid](https://github.com/satori/Go.uuid) 唯一ID生成
 - google.golang.org/grpc
-- [github.com/emicklei/go-restful](https://github.com/emicklei/go-restful) restful web框架
+- [go-restful](https://github.com/emicklei/go-restful) restful web框架
 - [bbolt](https://github.com/etcd-io/bbolt) 数据存储
 - [jwt](https://github.com/robbert229/jwt) token安全验证
 - [workpool](https://github.com/goinggo/workpool) 线程池
