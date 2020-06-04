@@ -5,15 +5,15 @@
 autoflow数据批量分布式作业调度系,支持批量调度之间无干扰，元数据相互对立，使用元数据能够快速恢复一个相同运行环境，系统间通信采用[go-restful](https://github.com/emicklei/go-restful)进行交互，数据采用json方式进行存储，节点和节点之间通过grpc通信，消息格式采用protobuffer。系统采用服务端和客户端相分离方式，只有同时使用服务端和客户端才能完成整套调度系统搭建。服务端元数据存储采用[bbolt](https://github.com/etcd-io/bbolt)无需安装，配置相关参数可以直接使用，客户端在[vue-element-admin](https://github.com/PanJiaChen/vue-element-admin) 基础上开发完成。
 
 ## 依赖
-```
--github.com/satori/go.uuid
+
+-[github.com/satori/go.uuid](github.com/satori/go.uuid)
 -google.golang.org/grpc
 -github.com/emicklei/go-restful
--go.etcd.io/bbolt
+-[go.etcd.io/bbolt](https://github.com/etcd-io/bbolt)
 -jwt
 -workpool
 
-```
+
 ## 名词
 ```
 -镜像: 带有存储作业配置，依赖，参数，触发等相关配置的bbolt存储文件，建立目录创建ID和打上标记形成对象
