@@ -6,12 +6,12 @@ autoflow数据批量分布式作业调度系,支持批量调度之间无干扰�
 
 ## 依赖
 
--[github.com/satori/go.uuid](github.com/satori/go.uuid)
--google.golang.org/grpc
--github.com/emicklei/go-restful
--[go.etcd.io/bbolt](https://github.com/etcd-io/bbolt)
--jwt
--workpool
+- [github.com/satori/go.uuid](github.com/satori/go.uuid)
+- google.golang.org/grpc
+- github.com/emicklei/go-restful
+- [go.etcd.io/bbolt](https://github.com/etcd-io/bbolt)
+- jwt
+- workpool
 
 
 ## 名词
