@@ -151,16 +151,23 @@ func (s *SServer) Executesh(job *module.MetaJobWorkerBean) error {
 		timeStr := time.Now().Format("20060102150405")
 		jobLogF := fmt.Sprintf("%v/%v_%v_%v_%v.log", logf, strings.ToLower(job.Job), i, job.RunningTime, timeStr)
 		c := job.Cmd[i].(string)
+                for j := len(job.Parameter)-1; j >=0; j-- {
+                        kv := new(module.KVBean)
+                        err := json.Unmarshal([]byte(job.Parameter[j].(string)), &kv)
+                        if err != nil {
+                                glog.Glog(LogF, fmt.Sprintf("parse kvbean error.%v", err))
+                        }
+                        //repalce variable
+                        vt := "\\$\\{" + kv.K + "\\}"
+                        reg := regexp.MustCompile(vt)
+                        c = reg.ReplaceAllString(c, kv.V)
+                }
 		for j := 0; j < len(job.Parameter); j++ {
 			kv := new(module.KVBean)
 			err := json.Unmarshal([]byte(job.Parameter[j].(string)), &kv)
 			if err != nil {
 				glog.Glog(LogF, fmt.Sprintf("parse kvbean error.%v", err))
 			}
-			//repalce variable
-			vt := "\\$\\{" + kv.K + "\\}"
-			reg := regexp.MustCompile(vt)
-			c = reg.ReplaceAllString(c, kv.V)
 			//set env
 			err = os.Setenv(kv.K, kv.V)
 			glog.Glog(LogF, fmt.Sprintf("%v = %v", kv.K, kv.V))
