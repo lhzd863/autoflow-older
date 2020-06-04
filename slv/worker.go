@@ -18,9 +18,9 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"sync"
 	"syscall"
 	"time"
-        "sync"
 
 	"github.com/satori/go.uuid"
 
@@ -46,7 +46,7 @@ var (
 
 // 业务实现方法的容器
 type SServer struct {
-        sync.RWMutex
+	sync.RWMutex
 	waitGroup util.WaitGroupWrapper
 }
 
@@ -151,17 +151,17 @@ func (s *SServer) Executesh(job *module.MetaJobWorkerBean) error {
 		timeStr := time.Now().Format("20060102150405")
 		jobLogF := fmt.Sprintf("%v/%v_%v_%v_%v.log", logf, strings.ToLower(job.Job), i, job.RunningTime, timeStr)
 		c := job.Cmd[i].(string)
-                for j := len(job.Parameter)-1; j >=0; j-- {
-                        kv := new(module.KVBean)
-                        err := json.Unmarshal([]byte(job.Parameter[j].(string)), &kv)
-                        if err != nil {
-                                glog.Glog(LogF, fmt.Sprintf("parse kvbean error.%v", err))
-                        }
-                        //repalce variable
-                        vt := "\\$\\{" + kv.K + "\\}"
-                        reg := regexp.MustCompile(vt)
-                        c = reg.ReplaceAllString(c, kv.V)
-                }
+		for j := len(job.Parameter) - 1; j >= 0; j-- {
+			kv := new(module.KVBean)
+			err := json.Unmarshal([]byte(job.Parameter[j].(string)), &kv)
+			if err != nil {
+				glog.Glog(LogF, fmt.Sprintf("parse kvbean error.%v", err))
+			}
+			//repalce variable
+			vt := "\\$\\{" + kv.K + "\\}"
+			reg := regexp.MustCompile(vt)
+			c = reg.ReplaceAllString(c, kv.V)
+		}
 		for j := 0; j < len(job.Parameter); j++ {
 			kv := new(module.KVBean)
 			err := json.Unmarshal([]byte(job.Parameter[j].(string)), &kv)
@@ -197,49 +197,50 @@ func (s *SServer) Executesh(job *module.MetaJobWorkerBean) error {
 		}
 		cmd.Start()
 		reader := bufio.NewReader(stdout)
-                logarr := make([]string,0)
-                logChan := make(chan int)
-                n := new(module.MetaParaFlowJobLogAddBean)
-                n.Sys = job.Sys
-                n.Job = job.Job
-                n.FlowId = job.FlowId
-                n.SServer = WorkerId
-                n.Sip = Ip
-                n.Sport = Port
-                n.Step = fmt.Sprint(i)
-                u2 := uuid.Must(uuid.NewV4())
-                n.Id = fmt.Sprint(u2)
-                n.StartTime = timeStr
-                tstopflag := 0
-                var wg util.WaitGroupWrapper
-                go func () {
-                        <- logChan
-                        tstopflag = 1
-                }()
-                wg.Wrap(func() {
-                        st := time.Now().Unix()
-                        et := time.Now().Unix()
-                        n.Content = make([]string,0)
-                        s.JobLogAppend(n)
-                        for {
-                               if tstopflag == 1{
-                                     break
-                               }
-                               et = time.Now().Unix()
-                               if len(logarr) >= 100 || (et - st >= 10&&len(logarr)>0) {
-                                   s.Lock()
-                                   tarr := logarr
-                                   logarr = make([]string,0)
-                                   s.Unlock()
-                                   n.Content = tarr
-                                   s.JobLogAppend(n)
-                                   st = time.Now().Unix()
-                               }
-                               rand.Seed(time.Now().UnixNano())
-                               ri := rand.Intn(2)
-                               time.Sleep(time.Duration(ri) * time.Second)
-                        }
-                })
+		logarr := make([]string, 0)
+		logChan := make(chan int)
+		n := new(module.MetaParaFlowJobLogAddBean)
+		n.Sys = job.Sys
+		n.Job = job.Job
+		n.FlowId = job.FlowId
+		n.SServer = WorkerId
+		n.Sip = Ip
+		n.Sport = Port
+		n.Step = fmt.Sprint(i)
+		n.Cmd = c
+		u2 := uuid.Must(uuid.NewV4())
+		n.Id = fmt.Sprint(u2)
+		n.StartTime = timeStr
+		tstopflag := 0
+		var wg util.WaitGroupWrapper
+		go func() {
+			<-logChan
+			tstopflag = 1
+		}()
+		wg.Wrap(func() {
+			st := time.Now().Unix()
+			et := time.Now().Unix()
+			n.Content = make([]string, 0)
+			s.JobLogAppend(n)
+			for {
+				if tstopflag == 1 {
+					break
+				}
+				et = time.Now().Unix()
+				if len(logarr) >= 100 || (et-st >= 10 && len(logarr) > 0) {
+					s.Lock()
+					tarr := logarr
+					logarr = make([]string, 0)
+					s.Unlock()
+					n.Content = tarr
+					s.JobLogAppend(n)
+					st = time.Now().Unix()
+				}
+				rand.Seed(time.Now().UnixNano())
+				ri := rand.Intn(2)
+				time.Sleep(time.Duration(ri) * time.Second)
+			}
+		})
 		go func() {
 			for {
 				line, err2 := reader.ReadString('\n')
@@ -247,7 +248,7 @@ func (s *SServer) Executesh(job *module.MetaJobWorkerBean) error {
 					break
 				}
 				glog.Glog(jobLogF, fmt.Sprintf("%v", line))
-                                logarr = append(logarr,line)
+				logarr = append(logarr, line)
 			}
 		}()
 		readererr := bufio.NewReader(stderr)
@@ -258,59 +259,59 @@ func (s *SServer) Executesh(job *module.MetaJobWorkerBean) error {
 					break
 				}
 				glog.Glog(jobLogF, fmt.Sprintf("%v", line))
-                                logarr = append(logarr,line)
+				logarr = append(logarr, line)
 			}
 		}()
 
 		cmd.Wait()
-                logChan <- 1
+		logChan <- 1
 		retcd := string(fmt.Sprintf("%v", cmd.ProcessState.Sys().(syscall.WaitStatus).ExitStatus()))
 		retcd = strings.Replace(retcd, " ", "", -1)
 		retcd = strings.Replace(retcd, "\n", "", -1)
-                timeStr1 := time.Now().Format("2006-01-02 15:04:05")
-                n.EndTime = timeStr1 
-                wg.Wait()
-                n.Content = logarr
+		timeStr1 := time.Now().Format("2006-01-02 15:04:05")
+		n.EndTime = timeStr1
+		wg.Wait()
+		n.Content = logarr
 		if retcd != "0" {
-                        n.ExitCode = retcd
-                        s.JobLogAppend(n)
+			n.ExitCode = retcd
+			s.JobLogAppend(n)
 			glog.Glog(jobLogF, fmt.Sprintf("%v", retcd))
 			exitChan <- 1
 			return fmt.Errorf("%v", retcd)
 		}
-                n.ExitCode = "0"
-                s.JobLogAppend(n)
+		n.ExitCode = "0"
+		s.JobLogAppend(n)
 	}
 	exitChan <- 1
 	return nil
 }
 
 func (s *SServer) JobLogAppend(n *module.MetaParaFlowJobLogAddBean) bool {
-        glog.Glog(LogF, fmt.Sprintf("node %v, %v", Ip, Port))
-        url := fmt.Sprintf("http://%v:%v/api/v1/flow/job/log/append?accesstoken=%v", ApiServerIp, ApiServerPort, AccessToken)
-        
-        jsonstr0, err := json.Marshal(n)
-        if err != nil {
-                glog.Glog(LogF, fmt.Sprint(err))
-                return false
-        }
+	glog.Glog(LogF, fmt.Sprintf("node %v, %v", Ip, Port))
+	url := fmt.Sprintf("http://%v:%v/api/v1/flow/job/log/append?accesstoken=%v", ApiServerIp, ApiServerPort, AccessToken)
 
-        jsonstr, err := util.Api_RequestPost(url, string(jsonstr0))
-        if err != nil {
-                glog.Glog(LogF, fmt.Sprint(err))
-                return false
-        }
-		retbn1 := new(module.RetBean)
-        err = json.Unmarshal([]byte(jsonstr), &retbn1)
-        if err != nil {
-                glog.Glog(LogF, fmt.Sprint(err))
-                return false
-        }
-        if retbn1.Status_Code != 200 {
-                glog.Glog(LogF, fmt.Sprintf("post url return status code:%v", retbn1.Status_Code))
-                return false
-        }
-        return true
+	jsonstr0, err := json.Marshal(n)
+	if err != nil {
+		glog.Glog(LogF, fmt.Sprint(err))
+		return false
+	}
+
+	jsonstr, err := util.Api_RequestPost(url, string(jsonstr0))
+	if err != nil {
+		glog.Glog(LogF, fmt.Sprint(err))
+		return false
+	}
+	retbn1 := new(module.RetBean)
+	err = json.Unmarshal([]byte(jsonstr), &retbn1)
+	if err != nil {
+		glog.Glog(LogF, fmt.Sprint(err))
+		return false
+	}
+	if retbn1.Status_Code != 200 {
+		glog.Glog(LogF, fmt.Sprintf("post url return status code:%v", retbn1.Status_Code))
+		return false
+	}
+	return true
 }
 
 func (s *SServer) WorkerJobRunningRegister(m *module.MetaSystemWorkerRoutineJobRunningHeartBean) bool {

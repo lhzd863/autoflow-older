@@ -10,7 +10,7 @@ type MetaConf struct {
 	AccessToken   string `yaml:"accesstoken"`
 	ApiServerIp   string `yaml:"apiserverip"`
 	ApiServerPort string `yaml:"apiserverport"`
-        ProcessNum    string `yaml:"processnum"`
+	ProcessNum    string `yaml:"processnum"`
 }
 
 type MetaJob struct {

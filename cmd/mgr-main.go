@@ -2,11 +2,11 @@ package main
 
 import (
 	"flag"
+	"io/ioutil"
+	"log"
 	"os"
-        "io/ioutil"
-        "log"
 
-        "gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v2"
 
 	"github.com/lhzd863/autoflow/internal/util"
 	"github.com/lhzd863/autoflow/mst"
@@ -15,7 +15,7 @@ import (
 var (
 	cfg  = flag.String("conf", "conf.yaml", "basic config")
 	conf *mst.MetaConf
-        LogF   string
+	LogF string
 )
 
 func main() {
@@ -35,18 +35,16 @@ func main() {
 	if ok, _ := util.PathExists(conf.HomeDir + "/LOG"); !ok {
 		os.Mkdir(conf.HomeDir+"/LOG", os.ModePerm)
 	}
-        mpara := make(map[string]interface{})
-        mpara["mstid"] = conf.Name
-        mpara["ip"] = conf.Ip
-        mpara["port"] = conf.Port
-        mpara["homedir"] = conf.HomeDir
-        mpara["accesstoken"] = conf.AccessToken
-        mpara["apiserverip"] = conf.ApiServerIp
-        mpara["apiserverport"] = conf.ApiServerPort
-        mpara["processnum"] = conf.ProcessNum
-          
-        m:=mst.NewMServer(mpara)
-        m.Main()
+	mpara := make(map[string]interface{})
+	mpara["mstid"] = conf.Name
+	mpara["ip"] = conf.Ip
+	mpara["port"] = conf.Port
+	mpara["homedir"] = conf.HomeDir
+	mpara["accesstoken"] = conf.AccessToken
+	mpara["apiserverip"] = conf.ApiServerIp
+	mpara["apiserverport"] = conf.ApiServerPort
+	mpara["processnum"] = conf.ProcessNum
+
+	m := mst.NewMServer(mpara)
+	m.Main()
 }
-
-

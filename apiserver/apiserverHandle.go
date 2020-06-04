@@ -1058,16 +1058,16 @@ func (rrs ResponseResource) WebService() *restful.WebService {
 		Writes(module.RetBean{}). // on the response
 		Returns(200, "OK", module.RetBean{}).
 		Returns(404, "Not Found", nil))
-        
-        ws.Route(ws.POST("/flow/job/log/append").To(rrs.FlowJobLogAppendHandler).
-                // docs
-                Doc("追加作业日志").
-                Metadata(restfulspec.KeyOpenAPITags, tags).
-                Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
-                Reads(module.MetaParaFlowJobLogAddBean{}).
-                Writes(module.RetBean{}). // on the response
-                Returns(200, "OK", module.RetBean{}).
-                Returns(404, "Not Found", nil))
+
+	ws.Route(ws.POST("/flow/job/log/append").To(rrs.FlowJobLogAppendHandler).
+		// docs
+		Doc("追加作业日志").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
+		Reads(module.MetaParaFlowJobLogAddBean{}).
+		Writes(module.RetBean{}). // on the response
+		Returns(200, "OK", module.RetBean{}).
+		Returns(404, "Not Found", nil))
 
 	tags = []string{"mst-flow-routine-job-running-heart"}
 	ws.Route(ws.POST("/mst/flow/routine/job/running/heart/add").To(rrs.MstFlowRoutineJobRunningHeartAddHandler).
@@ -4467,9 +4467,9 @@ func (rrs *ResponseResource) FlowJobStreamJobHandler(request *restful.Request, r
 	defer bt.Close()
 
 	fb0 := bt.Get(p.Sys + "." + p.Job)
-	if fb0 != nil {
-		glog.Glog(LogF, fmt.Sprintf("%v %v has exists.", p.Sys, p.Job))
-		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("%v %v has exists.", p.Sys, p.Job), nil)
+	if fb0 == nil {
+		glog.Glog(LogF, fmt.Sprintf("%v.%v not exists.", p.Sys, p.Job))
+		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("%v.%v not exists.", p.Sys, p.Job), nil)
 		return
 	}
 	fb := new(module.MetaJobBean)
@@ -4477,6 +4477,12 @@ func (rrs *ResponseResource) FlowJobStreamJobHandler(request *restful.Request, r
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("parse json error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parse json error.%v", err), nil)
+		return
+	}
+
+	if fb.Status != util.STATUS_AUTO_SUCC && fb.Status != util.STATUS_AUTO_READY {
+		glog.Glog(LogF, fmt.Sprintf("%v.%v status %v not equal %v or %v .", p.Sys, p.Job, fb.Status, util.STATUS_AUTO_SUCC, util.STATUS_AUTO_READY))
+		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("%v.%v status %v not equal %v or %v .", p.Sys, p.Job, fb.Status, util.STATUS_AUTO_SUCC, util.STATUS_AUTO_READY), nil)
 		return
 	}
 
@@ -6100,7 +6106,7 @@ func (rrs *ResponseResource) FlowJobLogAddHandler(request *restful.Request, resp
 	defer bt.Close()
 
 	m := new(module.MetaJobLogBean)
-        m.Id = p.Id
+	m.Id = p.Id
 	m.Sys = p.Sys
 	m.Job = p.Job
 	m.StartTime = p.StartTime
@@ -6108,12 +6114,13 @@ func (rrs *ResponseResource) FlowJobLogAddHandler(request *restful.Request, resp
 	m.SServer = p.SServer
 	m.Sip = p.Sip
 	m.Sport = p.Sport
-        m.Step = p.Step
-	m.Content = make([]string,0)
-        m.ExitCode = p.ExitCode
-        for _, v := range p.Content {
-                m.Content = append(m.Content, v)
-        }
+	m.Step = p.Step
+	m.Content = make([]string, 0)
+	m.ExitCode = p.ExitCode
+	m.Cmd = p.Cmd
+	for _, v := range p.Content {
+		m.Content = append(m.Content, v)
+	}
 	jsonstr, _ := json.Marshal(m)
 	err = bt.Set(p.Id, string(jsonstr))
 	if err != nil {
@@ -6152,26 +6159,27 @@ func (rrs *ResponseResource) FlowJobLogAppendHandler(request *restful.Request, r
 	if b != nil {
 		err := json.Unmarshal([]byte(b.(string)), &m)
 		if err != nil {
-			glog.Glog(LogF, fmt.Sprintf("get in db error.%v",err))
-                        util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get in db error.%v", err), nil)
-                        return
+			glog.Glog(LogF, fmt.Sprintf("get in db error.%v", err))
+			util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get in db error.%v", err), nil)
+			return
 		}
 	} else {
-                m.Id = p.Id
+		m.Id = p.Id
 		m.Sys = p.Sys
 		m.Job = p.Job
 		m.StartTime = p.StartTime
 		m.SServer = p.SServer
 		m.Sip = p.Sip
 		m.Sport = p.Sport
-                m.Step = p.Step
+		m.Step = p.Step
+		m.Cmd = p.Cmd
 		m.Content = make([]string, 0)
 	}
 	for _, v := range p.Content {
 		m.Content = append(m.Content, v)
 	}
-        m.EndTime = p.EndTime
-        m.ExitCode = p.ExitCode
+	m.EndTime = p.EndTime
+	m.ExitCode = p.ExitCode
 	jsonstr, _ := json.Marshal(m)
 	err = bt.Set(p.Id, string(jsonstr))
 	if err != nil {

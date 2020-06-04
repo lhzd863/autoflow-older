@@ -1,16 +1,16 @@
 package mst
 
 type MetaConf struct {
-	Apiversion  string `yaml:"apiversion"`
-	Name        string `yaml:"name"`
-        Ip          string `yaml:"ip"`
-	Port        string `yaml:"port"`
-	JwtKey      string `yaml:"jwtkey"`
-        HomeDir       string `yaml:"homedir"`
-        AccessToken   string `yaml:"accesstoken"`
-        ApiServerIp   string `yaml:"apiserverip"`
-        ApiServerPort string `yaml:"apiserverport"`
-        ProcessNum    string `yaml:"processnum"`
+	Apiversion    string `yaml:"apiversion"`
+	Name          string `yaml:"name"`
+	Ip            string `yaml:"ip"`
+	Port          string `yaml:"port"`
+	JwtKey        string `yaml:"jwtkey"`
+	HomeDir       string `yaml:"homedir"`
+	AccessToken   string `yaml:"accesstoken"`
+	ApiServerIp   string `yaml:"apiserverip"`
+	ApiServerPort string `yaml:"apiserverport"`
+	ProcessNum    string `yaml:"processnum"`
 }
 
 type MetaJob struct {
@@ -77,5 +77,3 @@ type MetaJobQueue struct {
 	Cts    string `json:"cts"`
 	Enable string `json:"enable"`
 }
-
-

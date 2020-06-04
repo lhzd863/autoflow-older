@@ -8,8 +8,8 @@ import (
 	"os"
 	"runtime"
 	"strings"
+	"sync"
 	"time"
-        "sync"
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -44,7 +44,7 @@ type FlowMgr struct {
 	shutdownGoStatusChannel      chan interface{}
 	pendingStatusChannel         chan []interface{}
 	shutdownPendingStatusChannel chan interface{}
-        sync.RWMutex
+	sync.RWMutex
 }
 
 func NewFlowMgr(flowid string, apiserverip string, apiserverport string, mstid string, homeDir string, mstip string, mstport string, accesstoken string, routineid string) *FlowMgr {
@@ -185,7 +185,7 @@ func (m *FlowMgr) jobStepCmd(sys string, job string) []interface{} {
 		return retarr
 	}
 	if retbn.Status_Code != 200 {
-		glog.Glog(LogF, fmt.Sprintf("post url return status code:%v", retbn.Status_Code))
+		glog.Glog(LogF, fmt.Sprintf("post url return err.%v", retbn.Status_Txt))
 		return retarr
 	}
 	if retbn.Data == nil {
@@ -214,7 +214,7 @@ func (m *FlowMgr) jobParameter(sys string, job string) []interface{} {
 		return retarr
 	}
 	if retbn.Status_Code != 200 {
-		glog.Glog(LogF, fmt.Sprintf("post url return status code:%v", retbn.Status_Code))
+		glog.Glog(LogF, fmt.Sprintf("post url return err.%v", retbn.Status_Txt))
 		return retarr
 	}
 	if retbn.Data == nil {
@@ -225,80 +225,80 @@ func (m *FlowMgr) jobParameter(sys string, job string) []interface{} {
 }
 
 func (m *FlowMgr) streamJob(job map[string]interface{}) bool {
-	glog.Glog(m.LogF, fmt.Sprintf("%v %v stream job.", job["sys"], job["job"]))
-        m.Lock()
-        defer m.Unlock()
-        streamarr := m.jobStream(job["sys"].(string),job["job"].(string))
-        if len(streamarr) > 0 {
-            for _,v := range streamarr {
-                v1 := v.(map[string]interface{})
-                if v1["enable"] != "1" {
-                        glog.Glog(m.LogF, fmt.Sprintf("%v %v stream %v %v enable %v is not enabled,wait for next time.",v1["streamsys"],v1["streamjob"], v1["sys"],v1["job"], v1["enable"]))
-                        continue
-                }
-                m.jobStreamJob(job["sys"].(string),job["job"].(string))
-            }   
-        }
-        
-        
+	glog.Glog(m.LogF, fmt.Sprintf("%v.%v stream job.", job["sys"], job["job"]))
+	m.Lock()
+	defer m.Unlock()
+	streamarr := m.jobStream(job["sys"].(string), job["job"].(string))
+	if len(streamarr) > 0 {
+		for _, v := range streamarr {
+			v1 := v.(map[string]interface{})
+			if v1["enable"] != "1" {
+				glog.Glog(m.LogF, fmt.Sprintf("%v %v stream %v %v enable %v is not enabled,wait for next time.", v1["streamsys"], v1["streamjob"], v1["sys"], v1["job"], v1["enable"]))
+				continue
+			}
+			glog.Glog(m.LogF, fmt.Sprintf("%v.%v stream %v.%v.", job["sys"], job["job"], v1["sys"], v1["job"]))
+			m.jobStreamJob(v1["sys"].(string), v1["job"].(string))
+		}
+	}
+
 	return true
 }
 
 func (m *FlowMgr) jobStream(sys string, job string) []interface{} {
-        retarr := make([]interface{}, 0)
-        url := fmt.Sprintf("http://%v:%v/api/v1/flow/job/stream/job/get?accesstoken=%v", m.ApiServerIp, m.ApiServerPort, m.AccessToken)
-        para := fmt.Sprintf("{\"flowid\":\"%v\",\"sys\":\"%v\",\"job\":\"%v\"}", m.FlowId, sys, job)
-        jsonstr, err := util.Api_RequestPost(url, para)
-        if err != nil {
-                _, cfile, cline, _ := runtime.Caller(1)
-                glog.Glog(m.LogF, fmt.Sprintf("%v %v %v", cfile, cline, err))
-                return retarr
-        }
-        retbn := new(module.RetBean)
-        err = json.Unmarshal([]byte(jsonstr), &retbn)
-        if err != nil {
-                _, cfile, cline, _ := runtime.Caller(1)
-                glog.Glog(LogF, fmt.Sprintf("%v %v %v", cfile, cline, err))
-                return retarr
-        }
-        if retbn.Status_Code != 200 {
-                glog.Glog(LogF, fmt.Sprintf("post url return status code:%v", retbn.Status_Code))
-                return retarr
-        }
-        if retbn.Data == nil {
-                glog.Glog(LogF, fmt.Sprintf("get pending status job err."))
-                return retarr
-        }
-        return retbn.Data.([]interface{})
+	retarr := make([]interface{}, 0)
+	url := fmt.Sprintf("http://%v:%v/api/v1/flow/job/stream/job/get?accesstoken=%v", m.ApiServerIp, m.ApiServerPort, m.AccessToken)
+	para := fmt.Sprintf("{\"flowid\":\"%v\",\"sys\":\"%v\",\"job\":\"%v\"}", m.FlowId, sys, job)
+	jsonstr, err := util.Api_RequestPost(url, para)
+	if err != nil {
+		_, cfile, cline, _ := runtime.Caller(1)
+		glog.Glog(m.LogF, fmt.Sprintf("%v %v %v", cfile, cline, err))
+		return retarr
+	}
+	retbn := new(module.RetBean)
+	err = json.Unmarshal([]byte(jsonstr), &retbn)
+	if err != nil {
+		_, cfile, cline, _ := runtime.Caller(1)
+		glog.Glog(LogF, fmt.Sprintf("%v %v %v", cfile, cline, err))
+		return retarr
+	}
+	if retbn.Status_Code != 200 {
+		glog.Glog(LogF, fmt.Sprintf("post url return err.%v", retbn.Status_Txt))
+		return retarr
+	}
+	if retbn.Data == nil {
+		glog.Glog(LogF, fmt.Sprintf("get pending status job err."))
+		return retarr
+	}
+	return retbn.Data.([]interface{})
 }
 
 func (m *FlowMgr) jobStreamJob(sys string, job string) []interface{} {
-        glog.Glog(LogF, fmt.Sprintf("Stream job %v %v.",sys,job))
-        retarr := make([]interface{}, 0)
-        url := fmt.Sprintf("http://%v:%v/api/v1/flow/job/stream/job?accesstoken=%v", m.ApiServerIp, m.ApiServerPort, m.AccessToken)
-        para := fmt.Sprintf("{\"flowid\":\"%v\",\"sys\":\"%v\",\"job\":\"%v\"}", m.FlowId, sys, job)
-        jsonstr, err := util.Api_RequestPost(url, para)
-        if err != nil {
-                _, cfile, cline, _ := runtime.Caller(1)
-                glog.Glog(m.LogF, fmt.Sprintf("%v %v %v", cfile, cline, err))
-                return retarr
-        }
-        retbn := new(module.RetBean)
-        err = json.Unmarshal([]byte(jsonstr), &retbn)
-        if err != nil {
-                _, cfile, cline, _ := runtime.Caller(1)
-                glog.Glog(LogF, fmt.Sprintf("%v %v %v", cfile, cline, err))
-                return retarr
-        }
-        if retbn.Status_Code != 200 {
-                glog.Glog(LogF, fmt.Sprintf("post url return status code:%v", retbn.Status_Code))
-                return retarr
-        }
-        if retbn.Data == nil {
-                glog.Glog(LogF, fmt.Sprintf("get pending status job err."))
-                return retarr
-        }
-        return retbn.Data.([]interface{})
+	glog.Glog(LogF, fmt.Sprintf("Stream job %v %v.", sys, job))
+	retarr := make([]interface{}, 0)
+	url := fmt.Sprintf("http://%v:%v/api/v1/flow/job/stream/job?accesstoken=%v", m.ApiServerIp, m.ApiServerPort, m.AccessToken)
+	para := fmt.Sprintf("{\"flowid\":\"%v\",\"sys\":\"%v\",\"job\":\"%v\"}", m.FlowId, sys, job)
+	jsonstr, err := util.Api_RequestPost(url, para)
+	if err != nil {
+		_, cfile, cline, _ := runtime.Caller(1)
+		glog.Glog(m.LogF, fmt.Sprintf("%v %v %v", cfile, cline, err))
+		return retarr
+	}
+	retbn := new(module.RetBean)
+	err = json.Unmarshal([]byte(jsonstr), &retbn)
+	if err != nil {
+		_, cfile, cline, _ := runtime.Caller(1)
+		glog.Glog(LogF, fmt.Sprintf("%v %v %v", cfile, cline, err))
+		return retarr
+	}
+	if retbn.Status_Code != 200 {
+		glog.Glog(LogF, fmt.Sprintf("post url return err.%v", retbn.Status_Txt))
+		return retarr
+	}
+	if retbn.Data == nil {
+		glog.Glog(LogF, fmt.Sprintf("get pending status job err."))
+		return retarr
+	}
+	return retbn.Data.([]interface{})
 }
 
 func (m *FlowMgr) invokeRealJob(job map[string]interface{}) {
@@ -642,7 +642,7 @@ func (m *FlowMgr) checkPending() bool {
 		m.submitJob(v)
 	}
 	if len(retarr) == 0 {
-		glog.Glog(m.LogF, fmt.Sprint("no pending job.%v", retbn.Status_Txt))
+		glog.Glog(m.LogF, fmt.Sprintf("no pending job.%v", retbn.Status_Txt))
 	} else {
 		m.pendingRemoveRing(fmt.Sprint(u1))
 	}
@@ -668,8 +668,7 @@ func (m *FlowMgr) pendingRemoveRing(id string) bool {
 		return false
 	}
 	if retbn.Status_Code != 200 {
-		_, cfile, cline, _ := runtime.Caller(1)
-		glog.Glog(LogF, fmt.Sprintf("%v %v post url return status code:%v", cfile, cline, retbn.Status_Code))
+		glog.Glog(LogF, fmt.Sprintf("post url return status code:%v", retbn.Status_Code))
 		return false
 	}
 	return true

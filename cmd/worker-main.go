@@ -2,11 +2,11 @@ package main
 
 import (
 	"flag"
+	"io/ioutil"
+	"log"
 	"os"
-        "io/ioutil"
-        "log"
 
-        "gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v2"
 
 	"github.com/lhzd863/autoflow/internal/util"
 	"github.com/lhzd863/autoflow/slv"
@@ -15,7 +15,7 @@ import (
 var (
 	cfg  = flag.String("conf", "conf.yaml", "basic config")
 	conf *slv.MetaConf
-        LogF   string
+	LogF string
 )
 
 func main() {
@@ -35,20 +35,18 @@ func main() {
 	if ok, _ := util.PathExists(conf.HomeDir + "/LOG"); !ok {
 		os.Mkdir(conf.HomeDir+"/LOG", os.ModePerm)
 	}
-        mpara := make(map[string]interface{})
-        mpara["workerid"] = conf.Name
-        mpara["ip"] = conf.Ip
-        mpara["port"] = conf.Port
-        mpara["homedir"] = conf.HomeDir
-        mpara["accesstoken"] = conf.AccessToken
-        mpara["apiserverip"] = conf.ApiServerIp
-        mpara["apiserverport"] = conf.ApiServerPort
-        mpara["processnum"] = conf.ProcessNum
-        //mpara["jwtkey"] = conf.JwtKey
-        //log.Println(mpara)
-          
-        s:=slv.NewSServer(mpara)
-        s.Main()
+	mpara := make(map[string]interface{})
+	mpara["workerid"] = conf.Name
+	mpara["ip"] = conf.Ip
+	mpara["port"] = conf.Port
+	mpara["homedir"] = conf.HomeDir
+	mpara["accesstoken"] = conf.AccessToken
+	mpara["apiserverip"] = conf.ApiServerIp
+	mpara["apiserverport"] = conf.ApiServerPort
+	mpara["processnum"] = conf.ProcessNum
+	//mpara["jwtkey"] = conf.JwtKey
+	//log.Println(mpara)
+
+	s := slv.NewSServer(mpara)
+	s.Main()
 }
-
-

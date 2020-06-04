@@ -7,13 +7,11 @@ import (
 )
 
 var (
-	cfg  = flag.String("conf", "conf.yaml", "basic config")
+	cfg = flag.String("conf", "conf.yaml", "basic config")
 )
 
 func main() {
 	flag.Parse()
-        
-        apiserver.NewApiServer(*cfg)
+
+	apiserver.NewApiServer(*cfg)
 }
-
-
