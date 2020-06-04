@@ -8,7 +8,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
-	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -32,14 +31,6 @@ import (
 
 	"github.com/satori/go.uuid"
 )
-
-type MetaInstancePortBean struct {
-	Ip           string       `json:"ip"`
-	Port         string       `json:"port"`
-	FlowId       string       `json:"flowid"`
-	HttpListener net.Listener `json:"httplistener"`
-	Enable       string       `json:"enable"`
-}
 
 // JobResource is the REST layer to the
 type ResponseResource struct {
