@@ -1,9 +1,8 @@
-package main
+package apiserver
 
 import (
 	"encoding/json"
 	"errors"
-	"flag"
 	"fmt"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
@@ -6185,7 +6184,6 @@ func (rrs *ResponseResource) FlowJobLogAppendHandler(request *restful.Request, r
 }
 
 var (
-	cfg              = flag.String("conf", "conf.yaml", "basic config")
 	conf             *module.MetaApiServerBean
 	jobpool          = db.NewMemDB()
 	slvMap           = db.NewMemDB()
@@ -6202,10 +6200,9 @@ var (
 	statusGoHashRing      *util.Consistent
 )
 
-func main() {
-	flag.Parse()
+func NewApiServer(cfg string) {
 	conf = new(module.MetaApiServerBean)
-	yamlFile, err := ioutil.ReadFile(*cfg)
+	yamlFile, err := ioutil.ReadFile(cfg)
 	if err != nil {
 		log.Printf("error: %s", err)
 		return
