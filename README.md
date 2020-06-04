@@ -11,7 +11,7 @@ autoflow数据批量分布式作业调度系,支持批量调度之间无干扰�
 - [github.com/emicklei/go-restful](https://github.com/emicklei/go-restful)
 - [go.etcd.io/bbolt](https://github.com/etcd-io/bbolt)
 - [jwt](https://github.com/robbert229/jwt)
-- workpool
+- [workpool](https://github.com/goinggo/workpool)
 
 
 ## 名词
