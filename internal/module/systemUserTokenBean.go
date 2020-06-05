@@ -1,5 +1,5 @@
 package module
 
 type MetaSystemUserTokenBean struct {
-	Token           string `json:"token"`
+	Token string `json:"token"`
 }

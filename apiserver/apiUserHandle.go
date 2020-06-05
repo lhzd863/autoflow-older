@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strconv"
 	"time"
+        "net/url"
 
 	"github.com/emicklei/go-restful"
 
@@ -949,7 +950,7 @@ func (rrs *ResponseResourceUser) SystemUserTokenHandler(request *restful.Request
 				return
 			}
 			n := new(module.MetaSystemUserTokenBean)
-			n.Token, err = rrs.createToken(30 * 24)
+			n.Token, err = rrs.createToken(m.UserName, 30*24)
 			if err != nil {
 				glog.Glog(LogF, fmt.Sprint(err))
 				util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("create token err.%v", err), nil)
@@ -968,10 +969,10 @@ func (rrs *ResponseResourceUser) SystemUserTokenHandler(request *restful.Request
 	util.ApiResponse(response.ResponseWriter, 200, "", retlst)
 }
 
-func (rrs *ResponseResourceUser) createToken(keeptime int64) (string, error) {
+func (rrs *ResponseResourceUser) createToken(username string, keeptime int64) (string, error) {
 	exp1, _ := strconv.ParseFloat(fmt.Sprintf("%v", time.Now().Unix()+3600*keeptime), 64)
 	claims := map[string]interface{}{
-		"iss": conf.JwtKey,
+		"iss": username,
 		"exp": exp1,
 	}
 	key := []byte(conf.JwtKey)
@@ -985,4 +986,76 @@ func (rrs *ResponseResourceUser) createToken(keeptime int64) (string, error) {
 		return "", errors.New(fmt.Sprintf("Failed to encode: %v", err))
 	}
 	return string(tokenbyte), nil
+}
+
+func (rrs *ResponseResourceUser) SystemUserInfoHandler(request *restful.Request, response *restful.Response) {
+        reqParams, err := url.ParseQuery(request.Request.URL.RawQuery)
+        if err != nil {
+                glog.Glog(LogF, fmt.Sprint(err))
+                util.ApiResponse(response.ResponseWriter, 700, "parse url parameter err.", nil)
+                return
+        }
+
+        username, err := util.JwtAccessTokenUserName(fmt.Sprint(reqParams["accesstoken"][0]), conf.JwtKey)
+        if err != nil {
+                glog.Glog(LogF, fmt.Sprint(err))
+                util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("accesstoken parse username err.%v", err), nil)
+                return
+        }
+        glog.Glog(LogF, fmt.Sprint(username ))
+	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_USER)
+	defer bt.Close()
+
+	retlst := make([]interface{}, 0)
+	strlist := bt.Scan()
+	bt.Close()
+	for _, v := range strlist {
+		for _, v1 := range v.(map[string]interface{}) {
+			m := new(module.MetaSystemUserBean)
+			err := json.Unmarshal([]byte(v1.(string)), &m)
+			if err != nil {
+				glog.Glog(LogF, fmt.Sprint(err))
+				util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get cmd failed.%v", err), nil)
+				return
+			}
+			if m.UserName != username || m.Enable != "1" {
+				continue
+			}
+			n := new(module.MetaSystemUserInfoBean)
+			n.UserName = m.UserName
+			n.Avatar = m.Avatar
+			n.Introduction = m.Introduction
+                        n.Role = rrs.userRole(m.UserName)
+			retlst = append(retlst, n)
+		}
+	}
+	util.ApiResponse(response.ResponseWriter, 200, "", retlst)
+}
+
+func (rrs *ResponseResourceUser) userRole(username string) []string {
+	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_USER_ROLE)
+	defer bt.Close()
+
+	retlst := make([]string, 0)
+	retmap := make(map[string]string)
+	strlist := bt.Scan()
+	bt.Close()
+	for _, v := range strlist {
+		for _, v1 := range v.(map[string]interface{}) {
+			m := new(module.MetaSystemUserRoleBean)
+			err := json.Unmarshal([]byte(v1.(string)), &m)
+			if err != nil {
+				glog.Glog(LogF, fmt.Sprint(err))
+                                continue
+			}
+			if m.UserName != username || m.Enable != "1" {
+				continue
+			}
+			retmap[m.Role] = m.Role
+		}
+	}
+	for k, _ := range retmap {
+		retlst = append(retlst, k)
+	}
+	return retlst
 }

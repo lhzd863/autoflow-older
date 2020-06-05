@@ -1,5 +1,5 @@
 package module
 
 type MetaParaSystemRoleRemoveBean struct {
-	Id         string `json:"id"`
+	Id string `json:"id"`
 }

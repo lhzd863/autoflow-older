@@ -125,6 +125,15 @@ func (rrs ResponseResource) WebService() *restful.WebService {
 		Returns(200, "OK", ResponseResource{}).
 		Returns(404, "Not Found", nil))
 
+        ws.Route(ws.POST("/system/user/info").To(rru.SystemUserInfoHandler).
+                // docs
+                Doc("用户列表").
+                Metadata(restfulspec.KeyOpenAPITags, tags).
+                Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
+                Writes(module.RetBean{}). // on the response
+                Returns(200, "OK", ResponseResource{}).
+                Returns(404, "Not Found", nil))
+
 	tags = []string{"system-role"}
 	ws.Route(ws.POST("/system/role/add").To(rru.SystemRoleAddHandler).
 		// docs
