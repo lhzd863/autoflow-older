@@ -80,6 +80,7 @@ func (rrs ResponseResource) WebService() *restful.WebService {
 		// docs
 		Doc("新增用户").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
+                Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
 		Reads(module.MetaParaSystemUserAddBean{}).
 		Writes(module.RetBean{}). // on the response
 		Returns(200, "OK", ResponseResource{}).
@@ -89,6 +90,7 @@ func (rrs ResponseResource) WebService() *restful.WebService {
 		// docs
 		Doc("获取用户").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
+                Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
 		Reads(module.MetaParaSystemUserGetBean{}).
 		Writes(module.RetBean{}). // on the response
 		Returns(200, "OK", ResponseResource{}).
@@ -98,6 +100,7 @@ func (rrs ResponseResource) WebService() *restful.WebService {
 		// docs
 		Doc("删除用户").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
+                Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
 		Reads(module.MetaParaSystemUserRemoveBean{}).
 		Writes(module.RetBean{}). // on the response
 		Returns(200, "OK", ResponseResource{}).
@@ -107,6 +110,7 @@ func (rrs ResponseResource) WebService() *restful.WebService {
 		// docs
 		Doc("更新用户").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
+                Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
 		Reads(module.MetaParaSystemUserUpdateBean{}).
 		Writes(module.RetBean{}). // on the response
 		Returns(200, "OK", ResponseResource{}).
@@ -116,6 +120,7 @@ func (rrs ResponseResource) WebService() *restful.WebService {
 		// docs
 		Doc("用户列表").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
+                Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
 		Writes(module.RetBean{}). // on the response
 		Returns(200, "OK", ResponseResource{}).
 		Returns(404, "Not Found", nil))
@@ -125,6 +130,7 @@ func (rrs ResponseResource) WebService() *restful.WebService {
 		// docs
 		Doc("新增角色").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
+                Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
 		Reads(module.MetaParaSystemRoleAddBean{}).
 		Writes(module.RetBean{}). // on the response
 		Returns(200, "OK", ResponseResource{}).
@@ -134,6 +140,7 @@ func (rrs ResponseResource) WebService() *restful.WebService {
 		// docs
 		Doc("获取角色").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
+                Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
 		Reads(module.MetaParaSystemRoleGetBean{}).
 		Writes(module.RetBean{}). // on the response
 		Returns(200, "OK", ResponseResource{}).
@@ -143,6 +150,7 @@ func (rrs ResponseResource) WebService() *restful.WebService {
 		// docs
 		Doc("删除角色").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
+                Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
 		Reads(module.MetaParaSystemRoleRemoveBean{}).
 		Writes(module.RetBean{}). // on the response
 		Returns(200, "OK", ResponseResource{}).
@@ -152,6 +160,7 @@ func (rrs ResponseResource) WebService() *restful.WebService {
 		// docs
 		Doc("更新角色").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
+                Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
 		Reads(module.MetaParaSystemRoleUpdateBean{}).
 		Writes(module.RetBean{}). // on the response
 		Returns(200, "OK", ResponseResource{}).
@@ -161,6 +170,7 @@ func (rrs ResponseResource) WebService() *restful.WebService {
 		// docs
 		Doc("列表角色").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
+                Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
 		Writes(module.RetBean{}). // on the response
 		Returns(200, "OK", ResponseResource{}).
 		Returns(404, "Not Found", nil))
@@ -170,6 +180,7 @@ func (rrs ResponseResource) WebService() *restful.WebService {
 		// docs
 		Doc("新增权限").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
+                Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
 		Reads(module.MetaParaSystemRightAddBean{}).
 		Writes(module.RetBean{}). // on the response
 		Returns(200, "OK", ResponseResource{}).
@@ -179,6 +190,7 @@ func (rrs ResponseResource) WebService() *restful.WebService {
 		// docs
 		Doc("获取权限").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
+                Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
 		Reads(module.MetaParaSystemRightGetBean{}).
 		Writes(module.RetBean{}). // on the response
 		Returns(200, "OK", ResponseResource{}).
@@ -188,6 +200,7 @@ func (rrs ResponseResource) WebService() *restful.WebService {
 		// docs
 		Doc("删除权限").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
+                Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
 		Reads(module.MetaParaSystemRightRemoveBean{}).
 		Writes(module.RetBean{}). // on the response
 		Returns(200, "OK", ResponseResource{}).
@@ -197,6 +210,7 @@ func (rrs ResponseResource) WebService() *restful.WebService {
 		// docs
 		Doc("更新权限").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
+                Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
 		Reads(module.MetaParaSystemRightUpdateBean{}).
 		Writes(module.RetBean{}). // on the response
 		Returns(200, "OK", ResponseResource{}).
@@ -206,6 +220,7 @@ func (rrs ResponseResource) WebService() *restful.WebService {
 		// docs
 		Doc("列表权限").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
+                Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
 		Writes(module.RetBean{}). // on the response
 		Returns(200, "OK", ResponseResource{}).
 		Returns(404, "Not Found", nil))
@@ -215,6 +230,7 @@ func (rrs ResponseResource) WebService() *restful.WebService {
 		// docs
 		Doc("新增角色权限").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
+                Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
 		Reads(module.MetaParaSystemRoleRightAddBean{}).
 		Writes(module.RetBean{}). // on the response
 		Returns(200, "OK", ResponseResource{}).
@@ -224,6 +240,7 @@ func (rrs ResponseResource) WebService() *restful.WebService {
 		// docs
 		Doc("获取角色权限").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
+                Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
 		Reads(module.MetaParaSystemRoleRightGetBean{}).
 		Writes(module.RetBean{}). // on the response
 		Returns(200, "OK", ResponseResource{}).
@@ -233,6 +250,7 @@ func (rrs ResponseResource) WebService() *restful.WebService {
 		// docs
 		Doc("删除角色权限").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
+                Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
 		Reads(module.MetaParaSystemRoleRightRemoveBean{}).
 		Writes(module.RetBean{}). // on the response
 		Returns(200, "OK", ResponseResource{}).
@@ -242,6 +260,7 @@ func (rrs ResponseResource) WebService() *restful.WebService {
 		// docs
 		Doc("更新角色权限").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
+                Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
 		Reads(module.MetaParaSystemRoleRightUpdateBean{}).
 		Writes(module.RetBean{}). // on the response
 		Returns(200, "OK", ResponseResource{}).
@@ -251,6 +270,7 @@ func (rrs ResponseResource) WebService() *restful.WebService {
 		// docs
 		Doc("列表角色权限").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
+                Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
 		Writes(module.RetBean{}). // on the response
 		Returns(200, "OK", ResponseResource{}).
 		Returns(404, "Not Found", nil))
@@ -260,6 +280,7 @@ func (rrs ResponseResource) WebService() *restful.WebService {
 		// docs
 		Doc("新增用户角色").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
+                Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
 		Reads(module.MetaParaSystemUserRoleAddBean{}).
 		Writes(module.RetBean{}). // on the response
 		Returns(200, "OK", ResponseResource{}).
@@ -269,6 +290,7 @@ func (rrs ResponseResource) WebService() *restful.WebService {
 		// docs
 		Doc("获取用户角色").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
+                Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
 		Reads(module.MetaParaSystemUserRoleGetBean{}).
 		Writes(module.RetBean{}). // on the response
 		Returns(200, "OK", ResponseResource{}).
@@ -278,6 +300,7 @@ func (rrs ResponseResource) WebService() *restful.WebService {
 		// docs
 		Doc("删除用户角色").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
+                Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
 		Reads(module.MetaParaSystemUserRoleRemoveBean{}).
 		Writes(module.RetBean{}). // on the response
 		Returns(200, "OK", ResponseResource{}).
@@ -287,6 +310,7 @@ func (rrs ResponseResource) WebService() *restful.WebService {
 		// docs
 		Doc("更新用户角色").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
+                Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
 		Reads(module.MetaParaSystemUserRoleUpdateBean{}).
 		Writes(module.RetBean{}). // on the response
 		Returns(200, "OK", ResponseResource{}).
@@ -296,6 +320,7 @@ func (rrs ResponseResource) WebService() *restful.WebService {
 		// docs
 		Doc("列表用户角色").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
+                Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
 		Writes(module.RetBean{}). // on the response
 		Returns(200, "OK", ResponseResource{}).
 		Returns(404, "Not Found", nil))
