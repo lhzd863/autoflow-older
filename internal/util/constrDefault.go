@@ -13,6 +13,11 @@ const (
 	TABLE_AUTO_SYS_FLOW_MASTER             = "auto_sys_flow_master"
 	TABLE_AUTO_SYS_JOB_RUNNING_HEART       = "auto_sys_job_running_heart"
 	TABLE_AUTO_SYS_SLAVE_JOB_RUNNING_HEART = "auto_sys_slave_job_running_heart"
+        TABLE_AUTO_SYS_USER                    = "auto_sys_user"
+        TABLE_AUTO_SYS_ROLE                    = "auto_sys_role"
+        TABLE_AUTO_SYS_RIGHT                   = "auto_sys_right"
+        TABLE_AUTO_SYS_USER_ROLE               = "auto_sys_user_user"
+        TABLE_AUTO_SYS_ROLE_RIGHT              = "auto_sys_role_right"
 	//
 	TABLE_AUTO_FLOW_PARAMETER = "auto_flow_parameter"
 	//table flow job

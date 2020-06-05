@@ -58,11 +58,245 @@ func (rrs ResponseResource) WebService() *restful.WebService {
 		Returns(200, "OK", ResponseResource{}).
 		Returns(404, "Not Found", nil))
 
-	ws.Route(ws.POST("/login").To(rrs.LoginHandler).
+	ws.Route(ws.POST("/login1").To(rrs.LoginHandler).
 		// docs
 		Doc("login info").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Writes(ResponseResource{}). // on the response
+		Returns(200, "OK", ResponseResource{}).
+		Returns(404, "Not Found", nil))
+
+        ws.Route(ws.POST("/login").To(rru.SystemUserTokenHandler).
+                // docs
+                Doc("login info").
+                Metadata(restfulspec.KeyOpenAPITags, tags).
+                Reads(module.MetaParaSystemUserTokenBean{}).
+                Writes(module.RetBean{}). // on the response
+                Returns(200, "OK", ResponseResource{}).
+                Returns(404, "Not Found", nil))
+
+	tags = []string{"system-user"}
+	ws.Route(ws.POST("/system/user/add").To(rru.SystemUserAddHandler).
+		// docs
+		Doc("新增用户").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Reads(module.MetaParaSystemUserAddBean{}).
+		Writes(module.RetBean{}). // on the response
+		Returns(200, "OK", ResponseResource{}).
+		Returns(404, "Not Found", nil))
+
+	ws.Route(ws.POST("/system/user/get").To(rru.SystemUserGetHandler).
+		// docs
+		Doc("获取用户").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Reads(module.MetaParaSystemUserGetBean{}).
+		Writes(module.RetBean{}). // on the response
+		Returns(200, "OK", ResponseResource{}).
+		Returns(404, "Not Found", nil))
+
+	ws.Route(ws.POST("/system/user/rm").To(rru.SystemUserRemoveHandler).
+		// docs
+		Doc("删除用户").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Reads(module.MetaParaSystemUserRemoveBean{}).
+		Writes(module.RetBean{}). // on the response
+		Returns(200, "OK", ResponseResource{}).
+		Returns(404, "Not Found", nil))
+
+	ws.Route(ws.POST("/system/user/update").To(rru.SystemUserUpdateHandler).
+		// docs
+		Doc("更新用户").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Reads(module.MetaParaSystemUserUpdateBean{}).
+		Writes(module.RetBean{}). // on the response
+		Returns(200, "OK", ResponseResource{}).
+		Returns(404, "Not Found", nil))
+
+	ws.Route(ws.POST("/system/user/ls").To(rru.SystemUserListHandler).
+		// docs
+		Doc("用户列表").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Writes(module.RetBean{}). // on the response
+		Returns(200, "OK", ResponseResource{}).
+		Returns(404, "Not Found", nil))
+
+	tags = []string{"system-role"}
+	ws.Route(ws.POST("/system/role/add").To(rru.SystemRoleAddHandler).
+		// docs
+		Doc("新增角色").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Reads(module.MetaParaSystemRoleAddBean{}).
+		Writes(module.RetBean{}). // on the response
+		Returns(200, "OK", ResponseResource{}).
+		Returns(404, "Not Found", nil))
+
+	ws.Route(ws.POST("/system/role/get").To(rru.SystemRoleGetHandler).
+		// docs
+		Doc("获取角色").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Reads(module.MetaParaSystemRoleGetBean{}).
+		Writes(module.RetBean{}). // on the response
+		Returns(200, "OK", ResponseResource{}).
+		Returns(404, "Not Found", nil))
+
+	ws.Route(ws.POST("/system/role/rm").To(rru.SystemRoleRemoveHandler).
+		// docs
+		Doc("删除角色").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Reads(module.MetaParaSystemRoleRemoveBean{}).
+		Writes(module.RetBean{}). // on the response
+		Returns(200, "OK", ResponseResource{}).
+		Returns(404, "Not Found", nil))
+
+	ws.Route(ws.POST("/system/role/update").To(rru.SystemRoleUpdateHandler).
+		// docs
+		Doc("更新角色").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Reads(module.MetaParaSystemRoleUpdateBean{}).
+		Writes(module.RetBean{}). // on the response
+		Returns(200, "OK", ResponseResource{}).
+		Returns(404, "Not Found", nil))
+
+	ws.Route(ws.POST("/system/role/ls").To(rru.SystemRoleListHandler).
+		// docs
+		Doc("列表角色").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Writes(module.RetBean{}). // on the response
+		Returns(200, "OK", ResponseResource{}).
+		Returns(404, "Not Found", nil))
+
+	tags = []string{"system-right"}
+	ws.Route(ws.POST("/system/right/add").To(rru.SystemRightAddHandler).
+		// docs
+		Doc("新增权限").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Reads(module.MetaParaSystemRightAddBean{}).
+		Writes(module.RetBean{}). // on the response
+		Returns(200, "OK", ResponseResource{}).
+		Returns(404, "Not Found", nil))
+
+	ws.Route(ws.POST("/system/right/get").To(rru.SystemRightGetHandler).
+		// docs
+		Doc("获取权限").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Reads(module.MetaParaSystemRightGetBean{}).
+		Writes(module.RetBean{}). // on the response
+		Returns(200, "OK", ResponseResource{}).
+		Returns(404, "Not Found", nil))
+
+	ws.Route(ws.POST("/system/right/rm").To(rru.SystemRightRemoveHandler).
+		// docs
+		Doc("删除权限").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Reads(module.MetaParaSystemRightRemoveBean{}).
+		Writes(module.RetBean{}). // on the response
+		Returns(200, "OK", ResponseResource{}).
+		Returns(404, "Not Found", nil))
+
+	ws.Route(ws.POST("/system/right/update").To(rru.SystemRightUpdateHandler).
+		// docs
+		Doc("更新权限").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Reads(module.MetaParaSystemRightUpdateBean{}).
+		Writes(module.RetBean{}). // on the response
+		Returns(200, "OK", ResponseResource{}).
+		Returns(404, "Not Found", nil))
+
+	ws.Route(ws.POST("/system/right/ls").To(rru.SystemRightListHandler).
+		// docs
+		Doc("列表权限").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Writes(module.RetBean{}). // on the response
+		Returns(200, "OK", ResponseResource{}).
+		Returns(404, "Not Found", nil))
+
+	tags = []string{"system-role-right"}
+	ws.Route(ws.POST("/system/role/right/add").To(rru.SystemRoleRightAddHandler).
+		// docs
+		Doc("新增角色权限").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Reads(module.MetaParaSystemRoleRightAddBean{}).
+		Writes(module.RetBean{}). // on the response
+		Returns(200, "OK", ResponseResource{}).
+		Returns(404, "Not Found", nil))
+
+	ws.Route(ws.POST("/system/role/right/get").To(rru.SystemRoleRightGetHandler).
+		// docs
+		Doc("获取角色权限").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Reads(module.MetaParaSystemRoleRightGetBean{}).
+		Writes(module.RetBean{}). // on the response
+		Returns(200, "OK", ResponseResource{}).
+		Returns(404, "Not Found", nil))
+
+	ws.Route(ws.POST("/system/role/right/rm").To(rru.SystemRoleRightRemoveHandler).
+		// docs
+		Doc("删除角色权限").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Reads(module.MetaParaSystemRoleRightRemoveBean{}).
+		Writes(module.RetBean{}). // on the response
+		Returns(200, "OK", ResponseResource{}).
+		Returns(404, "Not Found", nil))
+
+	ws.Route(ws.POST("/system/role/right/update").To(rru.SystemRoleRightUpdateHandler).
+		// docs
+		Doc("更新角色权限").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Reads(module.MetaParaSystemRoleRightUpdateBean{}).
+		Writes(module.RetBean{}). // on the response
+		Returns(200, "OK", ResponseResource{}).
+		Returns(404, "Not Found", nil))
+
+	ws.Route(ws.POST("/system/role/right/ls").To(rru.SystemRoleRightListHandler).
+		// docs
+		Doc("列表角色权限").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Writes(module.RetBean{}). // on the response
+		Returns(200, "OK", ResponseResource{}).
+		Returns(404, "Not Found", nil))
+
+	tags = []string{"system-user-role"}
+	ws.Route(ws.POST("/system/user/role/add").To(rru.SystemUserRoleAddHandler).
+		// docs
+		Doc("新增用户角色").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Reads(module.MetaParaSystemUserRoleAddBean{}).
+		Writes(module.RetBean{}). // on the response
+		Returns(200, "OK", ResponseResource{}).
+		Returns(404, "Not Found", nil))
+
+	ws.Route(ws.POST("/system/user/role/get").To(rru.SystemUserRoleGetHandler).
+		// docs
+		Doc("获取用户角色").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Reads(module.MetaParaSystemUserRoleGetBean{}).
+		Writes(module.RetBean{}). // on the response
+		Returns(200, "OK", ResponseResource{}).
+		Returns(404, "Not Found", nil))
+
+	ws.Route(ws.POST("/system/user/role/rm").To(rru.SystemUserRoleRemoveHandler).
+		// docs
+		Doc("删除用户角色").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Reads(module.MetaParaSystemUserRoleRemoveBean{}).
+		Writes(module.RetBean{}). // on the response
+		Returns(200, "OK", ResponseResource{}).
+		Returns(404, "Not Found", nil))
+
+	ws.Route(ws.POST("/system/user/role/update").To(rru.SystemUserRoleUpdateHandler).
+		// docs
+		Doc("更新用户角色").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Reads(module.MetaParaSystemUserRoleUpdateBean{}).
+		Writes(module.RetBean{}). // on the response
+		Returns(200, "OK", ResponseResource{}).
+		Returns(404, "Not Found", nil))
+
+	ws.Route(ws.POST("/system/user/role/ls").To(rru.SystemUserRoleListHandler).
+		// docs
+		Doc("列表用户角色").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Writes(module.RetBean{}). // on the response
 		Returns(200, "OK", ResponseResource{}).
 		Returns(404, "Not Found", nil))
 
@@ -1197,7 +1431,22 @@ func (rrs *ResponseResource) HealthHandler(request *restful.Request, response *r
 }
 
 func (rrs *ResponseResource) LoginHandler(request *restful.Request, response *restful.Response) {
+	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_USER)
+	defer bt.Close()
+
+	strlist := bt.Scan()
 	retlst := make([]interface{}, 0)
+	for _, v := range strlist {
+		for _, v1 := range v.(map[string]interface{}) {
+			m := new(module.MetaParaFlowBean)
+			err := json.Unmarshal([]byte(v1.(string)), &m)
+			if err != nil {
+				glog.Glog(LogF, fmt.Sprint(err))
+				continue
+			}
+			retlst = append(retlst, m)
+		}
+	}
 	util.ApiResponse(response.ResponseWriter, 200, "", retlst)
 }
 
@@ -6206,6 +6455,7 @@ var (
 	statusGoOffset        int
 	statusPendingHashRing *util.Consistent
 	statusGoHashRing      *util.Consistent
+	rru                   *ResponseResourceUser
 )
 
 func NewApiServer(cfg string) {
@@ -6236,6 +6486,7 @@ func NewApiServer(cfg string) {
 	go func() {
 		JobPool()
 	}()
+	rru = NewResponseResourceUser()
 	HttpServer()
 }
 
@@ -6535,7 +6786,7 @@ func globalOauth(req *restful.Request, resp *restful.Response, chain *restful.Fi
 		log.Println("parse url error")
 		return
 	}
-	if u.Path == "/api/login" || u.Path == "/api/register" || u.Path == "/apidocs" || u.Path == "/apidocs.json" {
+	if u.Path == "/api/v1/login" || u.Path == "/api/v1/register" || u.Path == "/apidocs" || u.Path == "/apidocs.json" {
 		chain.ProcessFilter(req, resp)
 		return
 	}

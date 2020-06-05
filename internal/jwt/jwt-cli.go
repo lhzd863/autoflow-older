@@ -15,13 +15,13 @@ type JwtToken struct {
 	Fun   string  `json:"fun" description:"fun"`
 }
 
-func NewJwtToken() *JwtToken {
+func NewJwtToken(key string) *JwtToken {
 	exp1, _ := strconv.ParseFloat(fmt.Sprintf("%v", time.Now().Unix()+3600*24*30*666), 64)
 	njt := &JwtToken{
 		Exp: exp1,
-		Key: "wifi",
+		Key: key,
 		Fun: "HS256",
-		Iss: "wifi",
+		Iss: key,
 	}
 	return njt
 }
