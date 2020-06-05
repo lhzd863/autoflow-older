@@ -8,16 +8,16 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
 	"time"
-        "strconv"
 
 	"github.com/emicklei/go-restful"
 
 	"github.com/lhzd863/autoflow/internal/db"
 	"github.com/lhzd863/autoflow/internal/glog"
+	"github.com/lhzd863/autoflow/internal/jwt"
 	"github.com/lhzd863/autoflow/internal/module"
 	"github.com/lhzd863/autoflow/internal/util"
-        "github.com/lhzd863/autoflow/internal/jwt"
 
 	"github.com/satori/go.uuid"
 )
@@ -945,18 +945,25 @@ func (rrs *ResponseResourceUser) SystemUserTokenHandler(request *restful.Request
 			}
 			enpassword := EnPwdCode(p.Password)
 			if enpassword != m.Password {
-				continue
+				util.ApiResponse(response.ResponseWriter, 700, "password entre err.", nil)
+				return
 			}
 			n := new(module.MetaSystemUserTokenBean)
-			n.Token, err = rrs.createToken(30*24)
+			n.Token, err = rrs.createToken(30 * 24)
 			if err != nil {
 				glog.Glog(LogF, fmt.Sprint(err))
+				util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("create token err.%v", err), nil)
+				return
 			} else {
 				retlst = append(retlst, n)
 				util.ApiResponse(response.ResponseWriter, 200, "", retlst)
 				return
 			}
 		}
+	}
+	if len(retlst) == 0 {
+		util.ApiResponse(response.ResponseWriter, 700, "username entre err.", nil)
+		return
 	}
 	util.ApiResponse(response.ResponseWriter, 200, "", retlst)
 }
