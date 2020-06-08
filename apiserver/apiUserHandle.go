@@ -8,9 +8,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/url"
 	"strconv"
 	"time"
-        "net/url"
 
 	"github.com/emicklei/go-restful"
 
@@ -989,20 +989,20 @@ func (rrs *ResponseResourceUser) createToken(username string, keeptime int64) (s
 }
 
 func (rrs *ResponseResourceUser) SystemUserInfoHandler(request *restful.Request, response *restful.Response) {
-        reqParams, err := url.ParseQuery(request.Request.URL.RawQuery)
-        if err != nil {
-                glog.Glog(LogF, fmt.Sprint(err))
-                util.ApiResponse(response.ResponseWriter, 700, "parse url parameter err.", nil)
-                return
-        }
+	reqParams, err := url.ParseQuery(request.Request.URL.RawQuery)
+	if err != nil {
+		glog.Glog(LogF, fmt.Sprint(err))
+		util.ApiResponse(response.ResponseWriter, 700, "parse url parameter err.", nil)
+		return
+	}
 
-        username, err := util.JwtAccessTokenUserName(fmt.Sprint(reqParams["accesstoken"][0]), conf.JwtKey)
-        if err != nil {
-                glog.Glog(LogF, fmt.Sprint(err))
-                util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("accesstoken parse username err.%v", err), nil)
-                return
-        }
-        glog.Glog(LogF, fmt.Sprint(username ))
+	username, err := util.JwtAccessTokenUserName(fmt.Sprint(reqParams["accesstoken"][0]), conf.JwtKey)
+	if err != nil {
+		glog.Glog(LogF, fmt.Sprint(err))
+		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("accesstoken parse username err.%v", err), nil)
+		return
+	}
+	glog.Glog(LogF, fmt.Sprint(username))
 	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_USER)
 	defer bt.Close()
 
@@ -1025,7 +1025,7 @@ func (rrs *ResponseResourceUser) SystemUserInfoHandler(request *restful.Request,
 			n.UserName = m.UserName
 			n.Avatar = m.Avatar
 			n.Introduction = m.Introduction
-                        n.Role = rrs.userRole(m.UserName)
+			n.Role = rrs.userRole(m.UserName)
 			retlst = append(retlst, n)
 		}
 	}
@@ -1046,7 +1046,7 @@ func (rrs *ResponseResourceUser) userRole(username string) []string {
 			err := json.Unmarshal([]byte(v1.(string)), &m)
 			if err != nil {
 				glog.Glog(LogF, fmt.Sprint(err))
-                                continue
+				continue
 			}
 			if m.UserName != username || m.Enable != "1" {
 				continue
