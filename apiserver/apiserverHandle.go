@@ -122,6 +122,26 @@ func (rrs ResponseResource) WebService() *restful.WebService {
 		Returns(200, "OK", ResponseResource{}).
 		Returns(404, "Not Found", nil))
 
+	ws.Route(ws.POST("/system/user/token").To(rru.SystemCreateTokenHandler).
+		// docs
+		Doc("用户列表").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
+		Reads(module.MetaTokenCreateBean{}).
+		Writes(module.RetBean{}). // on the response
+		Returns(200, "OK", ResponseResource{}).
+		Returns(404, "Not Found", nil))
+
+	ws.Route(ws.POST("/system/user/password/change").To(rru.SystemUserPasswordChangeHandler).
+		// docs
+		Doc("修改用户密码").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
+		Reads(module.MetaParaSystemUserPasswordChangeBean{}).
+		Writes(module.RetBean{}). // on the response
+		Returns(200, "OK", ResponseResource{}).
+		Returns(404, "Not Found", nil))
+
 	tags = []string{"system-role"}
 	ws.Route(ws.POST("/system/role/add").To(rru.SystemRoleAddHandler).
 		// docs
@@ -168,6 +188,17 @@ func (rrs ResponseResource) WebService() *restful.WebService {
 		Doc("列表角色").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
+		Writes(module.RetBean{}). // on the response
+		Returns(200, "OK", ResponseResource{}).
+		Returns(404, "Not Found", nil))
+
+	tags = []string{"system-token"}
+	ws.Route(ws.POST("/system/token/create").To(rru.SystemCreateTokenHandler).
+		// docs
+		Doc("创建用户token").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
+		Reads(module.MetaTokenCreateBean{}).
 		Writes(module.RetBean{}). // on the response
 		Returns(200, "OK", ResponseResource{}).
 		Returns(404, "Not Found", nil))
@@ -316,6 +347,56 @@ func (rrs ResponseResource) WebService() *restful.WebService {
 	ws.Route(ws.POST("/system/user/role/ls").To(rru.SystemUserRoleListHandler).
 		// docs
 		Doc("列表用户角色").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
+		Writes(module.RetBean{}). // on the response
+		Returns(200, "OK", ResponseResource{}).
+		Returns(404, "Not Found", nil))
+
+	tags = []string{"system-role-path"}
+	ws.Route(ws.POST("/system/role/path/add").To(rru.SystemRolePathAddHandler).
+		// docs
+		Doc("新增角色路径权限").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
+		Reads(module.MetaParaSystemRolePathAddBean{}).
+		Writes(module.RetBean{}). // on the response
+		Returns(200, "OK", ResponseResource{}).
+		Returns(404, "Not Found", nil))
+
+	ws.Route(ws.POST("/system/role/path/get").To(rru.SystemRolePathGetHandler).
+		// docs
+		Doc("获取角色路径权限").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
+		Reads(module.MetaParaSystemRolePathGetBean{}).
+		Writes(module.RetBean{}). // on the response
+		Returns(200, "OK", ResponseResource{}).
+		Returns(404, "Not Found", nil))
+
+	ws.Route(ws.POST("/system/role/path/rm").To(rru.SystemRolePathRemoveHandler).
+		// docs
+		Doc("删除角色路径权限").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
+		Reads(module.MetaParaSystemRolePathRemoveBean{}).
+		Writes(module.RetBean{}). // on the response
+		Returns(200, "OK", ResponseResource{}).
+		Returns(404, "Not Found", nil))
+
+	ws.Route(ws.POST("/system/role/path/update").To(rru.SystemRolePathUpdateHandler).
+		// docs
+		Doc("更新角色路径权限").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
+		Reads(module.MetaParaSystemRolePathUpdateBean{}).
+		Writes(module.RetBean{}). // on the response
+		Returns(200, "OK", ResponseResource{}).
+		Returns(404, "Not Found", nil))
+
+	ws.Route(ws.POST("/system/role/path/ls").To(rru.SystemRolePathListHandler).
+		// docs
+		Doc("列表角色路径权限").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
 		Writes(module.RetBean{}). // on the response
@@ -1837,6 +1918,91 @@ func enrichSwaggerObject(swo *spec.Swagger) {
 		Description: "Managing image"}}}
 }
 
+func validPass(username string, path string) bool {
+	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_USER)
+	defer bt.Close()
+
+	strlist := bt.Scan()
+	bt.Close()
+	retUserExists := false
+	for _, v := range strlist {
+		for _, v1 := range v.(map[string]interface{}) {
+			m := new(module.MetaSystemUserBean)
+			err := json.Unmarshal([]byte(v1.(string)), &m)
+			if err != nil {
+				glog.Glog(LogF, fmt.Sprint(err))
+				continue
+			}
+			if m.UserName != username || m.Enable != "1" {
+				continue
+			}
+			retUserExists = true
+		}
+	}
+	if !retUserExists {
+		return false
+	}
+
+	bt0 := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_USER_ROLE)
+	defer bt0.Close()
+
+	strlist0 := bt0.Scan()
+	bt0.Close()
+	retmap0 := make(map[string]string)
+	for _, v := range strlist0 {
+		for _, v1 := range v.(map[string]interface{}) {
+			m := new(module.MetaSystemUserRoleBean)
+			err := json.Unmarshal([]byte(v1.(string)), &m)
+			if err != nil {
+				glog.Glog(LogF, fmt.Sprint(err))
+				continue
+			}
+			if m.UserName != username || m.Enable != "1" {
+				continue
+			}
+			retmap0[m.Role] = m.Role
+		}
+	}
+	if _, ok := retmap0[util.CONST_ADMIN]; ok {
+		return true
+	}
+
+	bt1 := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_ROLE_PATH)
+	defer bt1.Close()
+
+	strlist1 := bt1.Scan()
+	bt1.Close()
+	retRolePathExists := false
+	retRightExists := false
+	for _, v := range strlist1 {
+		if retRolePathExists {
+			break
+		}
+		for _, v1 := range v.(map[string]interface{}) {
+			m := new(module.MetaSystemRolePathBean)
+			err := json.Unmarshal([]byte(v1.(string)), &m)
+			if err != nil {
+				glog.Glog(LogF, fmt.Sprint(err))
+				continue
+			}
+			if m.Path != path || m.Enable != "1" {
+				continue
+			}
+			retRolePathExists = true
+			if _, ok := retmap0[m.Role]; ok {
+				retRightExists = true
+				break
+			}
+		}
+	}
+	if !retRolePathExists {
+		return true
+	} else if retRolePathExists && retRightExists {
+		return true
+	}
+	return false
+}
+
 // Global Filter
 func globalOauth(req *restful.Request, resp *restful.Response, chain *restful.FilterChain) {
 	u, err := url.Parse(req.Request.URL.String())
@@ -1850,7 +2016,7 @@ func globalOauth(req *restful.Request, resp *restful.Response, chain *restful.Fi
 	}
 	reqParams, err := url.ParseQuery(req.Request.URL.RawQuery)
 	if err != nil {
-		log.Printf("Failed to decode: %v", err)
+		glog.Glog(LogF, fmt.Sprintf("Failed to decode: %v", err))
 		util.ApiResponse(resp.ResponseWriter, 700, fmt.Sprintf("Failed decode error.%v", err), nil)
 		return
 	}
@@ -1858,7 +2024,7 @@ func globalOauth(req *restful.Request, resp *restful.Response, chain *restful.Fi
 	var claimsDecoded map[string]interface{}
 	decodeErr := jwt.Decode([]byte(tokenstring), &claimsDecoded, []byte(conf.JwtKey))
 	if decodeErr != nil {
-		log.Printf("Failed to decode: %s (%s)", decodeErr, tokenstring)
+		glog.Glog(LogF, fmt.Sprintf("Failed to decode: %s (%s)", decodeErr, tokenstring))
 		util.ApiResponse(resp.ResponseWriter, 700, fmt.Sprintf("Failed to decode.%v", decodeErr), nil)
 		return
 	}
@@ -1867,10 +2033,24 @@ func globalOauth(req *restful.Request, resp *restful.Response, chain *restful.Fi
 	exp1, _ := strconv.ParseFloat(fmt.Sprintf("%v", time.Now().Unix()+0), 64)
 
 	if (exp - exp1) < 0 {
-		log.Printf("Failed to decode: %v %v %v", exp, exp1, (exp - exp1))
+		glog.Glog(LogF, fmt.Sprintf("Failed to decode: %v %v %v", exp, exp1, (exp-exp1)))
 		util.ApiResponse(resp.ResponseWriter, 700, "Not Authorized AccessToken Expired ,Please login", nil)
 		return
 	}
-	//fmt.Println((exp - exp1))
+
+	username, err := util.JwtAccessTokenUserName(fmt.Sprint(reqParams["accesstoken"][0]), conf.JwtKey)
+	if err != nil {
+		glog.Glog(LogF, fmt.Sprint(err))
+		util.ApiResponse(resp.ResponseWriter, 700, fmt.Sprintf("accesstoken parse username err.%v", err), nil)
+		return
+	}
+
+	if username != util.CONST_ADMIN {
+		if !validPass(username, u.Path) {
+			glog.Glog(LogF, fmt.Sprint("role on path right not allow."))
+			util.ApiResponse(resp.ResponseWriter, 700, fmt.Sprint("role on path right not allow."), nil)
+			return
+		}
+	}
 	chain.ProcessFilter(req, resp)
 }

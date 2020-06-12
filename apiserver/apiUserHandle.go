@@ -126,6 +126,28 @@ func (rrs *ResponseResourceUser) SystemUserAddHandler(request *restful.Request, 
 		return
 	}
 
+	bt0 := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_USER)
+	defer bt0.Close()
+
+	strlist := bt0.Scan()
+	bt0.Close()
+	for _, v := range strlist {
+		for _, v1 := range v.(map[string]interface{}) {
+			m := new(module.MetaSystemUserBean)
+			err := json.Unmarshal([]byte(v1.(string)), &m)
+			if err != nil {
+				glog.Glog(LogF, fmt.Sprint(err))
+				continue
+			}
+			if m.UserName != p.UserName {
+				continue
+			}
+			glog.Glog(LogF, fmt.Sprintf("%v user has existed.", p.UserName))
+			util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("%v user has existed.", p.UserName), nil)
+			return
+		}
+	}
+
 	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_USER)
 	defer bt.Close()
 
@@ -160,7 +182,7 @@ func (rrs *ResponseResourceUser) SystemUserUpdateHandler(request *restful.Reques
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("Parse json error.%v", err), nil)
 		return
 	}
-	if len(p.UserName) == 0 || len(p.Password) == 0 || len(p.Id) == 0 {
+	if len(p.Id) == 0 {
 		glog.Glog(LogF, fmt.Sprintf("parameter missed."))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
@@ -177,7 +199,7 @@ func (rrs *ResponseResourceUser) SystemUserUpdateHandler(request *restful.Reques
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parse json error.%v", err), nil)
 		return
 	}
-	m.Password = EnPwdCode(p.Password)
+	//m.Password = EnPwdCode(p.Password)
 	m.Avatar = p.Avatar
 	m.Introduction = p.Introduction
 	timeStr := time.Now().Format("2006-01-02 15:04:05")
@@ -695,6 +717,7 @@ func (rrs *ResponseResourceUser) SystemUserRoleAddHandler(request *restful.Reque
 	m := new(module.MetaSystemUserRoleBean)
 	m.UserName = p.UserName
 	m.Role = p.Role
+	m.Remark = p.Remark
 	timeStr := time.Now().Format("2006-01-02 15:04:05")
 	m.CreateTime = timeStr
 	m.UpdateTime = timeStr
@@ -714,7 +737,7 @@ func (rrs *ResponseResourceUser) SystemUserRoleAddHandler(request *restful.Reque
 }
 
 func (rrs *ResponseResourceUser) SystemUserRoleUpdateHandler(request *restful.Request, response *restful.Response) {
-	p := new(module.MetaParaSystemRoleAddBean)
+	p := new(module.MetaParaSystemUserRoleAddBean)
 	err := request.ReadEntity(&p)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("Parse json error.%v", err))
@@ -740,6 +763,7 @@ func (rrs *ResponseResourceUser) SystemUserRoleUpdateHandler(request *restful.Re
 	}
 	timeStr := time.Now().Format("2006-01-02 15:04:05")
 	m.UpdateTime = timeStr
+	m.Remark = p.Remark
 	m.Enable = p.Enable
 	jsonstr, _ := json.Marshal(m)
 	err = bt.Set(m.Id, string(jsonstr))
@@ -969,6 +993,33 @@ func (rrs *ResponseResourceUser) SystemUserTokenHandler(request *restful.Request
 	util.ApiResponse(response.ResponseWriter, 200, "", retlst)
 }
 
+func (rrs *ResponseResourceUser) SystemCreateTokenHandler(request *restful.Request, response *restful.Response) {
+	p := new(module.MetaTokenCreateBean)
+	err := request.ReadEntity(&p)
+	if err != nil {
+		glog.Glog(LogF, fmt.Sprintf("Parse json error.%v", err))
+		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("Parse json error.%v", err), nil)
+		return
+	}
+	h, err := strconv.ParseInt(p.Hour, 10, 64)
+	if err != nil || h < 1 || len(p.UserName) == 0 {
+		glog.Glog(LogF, fmt.Sprintf("parameter entre err."))
+		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter entre err."), nil)
+		return
+	}
+	token, err := rrs.createToken(p.UserName, 30*24)
+	if err != nil {
+		glog.Glog(LogF, fmt.Sprint(err))
+		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("create token err.%v", err), nil)
+		return
+	}
+	m := new(module.MetaSystemUserTokenBean)
+	m.Token = token
+	retlst := make([]interface{}, 0)
+	retlst = append(retlst, m)
+	util.ApiResponse(response.ResponseWriter, 200, "", retlst)
+}
+
 func (rrs *ResponseResourceUser) createToken(username string, keeptime int64) (string, error) {
 	exp1, _ := strconv.ParseFloat(fmt.Sprintf("%v", time.Now().Unix()+3600*keeptime), 64)
 	claims := map[string]interface{}{
@@ -1002,7 +1053,6 @@ func (rrs *ResponseResourceUser) SystemUserInfoHandler(request *restful.Request,
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("accesstoken parse username err.%v", err), nil)
 		return
 	}
-	glog.Glog(LogF, fmt.Sprint(username))
 	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_USER)
 	defer bt.Close()
 
@@ -1022,10 +1072,14 @@ func (rrs *ResponseResourceUser) SystemUserInfoHandler(request *restful.Request,
 				continue
 			}
 			n := new(module.MetaSystemUserInfoBean)
+			n.Id = m.Id
 			n.UserName = m.UserName
 			n.Avatar = m.Avatar
+			n.CreateTime = m.CreateTime
+			n.UpdateTime = m.UpdateTime
 			n.Introduction = m.Introduction
 			n.Role = rrs.userRole(m.UserName)
+			n.Enable = m.Enable
 			retlst = append(retlst, n)
 		}
 	}
@@ -1058,4 +1112,251 @@ func (rrs *ResponseResourceUser) userRole(username string) []string {
 		retlst = append(retlst, k)
 	}
 	return retlst
+}
+
+func (rrs *ResponseResourceUser) SystemRolePathListHandler(request *restful.Request, response *restful.Response) {
+
+	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_ROLE_PATH)
+	defer bt.Close()
+
+	strlist := bt.Scan()
+	bt.Close()
+	retlst := make([]interface{}, 0)
+	for _, v := range strlist {
+		for _, v1 := range v.(map[string]interface{}) {
+			m := new(module.MetaSystemRolePathBean)
+			err := json.Unmarshal([]byte(v1.(string)), &m)
+			if err != nil {
+				glog.Glog(LogF, fmt.Sprint(err))
+				continue
+			}
+			retlst = append(retlst, m)
+		}
+	}
+	util.ApiResponse(response.ResponseWriter, 200, "", retlst)
+}
+func (rrs *ResponseResourceUser) SystemRolePathGetHandler(request *restful.Request, response *restful.Response) {
+	p := new(module.MetaParaSystemRolePathGetBean)
+	err := request.ReadEntity(&p)
+	if err != nil {
+		glog.Glog(LogF, fmt.Sprintf("Parse json error.%v", err))
+		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("Parse json error.%v", err), nil)
+		return
+	}
+	if len(p.Id) == 0 {
+		glog.Glog(LogF, fmt.Sprintf("parameter missed."))
+		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
+		return
+	}
+
+	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_ROLE_PATH)
+	defer bt.Close()
+
+	retlst := make([]interface{}, 0)
+	strlist := bt.Scan()
+	bt.Close()
+	for _, v := range strlist {
+		for _, v1 := range v.(map[string]interface{}) {
+			m := new(module.MetaSystemRolePathBean)
+			err := json.Unmarshal([]byte(v1.(string)), &m)
+			if err != nil {
+				glog.Glog(LogF, fmt.Sprint(err))
+				util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get cmd failed.%v", err), nil)
+				return
+			}
+			if m.Role != p.Role || m.Enable != "1" || m.Path != p.Path {
+				continue
+			}
+			retlst = append(retlst, m)
+		}
+	}
+	util.ApiResponse(response.ResponseWriter, 200, "", retlst)
+}
+func (rrs *ResponseResourceUser) SystemRolePathRemoveHandler(request *restful.Request, response *restful.Response) {
+	p := new(module.MetaParaSystemRolePathRemoveBean)
+	err := request.ReadEntity(&p)
+	if err != nil {
+		glog.Glog(LogF, fmt.Sprintf("Parse json error.%v", err))
+		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("Parse json error.%v", err), nil)
+		return
+	}
+	if len(p.Id) == 0 {
+		glog.Glog(LogF, fmt.Sprintf("parameter missed."))
+		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
+		return
+	}
+
+	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_ROLE_PATH)
+	defer bt.Close()
+
+	bt.Remove(p.Id)
+	retlst := make([]interface{}, 0)
+	util.ApiResponse(response.ResponseWriter, 200, "", retlst)
+}
+func (rrs *ResponseResourceUser) SystemRolePathAddHandler(request *restful.Request, response *restful.Response) {
+	p := new(module.MetaParaSystemRolePathAddBean)
+	err := request.ReadEntity(&p)
+	if err != nil {
+		glog.Glog(LogF, fmt.Sprintf("Parse json error.%v", err))
+		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("Parse json error.%v", err), nil)
+		return
+	}
+	if len(p.Role) == 0 || len(p.Path) == 0 {
+		glog.Glog(LogF, fmt.Sprintf("parameter missed."))
+		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
+		return
+	}
+
+	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_ROLE_PATH)
+	defer bt.Close()
+
+	m := new(module.MetaSystemRolePathBean)
+	m.Role = p.Role
+	m.Path = p.Path
+	m.Remark = p.Remark
+	timeStr := time.Now().Format("2006-01-02 15:04:05")
+	m.CreateTime = timeStr
+	m.UpdateTime = timeStr
+	m.Enable = p.Enable
+	u1 := uuid.Must(uuid.NewV4())
+	m.Id = fmt.Sprint(u1)
+
+	jsonstr, _ := json.Marshal(m)
+	err = bt.Set(m.Id, string(jsonstr))
+	if err != nil {
+		glog.Glog(LogF, fmt.Sprintf("data in db update error.%v", err))
+		util.ApiResponse(response, 700, fmt.Sprintf("data in db update error.%v", err), nil)
+		return
+	}
+	retlst := make([]interface{}, 0)
+	util.ApiResponse(response.ResponseWriter, 200, "", retlst)
+}
+
+func (rrs *ResponseResourceUser) SystemRolePathUpdateHandler(request *restful.Request, response *restful.Response) {
+	p := new(module.MetaParaSystemRolePathUpdateBean)
+	err := request.ReadEntity(&p)
+	if err != nil {
+		glog.Glog(LogF, fmt.Sprintf("Parse json error.%v", err))
+		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("Parse json error.%v", err), nil)
+		return
+	}
+	if len(p.Role) == 0 || len(p.Id) == 0 || len(p.Path) == 0 {
+		glog.Glog(LogF, fmt.Sprintf("parameter missed."))
+		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
+		return
+	}
+
+	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_ROLE_PATH)
+	defer bt.Close()
+
+	fb0 := bt.Get(p.Id)
+	m := new(module.MetaSystemRolePathBean)
+	err = json.Unmarshal([]byte(fb0.(string)), &m)
+	if err != nil {
+		glog.Glog(LogF, fmt.Sprintf("parse json error.%v", err))
+		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parse json error.%v", err), nil)
+		return
+	}
+	timeStr := time.Now().Format("2006-01-02 15:04:05")
+	m.UpdateTime = timeStr
+	m.Enable = p.Enable
+	m.Remark = p.Remark
+	jsonstr, _ := json.Marshal(m)
+	err = bt.Set(m.Id, string(jsonstr))
+	if err != nil {
+		glog.Glog(LogF, fmt.Sprintf("data in db update error.%v", err))
+		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("data in db update error.%v", err), nil)
+		return
+	}
+	retlst := make([]interface{}, 0)
+	util.ApiResponse(response.ResponseWriter, 200, "", retlst)
+}
+
+func (rrs *ResponseResourceUser) SystemUserPasswordChangeHandler(request *restful.Request, response *restful.Response) {
+	reqParams, err := url.ParseQuery(request.Request.URL.RawQuery)
+	if err != nil {
+		glog.Glog(LogF, fmt.Sprint(err))
+		util.ApiResponse(response.ResponseWriter, 700, "parse url parameter err.", nil)
+		return
+	}
+	username, err := util.JwtAccessTokenUserName(fmt.Sprint(reqParams["accesstoken"][0]), conf.JwtKey)
+	if err != nil {
+		glog.Glog(LogF, fmt.Sprint(err))
+		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("accesstoken parse username err.%v", err), nil)
+		return
+	}
+	p := new(module.MetaParaSystemUserPasswordChangeBean)
+	err = request.ReadEntity(&p)
+	if err != nil {
+		glog.Glog(LogF, fmt.Sprintf("Parse json error.%v", err))
+		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("Parse json error.%v", err), nil)
+		return
+	}
+
+	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_USER)
+	defer bt.Close()
+
+	strlist := bt.Scan()
+	bt.Close()
+	tpassword := EnPwdCode(p.OldPassword)
+	tflag := false
+	tid := ""
+	retlst := make([]interface{}, 0)
+	for _, v := range strlist {
+		for _, v1 := range v.(map[string]interface{}) {
+			m := new(module.MetaSystemUserBean)
+			err := json.Unmarshal([]byte(v1.(string)), &m)
+			if err != nil {
+				glog.Glog(LogF, fmt.Sprint(err))
+				continue
+			}
+			if m.UserName != username || m.Enable != "1" {
+				continue
+			}
+			if tpassword != m.Password {
+				glog.Glog(LogF, fmt.Sprint("entre old password err."))
+				util.ApiResponse(response.ResponseWriter, 700, fmt.Sprint("entre old password err."), nil)
+				return
+			}
+			tflag = true
+			tid = m.Id
+			n := new(module.MetaSystemUserInfoBean)
+			n.UserName = m.UserName
+			n.Avatar = m.Avatar
+			n.Introduction = m.Introduction
+			n.CreateTime = m.CreateTime
+			n.UpdateTime = m.UpdateTime
+			n.Role = rrs.userRole(m.UserName)
+			n.Id = m.Id
+			n.Enable = m.Enable
+			retlst = append(retlst, n)
+		}
+	}
+	if !tflag {
+		glog.Glog(LogF, fmt.Sprintf("%v token user not exists.", username))
+		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("%v token user not exists.", username), nil)
+		return
+	}
+	bt0 := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_USER)
+	defer bt0.Close()
+	fb0 := bt0.Get(tid)
+	u := new(module.MetaSystemUserBean)
+	err = json.Unmarshal([]byte(fb0.(string)), &u)
+	if err != nil {
+		glog.Glog(LogF, fmt.Sprintf("parse json error.%v", err))
+		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parse json error.%v", err), nil)
+		return
+	}
+	timeStr := time.Now().Format("2006-01-02 15:04:05")
+	u.UpdateTime = timeStr
+	u.Password = EnPwdCode(p.Password)
+
+	jsonstr, _ := json.Marshal(u)
+	err = bt0.Set(tid, string(jsonstr))
+	if err != nil {
+		glog.Glog(LogF, fmt.Sprintf("data in db update error.%v", err))
+		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("data in db update error.%v", err), nil)
+		return
+	}
+	util.ApiResponse(response.ResponseWriter, 200, "", retlst)
 }

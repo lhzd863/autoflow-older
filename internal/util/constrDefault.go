@@ -18,6 +18,7 @@ const (
         TABLE_AUTO_SYS_RIGHT                   = "auto_sys_right"
         TABLE_AUTO_SYS_USER_ROLE               = "auto_sys_user_user"
         TABLE_AUTO_SYS_ROLE_RIGHT              = "auto_sys_role_right"
+        TABLE_AUTO_SYS_ROLE_PATH              = "auto_sys_role_path"
 	//
 	TABLE_AUTO_FLOW_PARAMETER = "auto_flow_parameter"
 	//table flow job
@@ -43,9 +44,11 @@ const (
 	//
 	CONST_ENABLE   = "1"
 	CONST_DISABLE  = "0"
+        CONST_ADMIN    = "admin"
 	CONST_FLOW_CTS = "AUTO_CREATE_TIMESTAMP"
 	CONST_FLOW_RCT = "AUTO_RUN_CONTEXT"
 	CONST_SYS      = "AUTO_SYS"
 	CONST_JOB      = "AUTO_JOB"
 	CONST_FLOW     = "AUTO_FLOW"
+        
 )
