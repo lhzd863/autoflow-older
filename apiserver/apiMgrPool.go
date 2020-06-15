@@ -106,7 +106,7 @@ func (mp *MgrPool) SubmitJob(jobstr interface{}, slvstr interface{}) bool {
 		return false
 	}
 
-	glog.Glog(LogF, fmt.Sprintf("rm from job pool %v,%v,%v.", jp["sys"], jp["job"], jp["flowid"]))
+	glog.Glog(LogF, fmt.Sprintf("rm from job pool %v,%v.%v.", jp["flowid"],jp["sys"], jp["job"]))
 	url := fmt.Sprintf("http://%v:%v/api/v1/job/pool/rm?accesstoken=%v", conf.ApiServerIp, conf.ApiServerPort, conf.AccessToken)
 	para := fmt.Sprintf("{\"sys\":\"%v\",\"job\":\"%v\",\"flowid\":\"%v\"}", jp["sys"], jp["job"], jp["flowid"])
 	jsonstr1, err := util.Api_RequestPost(url, para)
@@ -121,7 +121,7 @@ func (mp *MgrPool) SubmitJob(jobstr interface{}, slvstr interface{}) bool {
 		return false
 	}
 	if retbn1.Status_Code != 200 {
-		glog.Glog(LogF, fmt.Sprintf("post url %v return status code:%v", url, retbn1.Status_Code))
+		glog.Glog(LogF, fmt.Sprintf("post url %v return status code:%v", url, retbn1.Status_Txt))
 		return false
 	}
 
@@ -142,7 +142,7 @@ func (mp *MgrPool) ObtSlvRunningJobCnt() []interface{} {
 		return nil
 	}
 	if retbn.Status_Code != 200 {
-		glog.Glog(LogF, fmt.Sprintf("post url return status code:%v", retbn.Status_Code))
+		glog.Glog(LogF, fmt.Sprintf("post url return status code:%v", retbn.Status_Txt))
 		return nil
 	}
 	if retbn.Data == nil {

@@ -1384,7 +1384,6 @@ func (rrs *ResponseResourceJob) FlowJobStatusUpdateSubmitHandler(request *restfu
 	}
 	jobbn.Status = jobpara.Status
 	jsonstr, _ := json.Marshal(jobbn)
-	glog.Glog(LogF, fmt.Sprint(string(jsonstr)))
 	err = bt.Set(jobbn.Sys+"."+jobbn.Job, string(jsonstr))
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("data in db update error.%v", err))
