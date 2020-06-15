@@ -256,7 +256,7 @@ func (rrs *ResponseResourceJob) FlowJobStatusGetPendingHandle(request *restful.R
 	c, bid := rrs.CurrentStatusPendingOffset(len(strlist))
 	retlst := make([]interface{}, 0)
 	if bid == -1 {
-                glog.Glog(LogF, fmt.Sprint("all ringid is working."))
+		glog.Glog(LogF, fmt.Sprint("all ringid is working."))
 		util.ApiResponse(response.ResponseWriter, 200, fmt.Sprintf("all ringid is working."), retlst)
 		return
 	} else {

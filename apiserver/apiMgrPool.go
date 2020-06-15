@@ -1,19 +1,20 @@
 package apiserver
 
 import (
+	"encoding/json"
+	"errors"
+	"fmt"
+	"strconv"
 	"sync"
-        "fmt"
-        "time"
-        "encoding/json"
-        "strconv"
+	"time"
 
-        "golang.org/x/net/context"
+	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
 	"github.com/lhzd863/autoflow/internal/glog"
+	"github.com/lhzd863/autoflow/internal/gproto"
 	"github.com/lhzd863/autoflow/internal/module"
-        "github.com/lhzd863/autoflow/internal/util"
-        "github.com/lhzd863/autoflow/internal/gproto"
+	"github.com/lhzd863/autoflow/internal/util"
 )
 
 type MgrPool struct {
@@ -55,9 +56,13 @@ func (mp *MgrPool) JobPool() {
 		serverlst := mp.ObtSlvRunningJobCnt()
 		for i := 0; i < len(retarr); i++ {
 			v := retarr[i].(map[string]interface{})
-			s := mp.ObtJobServer(serverlst, v["server"].(string))
+			s, err := mp.ObtJobServer(serverlst, v["server"].(string))
+			if err != nil {
+				glog.Glog(LogF, fmt.Sprint(err))
+				continue
+			}
 			if len(s) < 1 {
-				glog.Glog(LogF, fmt.Sprintf("%v, %v, %v job no free server running,wait for next time.", v["flowid"], v["sys"], v["job"]))
+				glog.Glog(LogF, fmt.Sprintf("%v, %v.%v job no free server running,wait for next time.", v["flowid"], v["sys"], v["job"]))
 				time.Sleep(time.Duration(10) * time.Second)
 				continue
 			}
@@ -75,7 +80,7 @@ func (mp *MgrPool) JobPool() {
 func (mp *MgrPool) SubmitJob(jobstr interface{}, slvstr interface{}) bool {
 	s := slvstr.(map[string]interface{})
 	jp := jobstr.(map[string]interface{})
-	glog.Glog(LogF, fmt.Sprintf("%v update %v %v job status %v.", jp["flowid"], jp["sys"], jp["job"], util.STATUS_AUTO_GO))
+	glog.Glog(LogF, fmt.Sprintf("%v update %v.%v job status %v.", jp["flowid"], jp["sys"], jp["job"], util.STATUS_AUTO_GO))
 	url0 := fmt.Sprintf("http://%v:%v/api/v1/flow/job/status/update/go?accesstoken=%v", conf.ApiServerIp, conf.ApiServerPort, conf.AccessToken)
 	m := new(module.MetaParaFlowJobStatusUpdateGoBean)
 	m.FlowId = jp["flowid"].(string)
@@ -106,7 +111,7 @@ func (mp *MgrPool) SubmitJob(jobstr interface{}, slvstr interface{}) bool {
 		return false
 	}
 
-	glog.Glog(LogF, fmt.Sprintf("rm from job pool %v,%v.%v.", jp["flowid"],jp["sys"], jp["job"]))
+	glog.Glog(LogF, fmt.Sprintf("rm from job pool %v,%v.%v.", jp["flowid"], jp["sys"], jp["job"]))
 	url := fmt.Sprintf("http://%v:%v/api/v1/job/pool/rm?accesstoken=%v", conf.ApiServerIp, conf.ApiServerPort, conf.AccessToken)
 	para := fmt.Sprintf("{\"sys\":\"%v\",\"job\":\"%v\",\"flowid\":\"%v\"}", jp["sys"], jp["job"], jp["flowid"])
 	jsonstr1, err := util.Api_RequestPost(url, para)
@@ -129,7 +134,7 @@ func (mp *MgrPool) SubmitJob(jobstr interface{}, slvstr interface{}) bool {
 }
 
 func (mp *MgrPool) ObtSlvRunningJobCnt() []interface{} {
-	url := fmt.Sprintf("http://%v:%v/api/v1/worker/cnt/exec?accesstoken=%v", conf.ApiServerIp, conf.ApiServerPort, conf.AccessToken)
+	url := fmt.Sprintf("http://%v:%v/api/v1/worker/mgr/exec?accesstoken=%v", conf.ApiServerIp, conf.ApiServerPort, conf.AccessToken)
 	jsonstr, err := util.Api_RequestPost(url, "{}")
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprint(err))
@@ -153,36 +158,65 @@ func (mp *MgrPool) ObtSlvRunningJobCnt() []interface{} {
 	return retarr
 }
 
-func (mp *MgrPool) ObtJobServer(arr []interface{}, slvid string) []interface{} {
+func (mp *MgrPool) ObtJobServer(arr []interface{}, slvid string) ([]interface{}, error) {
 	retlst := make([]interface{}, 0)
 	for i := 0; i < len(arr); i++ {
 		v := arr[i].(map[string]interface{})
-		maxcnt, err := strconv.Atoi(v["maxcnt"].(string))
-		if err != nil {
-			glog.Glog(LogF, fmt.Sprintf("string conv int %v err.%v", v["maxcnt"], err))
-			continue
-		}
-		runningcnt, err := strconv.Atoi(v["runningcnt"].(string))
-		if err != nil {
-			glog.Glog(LogF, fmt.Sprintf("string conv int %v err.%v", v["runningcnt"], err))
-			continue
-		}
-		currentcnt, err := strconv.Atoi(v["currentcnt"].(string))
-		if err != nil {
-			glog.Glog(LogF, fmt.Sprintf("string conv int %v err.%v", v["currentcnt"], err))
-			continue
-		}
+		var runningcnt, currentexeccnt, currentsubmitcnt int
 		if len(slvid) > 0 {
-			if v["slaveid"] == slvid {
-				retlst = make([]interface{}, 0)
-				retlst = append(retlst, arr[i])
-				break
+			if v["slaveid"] != slvid {
+				continue
 			}
-		} else if 0 < (maxcnt - runningcnt - currentcnt) {
-			retlst = append(retlst, arr[i])
+			maxcnt, err := strconv.Atoi(v["maxcnt"].(string))
+			if err != nil {
+				return retlst, errors.New(fmt.Sprintf("string conv int %v err.%v", v["maxcnt"], err))
+			}
+			runningcnt, err = strconv.Atoi(v["runningcnt"].(string))
+			if err != nil {
+				return retlst, errors.New(fmt.Sprintf("string conv int %v err.%v", v["runningcnt"], err))
+			}
+			currentexeccnt, err = strconv.Atoi(v["currentexeccnt"].(string))
+			if err != nil {
+				glog.Glog(LogF, fmt.Sprintf("string conv int %v err.%v", v["currentcnt"], err))
+				return retlst, errors.New(fmt.Sprintf("string conv int %v err.%v", v["currentcnt"], err))
+			}
+			currentsubmitcnt, err = strconv.Atoi(v["currentsubmitcnt"].(string))
+			if err != nil {
+				glog.Glog(LogF, fmt.Sprintf("string conv currentsubmitcnt int %v err.%v", v["currentsubmitcnt"], err))
+				return retlst, errors.New(fmt.Sprintf("string conv currentsubmitcnt int %v err.%v", v["currentsubmitcnt"], err))
+			}
+			if 5*maxcnt < runningcnt+currentexeccnt+currentsubmitcnt {
+				return retlst, errors.New(fmt.Sprintf("cnt has limited total,wait for next time."))
+			}
+		} else {
+			maxcnt, err := strconv.Atoi(v["maxcnt"].(string))
+			if err != nil {
+				glog.Glog(LogF, fmt.Sprintf("string conv int %v err.%v", v["maxcnt"], err))
+				continue
+			}
+			runningcnt, err = strconv.Atoi(v["runningcnt"].(string))
+			if err != nil {
+				glog.Glog(LogF, fmt.Sprintf("string conv int %v err.%v", v["runningcnt"], err))
+				continue
+			}
+			currentexeccnt, err = strconv.Atoi(v["currentexeccnt"].(string))
+			if err != nil {
+				glog.Glog(LogF, fmt.Sprintf("string conv int %v err.%v", v["currentcnt"], err))
+				continue
+			}
+			currentsubmitcnt, err = strconv.Atoi(v["currentsubmitcnt"].(string))
+			if err != nil {
+				glog.Glog(LogF, fmt.Sprintf("string conv int currentsubmitcnt %v err.%v", v["currentsubmitcnt"], err))
+				continue
+			}
+			if 5*maxcnt < runningcnt+currentexeccnt+currentsubmitcnt {
+				continue
+			}
 		}
+		retlst = append(retlst, arr[i])
+		break
 	}
-	return retlst
+	return retlst, nil
 }
 
 func (mp *MgrPool) ServerRoutineStatus() {

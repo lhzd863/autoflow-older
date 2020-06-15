@@ -8,7 +8,7 @@ type MetaSystemUserInfoBean struct {
 	CreateTime   string   `json:"createtime"`
 	UpdateTime   string   `json:"updatetime"`
 	Role         []string `json:"role"`
-        Enable       string   `json:"enable"`
+	Enable       string   `json:"enable"`
 }
 
 type MetaParaSystemUserInfoGetBean struct {

@@ -59,16 +59,16 @@ func (rrs ResponseResource) WebService() *restful.WebService {
 		Returns(200, "OK", ResponseResource{}).
 		Returns(404, "Not Found", nil))
 
-        tags = []string{"system-stat"}
-        ws.Route(ws.POST("/system/stat/status").To(rra.SystemStatJobStatusCntHandler).
-                // docs
-                Doc("统计作业状态").
-                Metadata(restfulspec.KeyOpenAPITags, tags).
-                Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
-                Reads(module.MetaParaFlowJobListBean{}).
-                Writes(module.RetBean{}). // on the response
-                Returns(200, "OK", ResponseResource{}).
-                Returns(404, "Not Found", nil))
+	tags = []string{"system-stat"}
+	ws.Route(ws.POST("/system/stat/status").To(rra.SystemStatJobStatusCntHandler).
+		// docs
+		Doc("统计作业状态").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
+		Reads(module.MetaParaFlowJobListBean{}).
+		Writes(module.RetBean{}). // on the response
+		Returns(200, "OK", ResponseResource{}).
+		Returns(404, "Not Found", nil))
 
 	tags = []string{"system-user"}
 	ws.Route(ws.POST("/system/user/add").To(rru.SystemUserAddHandler).
@@ -835,7 +835,7 @@ func (rrs ResponseResource) WebService() *restful.WebService {
 		Returns(200, "OK", module.RetBean{}).
 		Returns(404, "Not Found", nil))
 
-	ws.Route(ws.POST("/worker/cnt/exec").To(rrw.WorkerExecCntHandler).
+	ws.Route(ws.POST("/worker/mgr/exec").To(rrw.WorkerMgrExecHandler).
 		// docs
 		Doc("节点执行作业").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
@@ -1596,7 +1596,7 @@ var (
 	rrl                   *ResponseResourceLeader
 	rrw                   *ResponseResourceWorker
 	rrj                   *ResponseResourceJob
-        rra                   *ResponseResourceStat
+	rra                   *ResponseResourceStat
 )
 
 func NewApiServer(cfg string) {
@@ -1624,7 +1624,7 @@ func NewApiServer(cfg string) {
 	}
 	statusPendingOffset = 0
 	statusGoOffset = 0
-        nmp := NewMgrPool()
+	nmp := NewMgrPool()
 	go func() {
 		nmp.JobPool()
 	}()
@@ -1635,10 +1635,9 @@ func NewApiServer(cfg string) {
 	rrl = NewResponseResourceLeader()
 	rrw = NewResponseResourceWorker()
 	rrj = NewResponseResourceJob()
-        rra = NewResponseResourceStat()
+	rra = NewResponseResourceStat()
 	HttpServer()
 }
-
 
 func HttpServer() {
 	restful.Filter(globalOauth)

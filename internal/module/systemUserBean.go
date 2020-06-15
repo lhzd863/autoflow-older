@@ -29,9 +29,9 @@ type MetaParaSystemUserUpdateBean struct {
 
 type MetaParaSystemUserGetBean struct {
 	Id       string `json:"id"`
-        UserName     string `json:"username"`
+	UserName string `json:"username"`
 }
 
 type MetaParaSystemUserRemoveBean struct {
-	Id       string `json:"id"`
+	Id string `json:"id"`
 }

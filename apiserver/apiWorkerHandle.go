@@ -36,31 +36,39 @@ func (rrs *ResponseResourceWorker) WorkerHeartAddHandler(request *restful.Reques
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	m := new(module.MetaWorkerHeartBean)
-	m.Id = p.Id
-	m.WorkerId = p.WorkerId
-	m.Ip = p.Ip
-	m.Port = p.Port
-	m.MaxCnt = p.MaxCnt
-	m.RunningCnt = p.RunningCnt
-	m.CurrentCnt = p.CurrentCnt
-	m.StartTime = p.StartTime
-	m.Duration = p.Duration
-	rrs.Lock()
 	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_WORKER_HEART)
 	defer bt.Close()
+	rrs.Lock()
+	m := new(module.MetaWorkerMgrBean)
+	v := bt.Get(p.Id)
+	if v != nil {
+		err := json.Unmarshal([]byte(v.(string)), &m)
+		if err != nil {
+			glog.Glog(LogF, fmt.Sprint(err))
+		}
+	} else {
+		m.Id = p.Id
+		m.WorkerId = p.WorkerId
+		m.Ip = p.Ip
+		m.CurrentExecCnt = "0"
+		m.CurrentSubmitCnt = "0"
+		m.StartTime = p.StartTime
+	}
+	m.MaxCnt = p.MaxCnt
+	m.Duration = p.Duration
+	m.RunningCnt = p.RunningCnt
 
 	timeStr := time.Now().Format("2006-01-02 15:04:05")
 	m.UpdateTime = timeStr
 
 	jsonstr, _ := json.Marshal(m)
 	err = bt.Set(m.Id, string(jsonstr))
+	rrs.Unlock()
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprint(err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("data in db update error.%v", err), nil)
 		return
 	}
-	rrs.Unlock()
 	retlst := make([]interface{}, 0)
 	util.ApiResponse(response.ResponseWriter, 200, "", retlst)
 }
@@ -83,12 +91,12 @@ func (rrs *ResponseResourceWorker) WorkerHeartRemoveHandler(request *restful.Req
 	defer bt.Close()
 
 	err = bt.Remove(p.Id)
+	rrs.Unlock()
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("data in db remove error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("data in db remove error.%v", err), nil)
 		return
 	}
-	rrs.Unlock()
 	retlst := make([]interface{}, 0)
 	util.ApiResponse(response.ResponseWriter, 200, "", retlst)
 }
@@ -103,7 +111,7 @@ func (rrs *ResponseResourceWorker) WorkerHeartListHandler(request *restful.Reque
 	retlst := make([]interface{}, 0)
 	for _, v := range strlist {
 		for k1, v1 := range v.(map[string]interface{}) {
-			m := new(module.MetaWorkerHeartBean)
+			m := new(module.MetaWorkerMgrBean)
 			err := json.Unmarshal([]byte(v1.(string)), &m)
 			if err != nil {
 				glog.Glog(LogF, fmt.Sprint(err))
@@ -141,20 +149,27 @@ func (rrs *ResponseResourceWorker) WorkerHeartGetHandler(request *restful.Reques
 
 	retlst := make([]interface{}, 0)
 	m := bt.Get(p.Id)
-	rrs.Unlock()
 	if m != nil {
-		v := new(module.MetaWorkerHeartBean)
+		v := new(module.MetaWorkerMgrBean)
 		err := json.Unmarshal([]byte(m.(string)), &v)
 		if err != nil {
 			glog.Glog(LogF, fmt.Sprint(err))
 		}
-		retlst = append(retlst, v)
+		timeStr := time.Now().Format("2006-01-02 15:04:05")
+		ise, _ := util.IsExpired(v.UpdateTime, timeStr, 300)
+		if ise {
+			glog.Glog(LogF, fmt.Sprintf("%v timeout %v:%v.", v.WorkerId, v.Ip, v.Port))
+			bt.Remove(p.Id)
+		} else {
+			retlst = append(retlst, v)
+		}
 	}
+	rrs.Unlock()
 	util.ApiResponse(response.ResponseWriter, 200, "", retlst)
 }
 
 func (rrs *ResponseResourceWorker) WorkerCntAddHandler(request *restful.Request, response *restful.Response) {
-	p := new(module.MetaWorkerHeartBean)
+	p := new(module.MetaWorkerMgrBean)
 	err := request.ReadEntity(&p)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprint(err))
@@ -172,14 +187,14 @@ func (rrs *ResponseResourceWorker) WorkerCntAddHandler(request *restful.Request,
 	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_WORKER_HEART)
 	defer bt.Close()
 	fb0 := bt.Get(p.Id)
-	fb := new(module.MetaWorkerHeartBean)
+	fb := new(module.MetaWorkerMgrBean)
 	err = json.Unmarshal([]byte(fb0.(string)), &fb)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("parse json error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parse json error.%v", err), nil)
 		return
 	}
-	fb.CurrentCnt = p.CurrentCnt
+	fb.CurrentExecCnt = p.CurrentExecCnt
 	jsonstr, _ := json.Marshal(fb)
 	err = bt.Set(fb.Id, string(jsonstr))
 	if err != nil {
@@ -191,17 +206,18 @@ func (rrs *ResponseResourceWorker) WorkerCntAddHandler(request *restful.Request,
 	util.ApiResponse(response.ResponseWriter, 200, "", retlst)
 }
 
-func (rrs *ResponseResourceWorker) WorkerExecCntHandler(request *restful.Request, response *restful.Response) {
+func (rrs *ResponseResourceWorker) WorkerMgrExecHandler(request *restful.Request, response *restful.Response) {
+	rrs.Lock()
+	rrs.Unlock()
 	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_WORKER_HEART)
 	defer bt.Close()
 
 	strlist := bt.Scan()
-	//bt.Close()
 
 	retlst := make([]interface{}, 0)
 	for _, v := range strlist {
 		for k1, v1 := range v.(map[string]interface{}) {
-			m := new(module.MetaWorkerHeartBean)
+			m := new(module.MetaWorkerMgrBean)
 			err := json.Unmarshal([]byte(v1.(string)), &m)
 			if err != nil {
 				glog.Glog(LogF, fmt.Sprint(err))
@@ -214,7 +230,7 @@ func (rrs *ResponseResourceWorker) WorkerExecCntHandler(request *restful.Request
 			sst := stheTime.Unix()
 			etheTime, _ := time.ParseInLocation(timeLayout, timeStr, loc)
 			est := etheTime.Unix()
-			if est-sst > 600 {
+			if est-sst > 300 {
 				glog.Glog(LogF, fmt.Sprintf("%v, %v:%v heart timeout.", m.WorkerId, m.Ip, m.Port))
 				_ = bt.Remove(k1)
 				continue
@@ -229,19 +245,23 @@ func (rrs *ResponseResourceWorker) WorkerExecCntHandler(request *restful.Request
 				glog.Glog(LogF, fmt.Sprintf("conv runningcnt fail.%v", err))
 				continue
 			}
-			currentcnt, err := strconv.Atoi(m.CurrentCnt)
+			currentexeccnt, err := strconv.Atoi(m.CurrentExecCnt)
 			if err != nil {
 				glog.Glog(LogF, fmt.Sprintf("conv currentcnt fail.%v", err))
 				continue
 			}
-			if maxcnt <= runningcnt+currentcnt {
-				glog.Glog(LogF, "max cnt gt running job cnt.")
+			currentsubmitcnt, err := strconv.Atoi(m.CurrentSubmitCnt)
+			if err != nil {
+				glog.Glog(LogF, fmt.Sprintf("conv currentsubmitcnt fail.%v", err))
+				continue
+			}
+			if 5*maxcnt <= runningcnt+currentexeccnt+currentsubmitcnt {
+				glog.Glog(LogF, fmt.Sprintf("5*maxcnt(%v)<=runningcnt(%v)+currentcnt(%v)+currentsubmitcnt(%v).", maxcnt, runningcnt, currentexeccnt, currentsubmitcnt))
 				continue
 			}
 			retlst = append(retlst, m)
 		}
 	}
-	bt.Close()
 	util.ApiResponse(response.ResponseWriter, 200, "", retlst)
 }
 
