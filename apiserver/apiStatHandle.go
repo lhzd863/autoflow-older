@@ -52,6 +52,7 @@ func (rrs *ResponseResourceStat) SystemStatJobStatusCntHandler(request *restful.
         retmap["Go"] = 0
         retmap["Succ"] = 0
         retmap["Fail"] = 0
+        retmap["Running"] = 0
         retlst := make([]interface{}, 0)
         for _, v := range strlist {
                 for _, v1 := range v.(map[string]interface{}) {
@@ -78,6 +79,7 @@ func (rrs *ResponseResourceStat) SystemStatJobStatusCntHandler(request *restful.
         n.Go = fmt.Sprint(retmap["Go"])
         n.Succ = fmt.Sprint(retmap["Succ"])
         n.Fail = fmt.Sprint(retmap["Fail"])
+        n.Running = fmt.Sprint(retmap["Running"])
         retlst = append(retlst, n)
         util.ApiResponse(response.ResponseWriter, 200, "", retlst)       
 }
