@@ -8,4 +8,5 @@ type MetaSystemStatJobStatusBean struct {
         Go             string `json:"go"`
         Succ           string `json:"succ"`
         Fail           string `json:"fail"`
+        Running        string `json:"running"`
 }
