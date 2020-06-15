@@ -1698,7 +1698,6 @@ func (rrs *ResponseResourceJob) FlowJobParameterGetAllHandler(request *restful.R
 				util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get cmd failed.%v", err), nil)
 				return
 			}
-			glog.Glog(LogF, fmt.Sprint(m))
 			retmap[m.Key] = *m
 		}
 	}
@@ -1716,7 +1715,6 @@ func (rrs *ResponseResourceJob) FlowJobParameterGetAllHandler(request *restful.R
 				util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get cmd failed.%v", err), nil)
 				return
 			}
-			glog.Glog(LogF, fmt.Sprint(m))
 			retmap[m.Key] = *m
 		}
 	}
