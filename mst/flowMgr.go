@@ -114,12 +114,14 @@ func (m *FlowMgr) checkGo() bool {
 
 		var waitGroup util.WaitGroupWrapper
 		jobv := m.jobInfo(v["sys"].(string), v["job"].(string))
-		if v["jobtype"].(string) == "V" {
-			//var waitGroup util.WaitGroupWrapper
-			waitGroup.Wrap(func() { m.invokeVirtualJob(jobv[0].(map[string]interface{})) })
-		} else {
-			//var waitGroup util.WaitGroupWrapper
-			waitGroup.Wrap(func() { m.invokeRealJob(jobv[0].(map[string]interface{})) })
+		if len(jobv) > 0 {
+			if v["jobtype"].(string) == "V" {
+				//var waitGroup util.WaitGroupWrapper
+				waitGroup.Wrap(func() { m.invokeVirtualJob(jobv[0].(map[string]interface{})) })
+			} else {
+				//var waitGroup util.WaitGroupWrapper
+				waitGroup.Wrap(func() { m.invokeRealJob(jobv[0].(map[string]interface{})) })
+			}
 		}
 	}
 	if len(retarr) == 0 {
@@ -233,11 +235,23 @@ func (m *FlowMgr) streamJob(job map[string]interface{}) bool {
 		for _, v := range streamarr {
 			v1 := v.(map[string]interface{})
 			if v1["enable"] != "1" {
-				glog.Glog(m.LogF, fmt.Sprintf("%v %v stream %v %v enable %v is not enabled,wait for next time.", v1["streamsys"], v1["streamjob"], v1["sys"], v1["job"], v1["enable"]))
+				glog.Glog(m.LogF, fmt.Sprintf("%v.%v stream %v.%v enable %v is not enabled,wait for next time.", v1["streamsys"], v1["streamjob"], v1["sys"], v1["job"], v1["enable"]))
 				continue
 			}
 			glog.Glog(m.LogF, fmt.Sprintf("%v.%v stream %v.%v.", job["sys"], job["job"], v1["sys"], v1["job"]))
-			m.jobStreamJob(v1["sys"].(string), v1["job"].(string))
+			//fail retry 3 times
+			for j := 0; j < 3; j++ {
+				err := m.jobStreamJob(v1["sys"].(string), v1["job"].(string))
+				if err == nil {
+					glog.Glog(m.LogF, fmt.Sprintf("%v.%v stream %v.%v successfully.", v1["streamsys"], v1["streamjob"], v1["sys"], v1["job"]))
+					break
+				} else {
+					glog.Glog(m.LogF, fmt.Sprintf("%v.%v stream %v.%v fail %v times,%v.", v1["streamsys"], v1["streamjob"], v1["sys"], v1["job"], j, err))
+				}
+				rand.Seed(time.Now().UnixNano())
+				ri := rand.Intn(10)
+				time.Sleep(time.Duration(ri) * time.Millisecond)
+			}
 		}
 	}
 
@@ -272,33 +286,28 @@ func (m *FlowMgr) jobStream(sys string, job string) []interface{} {
 	return retbn.Data.([]interface{})
 }
 
-func (m *FlowMgr) jobStreamJob(sys string, job string) []interface{} {
-	glog.Glog(LogF, fmt.Sprintf("Stream job %v %v.", sys, job))
-	retarr := make([]interface{}, 0)
+func (m *FlowMgr) jobStreamJob(sys string, job string) error {
+	glog.Glog(LogF, fmt.Sprintf("%v.%v stream job.", sys, job))
 	url := fmt.Sprintf("http://%v:%v/api/v1/flow/job/stream/job?accesstoken=%v", m.ApiServerIp, m.ApiServerPort, m.AccessToken)
 	para := fmt.Sprintf("{\"flowid\":\"%v\",\"sys\":\"%v\",\"job\":\"%v\"}", m.FlowId, sys, job)
 	jsonstr, err := util.Api_RequestPost(url, para)
 	if err != nil {
 		_, cfile, cline, _ := runtime.Caller(1)
 		glog.Glog(m.LogF, fmt.Sprintf("%v %v %v", cfile, cline, err))
-		return retarr
+		return err
 	}
 	retbn := new(module.RetBean)
 	err = json.Unmarshal([]byte(jsonstr), &retbn)
 	if err != nil {
 		_, cfile, cline, _ := runtime.Caller(1)
 		glog.Glog(LogF, fmt.Sprintf("%v %v %v", cfile, cline, err))
-		return retarr
+		return err
 	}
 	if retbn.Status_Code != 200 {
 		glog.Glog(LogF, fmt.Sprintf("post url return err.%v", retbn.Status_Txt))
-		return retarr
+		return errors.New(retbn.Status_Txt)
 	}
-	if retbn.Data == nil {
-		glog.Glog(LogF, fmt.Sprintf("get pending status job err."))
-		return retarr
-	}
-	return retbn.Data.([]interface{})
+	return nil
 }
 
 func (m *FlowMgr) invokeRealJob(job map[string]interface{}) {
@@ -627,19 +636,21 @@ func (m *FlowMgr) checkPending() bool {
 			glog.Glog(m.LogF, fmt.Sprintf("Job %v %v is not enabled,wait for next time.", v["job"], v["enable"]))
 			continue
 		}
-		if !m.isDependencyOk(v) {
-			glog.Glog(m.LogF, fmt.Sprintf("%v check %v %v Dependency is not ok.", m.FlowId, v["sys"], v["job"]))
+		if err = m.isDependencyOk(v); err != nil {
+			glog.Glog(m.LogF, fmt.Sprintf("Dependency is not ok,%v", err))
 			continue
 		}
-		if !m.isTimeWindowOk(v) {
-			glog.Glog(m.LogF, fmt.Sprintf("%v check %v %v TimeWindow is not ok.", m.FlowId, v["sys"], v["job"]))
+		if err = m.isTimeWindowOk(v); err != nil {
+			glog.Glog(m.LogF, fmt.Sprintf("Timewindow is not ok,%v", err))
 			continue
 		}
-		if !m.isCmdOk(v) {
-			glog.Glog(m.LogF, fmt.Sprintf("%v check %v %v cmd is not ok.", m.FlowId, v["sys"], v["job"]))
+		if err = m.isCmdOk(v); err != nil {
+			glog.Glog(m.LogF, fmt.Sprintf("Cmd is not ok,%v", err))
 			continue
 		}
-		m.submitJob(v)
+		if err = m.submitJob(v); err != nil {
+			glog.Glog(m.LogF, fmt.Sprintf("Submit job is not ok.", err))
+		}
 	}
 	if len(retarr) == 0 {
 		glog.Glog(m.LogF, fmt.Sprintf("no pending job.%v", retbn.Status_Txt))
@@ -674,27 +685,20 @@ func (m *FlowMgr) pendingRemoveRing(id string) bool {
 	return true
 }
 
-//Check the job queue in repository and try to get the job
-func (m *FlowMgr) submitJob(job map[string]interface{}) bool {
-	glog.Glog(m.LogF, fmt.Sprintf("Invoke job for %v %v", job["sys"], job["job"]))
+func (m *FlowMgr) submitJob(job map[string]interface{}) error {
 	url0 := fmt.Sprintf("http://%v:%v/api/v1/job/pool/add?accesstoken=%v", m.ApiServerIp, m.ApiServerPort, m.AccessToken)
 	para0 := fmt.Sprintf("{\"sys\":\"%v\",\"job\":\"%v\",\"flowid\":\"%v\",\"priority\":\"%v\"}", job["sys"], job["job"], m.FlowId, job["priority"])
 	jsonstr0, err := util.Api_RequestPost(url0, para0)
 	if err != nil {
-		_, cfile, cline, _ := runtime.Caller(1)
-		glog.Glog(m.LogF, fmt.Sprintf("%v %v %v", cfile, cline, err))
-		return false
+		return err
 	}
 	retbn0 := new(module.RetBean)
 	err = json.Unmarshal([]byte(jsonstr0), &retbn0)
 	if err != nil {
-		_, cfile, cline, _ := runtime.Caller(1)
-		glog.Glog(LogF, fmt.Sprintf("%v %v %v", cfile, cline, err))
-		return false
+		return err
 	}
 	if retbn0.Status_Code != 200 {
-		glog.Glog(LogF, fmt.Sprintf("post url return status code:%v", retbn0.Status_Code))
-		return false
+		return errors.New(retbn0.Status_Txt)
 	}
 	glog.Glog(m.LogF, fmt.Sprintf("update job status %v %v submit", job["sys"], job["job"]))
 	url1 := fmt.Sprintf("http://%v:%v/api/v1/flow/job/status/update/submit?accesstoken=%v", m.ApiServerIp, m.ApiServerPort, m.AccessToken)
@@ -702,22 +706,17 @@ func (m *FlowMgr) submitJob(job map[string]interface{}) bool {
 	glog.Glog(LogF, fmt.Sprint(url1))
 	jsonstr, err := util.Api_RequestPost(url1, para1)
 	if err != nil {
-		_, cfile, cline, _ := runtime.Caller(1)
-		glog.Glog(m.LogF, fmt.Sprintf("%v %v %v", cfile, cline, err))
-		return false
+		return err
 	}
 	retbn := new(module.RetBean)
 	err = json.Unmarshal([]byte(jsonstr), &retbn)
 	if err != nil {
-		_, cfile, cline, _ := runtime.Caller(1)
-		glog.Glog(LogF, fmt.Sprintf("%v %v %v", cfile, cline, err))
-		return false
+		return err
 	}
 	if retbn.Status_Code != 200 {
-		glog.Glog(LogF, fmt.Sprintf("post url return status code:%v", retbn.Status_Code))
-		return false
+		return errors.New(retbn.Status_Txt)
 	}
-	return true
+	return nil
 }
 
 func (m *FlowMgr) processControlFile(ctlinfo interface{}) bool {
@@ -794,99 +793,80 @@ func (m *FlowMgr) mstCtlWrite(f string, data []byte) error {
 	return nil
 }
 
-func (m *FlowMgr) isDependencyOk(job map[string]interface{}) bool {
+func (m *FlowMgr) isDependencyOk(job map[string]interface{}) error {
 	url := fmt.Sprintf("http://%v:%v/api/v1/flow/job/dependency?accesstoken=%v", m.ApiServerIp, m.ApiServerPort, m.AccessToken)
 	para := fmt.Sprintf("{\"flowid\":\"%v\",\"sys\":\"%v\",\"job\":\"%v\"}", m.FlowId, job["sys"], job["job"])
 	jsonstr, err := util.Api_RequestPost(url, para)
 	if err != nil {
-		_, cfile, cline, _ := runtime.Caller(1)
-		glog.Glog(m.LogF, fmt.Sprintf("%v %v %v", cfile, cline, err))
-		return false
+		return err
 	}
 	retbn := new(module.RetBean)
 	err = json.Unmarshal([]byte(jsonstr), &retbn)
 	if err != nil {
-		_, cfile, cline, _ := runtime.Caller(1)
-		glog.Glog(LogF, fmt.Sprintf("%v %v %v", cfile, cline, err))
-		return false
+		return err
 	}
 	if retbn.Status_Code != 200 {
-		glog.Glog(LogF, fmt.Sprintf("status code:%v", retbn.Status_Code))
-		return false
+		return errors.New(retbn.Status_Txt)
 	}
 	if retbn.Data == nil {
-		return false
+		return errors.New("return data null.")
 	}
 	retarr := (retbn.Data).([]interface{})
 	if len(retarr) > 0 {
 		v := retarr[0].(map[string]interface{})
-		glog.Glog(m.LogF, fmt.Sprintf("There is dependant job %v %v running, wait for next time!", v["sys"], v["job"]))
-		return false
+		return errors.New(fmt.Sprintf("%v.%v dependant %v.%v not finished, wait for next time!", v["sys"], v["job"], v["dependencysys"], v["dependencyjob"]))
 	}
-	return true
+	return nil
 }
 
-func (m *FlowMgr) isTimeWindowOk(job map[string]interface{}) bool {
+func (m *FlowMgr) isTimeWindowOk(job map[string]interface{}) error {
 	url := fmt.Sprintf("http://%v:%v/api/v1/flow/job/timewindow?accesstoken=%v", m.ApiServerIp, m.ApiServerPort, m.AccessToken)
 	para := fmt.Sprintf("{\"flowid\":\"%v\",\"sys\":\"%v\",\"job\":\"%v\"}", m.FlowId, job["sys"], job["job"])
 	jsonstr, err := util.Api_RequestPost(url, para)
 	if err != nil {
-		_, cfile, cline, _ := runtime.Caller(1)
-		glog.Glog(m.LogF, fmt.Sprintf("%v %v %v", cfile, cline, err))
-		return false
+		return err
 	}
 	retbn := new(module.RetBean)
 	err = json.Unmarshal([]byte(jsonstr), &retbn)
 	if err != nil {
-		_, cfile, cline, _ := runtime.Caller(1)
-		glog.Glog(LogF, fmt.Sprintf("%v %v %v", cfile, cline, err))
-		return false
+		return err
 	}
 	if retbn.Status_Code != 200 {
-		glog.Glog(LogF, fmt.Sprintf("status code:%v", retbn.Status_Code))
-		return false
+		return errors.New(retbn.Status_Txt)
 	}
 	if retbn.Data == nil {
-		return false
+		return errors.New("return data null.")
 	}
 	retarr := (retbn.Data).([]interface{})
 	if len(retarr) > 0 {
 		v := retarr[0].(map[string]interface{})
 		timeHour := time.Now().Hour()
-		glog.Glog(m.LogF, fmt.Sprintf("The current hour %v does not match %v-%v the job %v %v time window, wait for next time.", timeHour, v["starthour"], v["endhour"], v["sys"], v["job"]))
-
-		return false
+		return errors.New(fmt.Sprintf("The current hour %v does not match %v-%v the job %v %v time window, wait for next time.", timeHour, v["starthour"], v["endhour"], v["sys"], v["job"]))
 	}
-	return true
+	return nil
 }
 
-func (m *FlowMgr) isCmdOk(job map[string]interface{}) bool {
+func (m *FlowMgr) isCmdOk(job map[string]interface{}) error {
 	url := fmt.Sprintf("http://%v:%v/api/v1/flow/job/cmd/getall?accesstoken=%v", m.ApiServerIp, m.ApiServerPort, m.AccessToken)
 	para := fmt.Sprintf("{\"flowid\":\"%v\",\"sys\":\"%v\",\"job\":\"%v\"}", m.FlowId, job["sys"], job["job"])
 	jsonstr, err := util.Api_RequestPost(url, para)
 	if err != nil {
-		_, cfile, cline, _ := runtime.Caller(1)
-		glog.Glog(m.LogF, fmt.Sprintf("%v %v %v", cfile, cline, err))
-		return false
+		return err
 	}
 	retbn := new(module.RetBean)
 	err = json.Unmarshal([]byte(jsonstr), &retbn)
 	if err != nil {
-		_, cfile, cline, _ := runtime.Caller(1)
-		glog.Glog(LogF, fmt.Sprintf("%v %v %v", cfile, cline, err))
-		return false
+		return err
 	}
 	if retbn.Status_Code != 200 {
-		glog.Glog(LogF, fmt.Sprintf("status code:%v", retbn.Status_Code))
-		return false
+		return errors.New(retbn.Status_Txt)
 	}
 	if retbn.Data == nil {
-		return false
+		return errors.New("return data null.")
 	}
 	retarr := (retbn.Data).([]interface{})
 	if len(retarr) > 0 {
-		return true
+		return nil
 	}
-	glog.Glog(m.LogF, fmt.Sprintf("The job %v, %v is not exists cmd, wait for next time.", job["sys"], job["job"]))
-	return false
+	return errors.New(fmt.Sprintf("%v.%v is not exists cmd, wait for next time.", job["sys"], job["job"]))
 }

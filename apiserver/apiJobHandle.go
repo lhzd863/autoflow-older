@@ -256,6 +256,7 @@ func (rrs *ResponseResourceJob) FlowJobStatusGetPendingHandle(request *restful.R
 	c, bid := rrs.CurrentStatusPendingOffset(len(strlist))
 	retlst := make([]interface{}, 0)
 	if bid == -1 {
+                glog.Glog(LogF, fmt.Sprint("all ringid is working."))
 		util.ApiResponse(response.ResponseWriter, 200, fmt.Sprintf("all ringid is working."), retlst)
 		return
 	} else {
@@ -406,7 +407,7 @@ func (rrs *ResponseResourceJob) FlowJobDependencyHandler(request *restful.Reques
 					if err != nil {
 						glog.Glog(LogF, fmt.Sprint(err))
 					}
-					if jobbn.Status == util.STATUS_AUTO_SUCC || jobbn.Enable != "1" || jobdb.Enable != "1" {
+					if jobbn.Status == util.STATUS_AUTO_SUCC || jobbn.Enable != "1" {
 						continue
 					}
 					retlst = append(retlst, jobdb)
