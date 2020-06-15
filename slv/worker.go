@@ -500,7 +500,7 @@ func (s *SServer) Register(m *module.MetaWorkerHeartBean) bool {
 	url := fmt.Sprintf("http://%v:%v/api/v1/worker/heart/add?accesstoken=%v", ApiServerIp, ApiServerPort, AccessToken)
 	m.MaxCnt = fmt.Sprint(ProcessNum)
 	m.RunningCnt = fmt.Sprint(len(jobpool.MemMap))
-	m.CurrentCnt = "0"
+	m.CurrentExecCnt = "0"
 	loc, _ := time.LoadLocation("Local")
 	timeLayout := "2006-01-02 15:04:05"
 	stheTime, _ := time.ParseInLocation(timeLayout, m.StartTime, loc)

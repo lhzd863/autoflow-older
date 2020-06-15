@@ -50,6 +50,7 @@ func (rrs *ResponseResourceWorker) WorkerHeartAddHandler(request *restful.Reques
 		m.Id = p.Id
 		m.WorkerId = p.WorkerId
 		m.Ip = p.Ip
+                m.Port = p.Port
 		m.CurrentExecCnt = "0"
 		m.CurrentSubmitCnt = "0"
 		m.StartTime = p.StartTime

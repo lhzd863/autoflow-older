@@ -177,7 +177,7 @@ func (mp *MgrPool) ObtJobServer(arr []interface{}, slvid string) ([]interface{},
 			}
 			currentexeccnt, err = strconv.Atoi(v["currentexeccnt"].(string))
 			if err != nil {
-				glog.Glog(LogF, fmt.Sprintf("string conv int %v err.%v", v["currentcnt"], err))
+				glog.Glog(LogF, fmt.Sprintf("string conv int %v err.%v", v["currenexectcnt"], err))
 				return retlst, errors.New(fmt.Sprintf("string conv int %v err.%v", v["currentcnt"], err))
 			}
 			currentsubmitcnt, err = strconv.Atoi(v["currentsubmitcnt"].(string))
@@ -201,7 +201,7 @@ func (mp *MgrPool) ObtJobServer(arr []interface{}, slvid string) ([]interface{},
 			}
 			currentexeccnt, err = strconv.Atoi(v["currentexeccnt"].(string))
 			if err != nil {
-				glog.Glog(LogF, fmt.Sprintf("string conv int %v err.%v", v["currentcnt"], err))
+				glog.Glog(LogF, fmt.Sprintf("string conv int %v err.%v", v["currentexeccnt"], err))
 				continue
 			}
 			currentsubmitcnt, err = strconv.Atoi(v["currentsubmitcnt"].(string))

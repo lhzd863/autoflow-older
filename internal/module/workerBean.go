@@ -1,16 +1,16 @@
 package module
 
 type MetaWorkerHeartBean struct {
-	Id         string `json:"id"`
-	WorkerId   string `json:"workerid"`
-	Ip         string `json:"ip"`
-	Port       string `json:"port"`
-	MaxCnt     string `json:"maxcnt"`
-	RunningCnt string `json:"runningcnt"`
-	CurrentCnt string `json:"currentcnt"`
-	StartTime  string `json:"starttime"`
-	UpdateTime string `json:"updatetime"`
-	Duration   string `json:"duration"`
+	Id             string `json:"id"`
+	WorkerId       string `json:"workerid"`
+	Ip             string `json:"ip"`
+	Port           string `json:"port"`
+	MaxCnt         string `json:"maxcnt"`
+	RunningCnt     string `json:"runningcnt"`
+	CurrentExecCnt string `json:"currentexeccnt"`
+	StartTime      string `json:"starttime"`
+	UpdateTime     string `json:"updatetime"`
+	Duration       string `json:"duration"`
 }
 
 type MetaWorkerMgrBean struct {
