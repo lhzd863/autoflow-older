@@ -174,14 +174,14 @@ func (rrs *ResponseResourceSystem) SysListPortHandler(request *restful.Request, 
 }
 
 func (rrs *ResponseResourceSystem) JobPoolAddHandler(request *restful.Request, response *restful.Response) {
-	jpbean := new(module.MetaJobPoolBean)
-	err := request.ReadEntity(&jpbean)
+	p := new(module.MetaJobPoolBean)
+	err := request.ReadEntity(&p)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprint(err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("Parse json error.%v", err), nil)
 		return
 	}
-	if len(jpbean.FlowId) == 0 || len(jpbean.Sys) == 0 || len(jpbean.Job) == 0 {
+	if len(p.FlowId) == 0 || len(p.Sys) == 0 || len(p.Job) == 0 {
 		glog.Glog(LogF, fmt.Sprintf("flowid sys or job missed."))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("flowid sys job missed."), nil)
 		return
@@ -190,11 +190,11 @@ func (rrs *ResponseResourceSystem) JobPoolAddHandler(request *restful.Request, r
 	defer bt.Close()
 
 	timeStr := time.Now().Format("2006-01-02 15:04:05")
-	jpbean.StartTime = timeStr
-	jpbean.Enable = "1"
+	p.StartTime = timeStr
+	p.Enable = "1"
 
-	jsonstr, _ := json.Marshal(jpbean)
-	err = bt.Set(jpbean.FlowId+"."+jpbean.Sys+"."+jpbean.Job, string(jsonstr))
+	jsonstr, _ := json.Marshal(p)
+	err = bt.Set(p.FlowId+"."+p.Sys+"."+p.Job, string(jsonstr))
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprint(err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("data in db update error.%v", err), nil)
@@ -205,14 +205,14 @@ func (rrs *ResponseResourceSystem) JobPoolAddHandler(request *restful.Request, r
 }
 
 func (rrs *ResponseResourceSystem) JobPoolGetHandler(request *restful.Request, response *restful.Response) {
-	jpbean := new(module.MetaJobPoolBean)
-	err := request.ReadEntity(&jpbean)
+	p := new(module.MetaJobPoolBean)
+	err := request.ReadEntity(&p)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("parse json error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parse json error.%v", err), nil)
 		return
 	}
-	if len(jpbean.FlowId) == 0 || len(jpbean.Sys) == 0 || len(jpbean.Job) == 0 {
+	if len(p.FlowId) == 0 || len(p.Sys) == 0 || len(p.Job) == 0 {
 		glog.Glog(LogF, fmt.Sprintf("flowid sys or job missed."))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("flowid sys job missed."), nil)
 		return
@@ -221,14 +221,14 @@ func (rrs *ResponseResourceSystem) JobPoolGetHandler(request *restful.Request, r
 	defer bt.Close()
 
 	retlst := make([]interface{}, 0)
-	jp := bt.Get(jpbean.FlowId + "." + jpbean.Sys + "." + jpbean.Job)
+	jp := bt.Get(p.FlowId + "." + p.Sys + "." + p.Job)
 	if jp != nil {
-		mjpb := new(module.MetaJobPoolBean)
-		err := json.Unmarshal([]byte(jp.(string)), &mjpb)
+		m := new(module.MetaJobPoolBean)
+		err := json.Unmarshal([]byte(jp.(string)), &m)
 		if err != nil {
 			glog.Glog(LogF, fmt.Sprint(err))
 		}
-		retlst = append(retlst, mjpb)
+		retlst = append(retlst, m)
 	}
 	util.ApiResponse(response.ResponseWriter, 200, "", retlst)
 }
@@ -241,20 +241,20 @@ func (rrs *ResponseResourceSystem) JobPoolListHandler(request *restful.Request, 
 	retlst := make([]interface{}, 0)
 	for _, v := range strlist {
 		for k1, v1 := range v.(map[string]interface{}) {
-			mjpb := new(module.MetaJobPoolBean)
-			err := json.Unmarshal([]byte(v1.(string)), &mjpb)
+			m := new(module.MetaJobPoolBean)
+			err := json.Unmarshal([]byte(v1.(string)), &m)
 			if err != nil {
 				glog.Glog(LogF, fmt.Sprint(err))
 				continue
 			}
 			timeStr := time.Now().Format("2006-01-02 15:04:05")
-			ise, _ := util.IsExpired(mjpb.StartTime, timeStr, 600)
+			ise, _ := util.IsExpired(m.StartTime, timeStr, 300)
 			if ise {
-				glog.Glog(LogF, fmt.Sprintf("%v %v %v exist job pool timeout,will remove from pool.", mjpb.FlowId, mjpb.Sys, mjpb.Job))
+				glog.Glog(LogF, fmt.Sprintf("%v %v %v exist job pool timeout,will remove from pool.", m.FlowId, m.Sys, m.Job))
 				bt.Remove(k1)
 				continue
 			}
-			retlst = append(retlst, mjpb)
+			retlst = append(retlst, m)
 		}
 	}
 	util.ApiResponse(response.ResponseWriter, 200, "", retlst)
@@ -262,14 +262,14 @@ func (rrs *ResponseResourceSystem) JobPoolListHandler(request *restful.Request, 
 
 func (rrs *ResponseResourceSystem) JobPoolRemoveHandler(request *restful.Request, response *restful.Response) {
 
-	jpbean := new(module.MetaJobPoolBean)
-	err := request.ReadEntity(&jpbean)
+        p := new(module.MetaJobPoolBean)
+	err := request.ReadEntity(&p)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("Parse json error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("Parse json error.%v", err), nil)
 		return
 	}
-	if len(jpbean.FlowId) == 0 || len(jpbean.Sys) == 0 || len(jpbean.Job) == 0 {
+	if len(p.FlowId) == 0 || len(p.Sys) == 0 || len(p.Job) == 0 {
 		glog.Glog(LogF, fmt.Sprintf("flowid sys or job missed."))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("flowid sys job missed."), nil)
 		return
@@ -277,7 +277,7 @@ func (rrs *ResponseResourceSystem) JobPoolRemoveHandler(request *restful.Request
 	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_JOBSPOOL)
 	defer bt.Close()
 
-	err = bt.Remove(jpbean.FlowId + "." + jpbean.Sys + "." + jpbean.Job)
+	err = bt.Remove(p.FlowId + "." + p.Sys + "." + p.Job)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("data in db remove error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("data in db remove error.%v", err), nil)

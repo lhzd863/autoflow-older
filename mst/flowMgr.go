@@ -739,7 +739,7 @@ func (m *FlowMgr) pendingRemoveRing(id string) bool {
 
 func (m *FlowMgr) submitJob(job map[string]interface{}) error {
 	url0 := fmt.Sprintf("http://%v:%v/api/v1/job/pool/add?accesstoken=%v", m.ApiServerIp, m.ApiServerPort, m.AccessToken)
-	para0 := fmt.Sprintf("{\"sys\":\"%v\",\"job\":\"%v\",\"flowid\":\"%v\",\"priority\":\"%v\"}", job["sys"], job["job"], m.FlowId, job["priority"])
+	para0 := fmt.Sprintf("{\"sys\":\"%v\",\"job\":\"%v\",\"flowid\":\"%v\",\"priority\":\"%v\",\"dynamicserver\":\"%v\",\"server\":\"%v\"}", job["sys"], job["job"], m.FlowId, job["priority"],job["dynamicserver"],job["sserver"])
 	jsonstr0, err := util.Api_RequestPost(url0, para0)
 	if err != nil {
 		return err

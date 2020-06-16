@@ -58,7 +58,7 @@ func (mp *MgrPool) JobPool() {
 		flag := 0
 		for i := 0; i < len(retarr); i++ {
 			v := retarr[i].(map[string]interface{})
-			s, err := mp.ObtJobServer(serverlst, v["dynamicserver"].(string),v["sserver"].(string))
+			s, err := mp.ObtJobServer(serverlst, v["dynamicserver"].(string),v["server"].(string))
 			if err != nil {
 				glog.Glog(LogF, fmt.Sprint(err))
 				continue
