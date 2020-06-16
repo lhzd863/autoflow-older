@@ -316,7 +316,7 @@ func (m *FlowMgr) jobStreamJob(sys string, job string) error {
 }
 
 func (m *FlowMgr) invokeRealJob(job map[string]interface{}) {
-	glog.Glog(m.LogF, fmt.Sprintf("exec %v,%v on slave %v [%v:%v].", job["sys"], job["job"], job["sserver"], job["sip"], job["sport"]))
+	glog.Glog(m.LogF, fmt.Sprintf("exec %v.%v on slave %v [%v:%v].", job["sys"], job["job"], job["sserver"], job["sip"], job["sport"]))
 	SFlag := 0
 	timeStr := time.Now().Format("2006-01-02 15:04:05")
 	var waitGroup util.WaitGroupWrapper
