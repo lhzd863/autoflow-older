@@ -120,6 +120,11 @@ func (m *FlowMgr) checkGo() bool {
 				waitGroup.Wrap(func() { m.invokeVirtualJob(jobv[0].(map[string]interface{})) })
 			} else {
 				//var waitGroup util.WaitGroupWrapper
+                                err = m.workerExecApplication(v["sserver"].(string))
+                                if err != nil {
+                                   glog.Glog(m.LogF, fmt.Sprint(err))
+                                   continue
+                                }
 				waitGroup.Wrap(func() { m.invokeRealJob(jobv[0].(map[string]interface{})) })
 			}
 		}
@@ -445,6 +450,10 @@ func (m *FlowMgr) invokeRealJob(job map[string]interface{}) {
 		waitGroup.Wait()
 		return
 	}
+        err = m.workerExecApplicationLogout(job["sserver"].(string))
+        if err!=nil {
+                glog.Glog(m.LogF, fmt.Sprint(err))
+        }
 	exitChan <- 1
 	waitGroup.Wait()
 	m.streamJob(job)
@@ -573,26 +582,48 @@ func (m *FlowMgr) updateStatusEnd(sys string, job string, status string) error {
 	return nil
 }
 
-func (m *FlowMgr) ApplicationExec(workerid string) error {
-        url := fmt.Sprintf("http://%v:%v/api/v1/flow/job/status/update/end?accesstoken=%v", m.ApiServerIp, m.ApiServerPort, m.AccessToken)
+func (m *FlowMgr) workerExecApplication(workerid string) error {
+        url := fmt.Sprintf("http://%v:%v/api/v1/worker/exec/add?accesstoken=%v", m.ApiServerIp, m.ApiServerPort, m.AccessToken)
         para := fmt.Sprintf("{\"workerid\":\"%v\"}",workerid)
         jsonstr, err := util.Api_RequestPost(url, para)
         if err != nil {
-                glog.Glog(m.LogF, fmt.Sprint(err))
                 return err
         }
         retbn := new(module.RetBean)
         err = json.Unmarshal([]byte(jsonstr), &retbn)
         if err != nil {
-                glog.Glog(LogF, fmt.Sprint(err))
                 return err
         }
         if retbn.Status_Code != 200 {
-                glog.Glog(LogF, fmt.Sprintf("post url return err:%v", retbn.Status_Txt))
+                return errors.New(fmt.Sprintf("post url return err:%v", retbn.Status_Txt))
+        }
+        if retbn.Data == nil {
+                return errors.New("application exec err.")
+        }
+        if len((retbn.Data).([]interface{})) == 0 {
+                return errors.New("application 0 exec.")
+        }
+        return nil
+}
+
+func (m *FlowMgr) workerExecApplicationLogout(workerid string) error {
+        url := fmt.Sprintf("http://%v:%v/api/v1/worker/exec/sub?accesstoken=%v", m.ApiServerIp, m.ApiServerPort, m.AccessToken)
+        para := fmt.Sprintf("{\"workerid\":\"%v\"}",workerid)
+        jsonstr, err := util.Api_RequestPost(url, para)
+        if err != nil {
+                return err
+        }
+        retbn := new(module.RetBean)
+        err = json.Unmarshal([]byte(jsonstr), &retbn)
+        if err != nil {
+                return err
+        }
+        if retbn.Status_Code != 200 {
                 return errors.New(fmt.Sprintf("post url return err:%v", retbn.Status_Txt))
         }
         return nil
 }
+
 
 func (m *FlowMgr) jobInfo(sys string, job string) []interface{} {
 	retarr := make([]interface{}, 0)
