@@ -752,7 +752,7 @@ func (m *FlowMgr) submitJob(job map[string]interface{}) error {
 	if retbn0.Status_Code != 200 {
 		return errors.New(retbn0.Status_Txt)
 	}
-	glog.Glog(m.LogF, fmt.Sprintf("update job status %v %v submit", job["sys"], job["job"]))
+	glog.Glog(m.LogF, fmt.Sprintf("update job status %v.%v submit", job["sys"], job["job"]))
 	url1 := fmt.Sprintf("http://%v:%v/api/v1/flow/job/status/update/submit?accesstoken=%v", m.ApiServerIp, m.ApiServerPort, m.AccessToken)
 	para1 := fmt.Sprintf("{\"sys\":\"%v\",\"job\":\"%v\",\"flowid\":\"%v\",\"status\":\"%v\"}", job["sys"], job["job"], m.FlowId, util.STATUS_AUTO_SUBMIT)
 	glog.Glog(LogF, fmt.Sprint(url1))

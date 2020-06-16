@@ -28,5 +28,5 @@ type MetaWorkerMgrBean struct {
 }
 
 type MetaParaWorkerExecAddBean struct {
-     WorkerId         string `json:"workerid"`
+	WorkerId string `json:"workerid"`
 }

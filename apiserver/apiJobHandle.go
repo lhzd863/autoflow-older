@@ -2223,3 +2223,54 @@ func (rrs *ResponseResourceJob) FlowJobLogAppendHandler(request *restful.Request
 	retlst := make([]interface{}, 0)
 	util.ApiResponse(response.ResponseWriter, 200, "", retlst)
 }
+
+func (rrs *ResponseResourceJob) FlowJobStatusAllUpdateHandler(request *restful.Request, response *restful.Response) {
+        p := new(module.MetaParaFlowJobStatusAllUpdateBean)
+        err := request.ReadEntity(&p)
+        if err != nil {
+                glog.Glog(LogF, fmt.Sprintf("Parse json error.%v", err))
+                util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("Parse json error.%v", err), nil)
+                return
+        }
+        if len(p.FlowId) == 0 || len(p.Status) == 0 {
+                glog.Glog(LogF, fmt.Sprintf("parameter missed."))
+                util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
+                return
+        }
+        dbf, err := rrf.flowDbFile(p.FlowId)
+        if err != nil {
+                glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
+                util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
+                return
+        }
+		rrs.Lock()
+		rrs.Unlock()
+        bt := db.NewBoltDB(dbf, util.TABLE_AUTO_JOB)
+        defer bt.Close()
+
+        strlist := bt.Scan()
+        retlst := make([]interface{}, 0)
+        for _, v := range strlist {
+                for k1, v1 := range v.(map[string]interface{}) {
+                        m := new(module.MetaJobBean)
+                        err := json.Unmarshal([]byte(v1.(string)), &m)
+                        if err != nil {
+                                glog.Glog(LogF, fmt.Sprint(err))
+                                continue
+                        }
+                        if m.Enable != "1" {
+                                continue
+                        }
+                        m.Status = p.Status
+						jsonstr, _ := json.Marshal(m)
+                        err = bt.Set(k1, string(jsonstr))
+                        if err != nil {
+                                glog.Glog(LogF, fmt.Sprint(err))
+								continue
+                        }
+                }
+        }
+        retlst := make([]interface{}, 0)
+        util.ApiResponse(response.ResponseWriter, 200, "", retlst)
+}
+
