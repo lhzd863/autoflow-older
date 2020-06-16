@@ -423,8 +423,11 @@ func (m *FlowMgr) invokeRealJob(job map[string]interface{}) {
 	// 创建Waiter服务的客户端
 	t := gproto.NewSlaverClient(conn)
 
+        ctx, cancel := context.WithTimeout(context.Background(), 60 * time.Second)
+        defer cancel()
+
 	// 调用gRPC接口
-	tr, err := t.JobStart(context.Background(), &gproto.Req{JsonStr: string(jsonstr)})
+	tr, err := t.JobStart(ctx, &gproto.Req{JsonStr: string(jsonstr)})
 	if err != nil {
 		_, cfile, cline, _ := runtime.Caller(1)
 		glog.Glog(m.LogF, fmt.Sprintf("%v %v could not greet: %v", cfile, cline, err))

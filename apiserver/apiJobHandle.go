@@ -127,6 +127,9 @@ func (rrs *ResponseResourceJob) FlowJobAddHandle(request *restful.Request, respo
 	mj := new(module.MetaJobBean)
 	mj.Sys = p.Sys
 	mj.Job = p.Job
+        mj.SServer = p.SServer
+        mj.Sip = p.Sip
+        mj.Sport = p.Sport
 	mj.Enable = p.Enable
 	mj.TimeWindow = p.TimeWindow
 	mj.RetryCnt = p.RetryCnt
@@ -177,6 +180,9 @@ func (rrs *ResponseResourceJob) FlowJobUpdateHandle(request *restful.Request, re
 		if err != nil {
 			glog.Glog(LogF, fmt.Sprint(err))
 		}
+                mj.SServer = p.SServer
+                mj.Sip = p.Sip
+                mj.Sport = p.Sport
 		mj.Enable = p.Enable
 		mj.TimeWindow = p.TimeWindow
 		mj.RetryCnt = p.RetryCnt

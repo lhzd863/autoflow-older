@@ -32,6 +32,9 @@ type MetaParaFlowJobAddBean struct {
 	FlowId         string `json:"flowid"`
 	Sys            string `json:"sys"`
 	Job            string `json:"job"`
+        SServer        string `json:"sserver"`
+        Sip            string `json:"sip"`
+        Sport          string `json:"sport"`
 	RunContext     string `json:"runcontext"`
 	Status         string `json:"status"`
 	JobType        string `json:"jobtype"`
@@ -67,6 +70,9 @@ type MetaParaFlowJobUpdateBean struct {
 	FlowId         string `json:"flowid"`
 	Sys            string `json:"sys"`
 	Job            string `json:"job"`
+        SServer        string `json:"sserver"`
+        Sip            string `json:"sip"`
+        Sport          string `json:"sport"`
 	RunContext     string `json:"runcontext"`
 	Status         string `json:"status"`
 	JobType        string `json:"jobtype"`
