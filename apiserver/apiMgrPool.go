@@ -169,7 +169,7 @@ func (mp *MgrPool) ObtJobServer(arr []interface{}, dynamicserver string,workerid
 		v := arr[i].(map[string]interface{})
 		var runningcnt, currentexeccnt, currentsubmitcnt int
 		if dynamicserver == "N" {
-                        if workerid == nil {
+                        if len(workerid) == 0 {
                                 return retlst, errors.New(fmt.Sprintf("worker server is null."))
                         }
 			if v["workerid"] != workerid {
