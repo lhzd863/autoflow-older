@@ -75,7 +75,7 @@ func (mp *MgrPool) JobPool() {
 		if len(retarr) == 0 {
 			glog.Glog(LogF, fmt.Sprint("job pool empty ,no running job ."))
 		} else if flag != 0 {
-			glog.Glog(LogF, fmt.Sprint("submit has reached limit ,submit %v job.", cnt))
+			glog.Glog(LogF, fmt.Sprintf("submit has reached limit ,submit %v job.", cnt))
 		} else {
 			glog.Glog(LogF, fmt.Sprintf("do with job cnt %v", len(retarr)))
 		}
@@ -234,6 +234,7 @@ func (mp *MgrPool) ObtJobServer(arr []interface{}, dynamicserver string, workeri
 				continue
 			}
 			tpct = (runningcnt + currentexeccnt + currentsubmitcnt + 1) * 100 / (maxcnt + 1)
+                         glog.Glog(LogF, fmt.Sprintf("%v-> %v",tpc,pct))
 			if tpct < pct {
 				pct = tpct
 				tmap = arr[i].(map[string]interface{})
