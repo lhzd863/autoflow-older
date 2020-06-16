@@ -164,10 +164,16 @@ func (mp *MgrPool) ObtSlvRunningJobCnt() []interface{} {
 }
 
 func (mp *MgrPool) ObtJobServer(arr []interface{}, dynamicserver string,workerid string) ([]interface{}, error) {
+        mp.Lock()
+        mp.Unlock()
+        var tmap interface{}
+        pct:=10000
+        tpct:=0
 	retlst := make([]interface{}, 0)
 	for i := 0; i < len(arr); i++ {
 		v := arr[i].(map[string]interface{})
-		var runningcnt, currentexeccnt, currentsubmitcnt int
+		var maxcnt, runningcnt, currentexeccnt, currentsubmitcnt int
+                var err error
 		if dynamicserver == "N" {
                         if len(workerid) == 0 {
                                 return retlst, errors.New(fmt.Sprintf("worker server is null."))
@@ -175,7 +181,7 @@ func (mp *MgrPool) ObtJobServer(arr []interface{}, dynamicserver string,workerid
 			if v["workerid"] != workerid {
 				continue
 			}
-			maxcnt, err := strconv.Atoi(v["maxcnt"].(string))
+			maxcnt, err = strconv.Atoi(v["maxcnt"].(string))
 			if err != nil {
 				return retlst, errors.New(fmt.Sprintf("string conv int %v err.%v", v["maxcnt"], err))
 			}
@@ -196,8 +202,10 @@ func (mp *MgrPool) ObtJobServer(arr []interface{}, dynamicserver string,workerid
 			if 5*maxcnt < runningcnt+currentexeccnt+currentsubmitcnt {
 				return retlst, errors.New(fmt.Sprintf("submit has reached limit total,wait for next time."))
 			}
+                        retlst = append(retlst, arr[i])
+                        return  retlst,nil
 		} else {
-			maxcnt, err := strconv.Atoi(v["maxcnt"].(string))
+			maxcnt, err = strconv.Atoi(v["maxcnt"].(string))
 			if err != nil {
 				glog.Glog(LogF, fmt.Sprintf("string conv int %v err.%v", v["maxcnt"], err))
 				continue
@@ -220,9 +228,13 @@ func (mp *MgrPool) ObtJobServer(arr []interface{}, dynamicserver string,workerid
 			if 5*maxcnt < runningcnt+currentexeccnt+currentsubmitcnt {
 				continue
 			}
+                        tpct = (runningcnt+currentexeccnt+currentsubmitcnt+1)*100/(maxcnt+1)
+                        if tpct < pct {
+                            pct = tpct
+                            tmap = arr[i]
+                        }
 		}
-		retlst = append(retlst, arr[i])
-		break
+		retlst = append(retlst, tmap)
 	}
 	return retlst, nil
 }
