@@ -58,7 +58,7 @@ func (mp *MgrPool) JobPool() {
 		flag := 0
 		for i := 0; i < len(retarr); i++ {
 			v := retarr[i].(map[string]interface{})
-			s, err := mp.ObtJobServer(serverlst, v["server"].(string))
+			s, err := mp.ObtJobServer(serverlst, v["dynamicserver"].(string),v["sserver"].(string))
 			if err != nil {
 				glog.Glog(LogF, fmt.Sprint(err))
 				continue
@@ -163,13 +163,16 @@ func (mp *MgrPool) ObtSlvRunningJobCnt() []interface{} {
 	return retarr
 }
 
-func (mp *MgrPool) ObtJobServer(arr []interface{}, slvid string) ([]interface{}, error) {
+func (mp *MgrPool) ObtJobServer(arr []interface{}, dynamicserver string,workerid string) ([]interface{}, error) {
 	retlst := make([]interface{}, 0)
 	for i := 0; i < len(arr); i++ {
 		v := arr[i].(map[string]interface{})
 		var runningcnt, currentexeccnt, currentsubmitcnt int
-		if len(slvid) > 0 {
-			if v["slaveid"] != slvid {
+		if dynamicserver == "N" {
+                        if workerid == nil {
+                                return retlst, errors.New(fmt.Sprintf("worker server is null."))
+                        }
+			if v["workerid"] != workerid {
 				continue
 			}
 			maxcnt, err := strconv.Atoi(v["maxcnt"].(string))

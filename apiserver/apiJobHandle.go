@@ -132,6 +132,7 @@ func (rrs *ResponseResourceJob) FlowJobAddHandle(request *restful.Request, respo
 	mj.RetryCnt = p.RetryCnt
 	mj.Alert = p.Alert
 	mj.TimeTrigger = p.TimeTrigger
+        mj.DynamicServer = p.DynamicServer
 	mj.JobType = p.JobType
 	mj.Frequency = p.Frequency
 	mj.CheckBatStatus = p.CheckBatStatus
@@ -181,6 +182,7 @@ func (rrs *ResponseResourceJob) FlowJobUpdateHandle(request *restful.Request, re
 		mj.RetryCnt = p.RetryCnt
 		mj.Alert = p.Alert
 		mj.TimeTrigger = p.TimeTrigger
+                mj.DynamicServer = p.DynamicServer
 		mj.JobType = p.JobType
 		mj.Frequency = p.Frequency
 		mj.CheckBatStatus = p.CheckBatStatus
