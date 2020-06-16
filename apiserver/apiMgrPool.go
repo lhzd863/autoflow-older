@@ -54,6 +54,8 @@ func (mp *MgrPool) JobPool() {
 		}
 		retarr := (retbn.Data).([]interface{})
 		serverlst := mp.ObtSlvRunningJobCnt()
+		cnt := 0
+		flag := 0
 		for i := 0; i < len(retarr); i++ {
 			v := retarr[i].(map[string]interface{})
 			s, err := mp.ObtJobServer(serverlst, v["server"].(string))
@@ -63,13 +65,16 @@ func (mp *MgrPool) JobPool() {
 			}
 			if len(s) < 1 {
 				glog.Glog(LogF, fmt.Sprintf("%v, %v.%v job no free server running,wait for next time.", v["flowid"], v["sys"], v["job"]))
-				time.Sleep(time.Duration(10) * time.Second)
-				continue
+				flag = 1
+				break
 			}
 			mp.SubmitJob(v, s[0])
+			cnt++
 		}
 		if len(retarr) == 0 {
 			glog.Glog(LogF, fmt.Sprint("job pool empty ,no running job ."))
+		} else if flag != 0 {
+			glog.Glog(LogF, fmt.Sprint("submit has reached limit ,submit %v job.", cnt))
 		} else {
 			glog.Glog(LogF, fmt.Sprintf("do with job cnt %v", len(retarr)))
 		}
@@ -186,7 +191,7 @@ func (mp *MgrPool) ObtJobServer(arr []interface{}, slvid string) ([]interface{},
 				return retlst, errors.New(fmt.Sprintf("string conv currentsubmitcnt int %v err.%v", v["currentsubmitcnt"], err))
 			}
 			if 5*maxcnt < runningcnt+currentexeccnt+currentsubmitcnt {
-				return retlst, errors.New(fmt.Sprintf("cnt has limited total,wait for next time."))
+				return retlst, errors.New(fmt.Sprintf("submit has reached limit total,wait for next time."))
 			}
 		} else {
 			maxcnt, err := strconv.Atoi(v["maxcnt"].(string))

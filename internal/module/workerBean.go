@@ -26,3 +26,7 @@ type MetaWorkerMgrBean struct {
 	UpdateTime       string `json:"updatetime"`
 	Duration         string `json:"duration"`
 }
+
+type MetaParaWorkerExecAddBean struct {
+     WorkerId         string `json:"workerid"`
+}

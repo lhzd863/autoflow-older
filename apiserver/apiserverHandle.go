@@ -1532,6 +1532,27 @@ func (rrs ResponseResource) WebService() *restful.WebService {
 		Returns(200, "OK", module.RetBean{}).
 		Returns(404, "Not Found", nil))
 
+	tags = []string{"worker-exec"}
+	ws.Route(ws.POST("/worker/exec/add").To(rrt.WorkerExecAddHandler).
+		// docs
+		Doc("增加执行作业").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
+		Reads(module.MetaParaWorkerExecAddBean{}).
+		Writes(module.RetBean{}). // on the response
+		Returns(200, "OK", module.RetBean{}).
+		Returns(404, "Not Found", nil))
+
+	ws.Route(ws.POST("/worker/exec/sub").To(rrt.WorkerExecSubHandler).
+		// docs
+		Doc("减少执行作业").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
+		Reads(module.MetaParaWorkerExecAddBean{}).
+		Writes(module.RetBean{}). // on the response
+		Returns(200, "OK", module.RetBean{}).
+		Returns(404, "Not Found", nil))
+
 	return ws
 }
 

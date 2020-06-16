@@ -50,7 +50,7 @@ func (rrs *ResponseResourceWorker) WorkerHeartAddHandler(request *restful.Reques
 		m.Id = p.Id
 		m.WorkerId = p.WorkerId
 		m.Ip = p.Ip
-                m.Port = p.Port
+		m.Port = p.Port
 		m.CurrentExecCnt = "0"
 		m.CurrentSubmitCnt = "0"
 		m.StartTime = p.StartTime
@@ -58,6 +58,7 @@ func (rrs *ResponseResourceWorker) WorkerHeartAddHandler(request *restful.Reques
 	m.MaxCnt = p.MaxCnt
 	m.Duration = p.Duration
 	m.RunningCnt = p.RunningCnt
+	m.CurrentExecCnt = p.RunningCnt
 
 	timeStr := time.Now().Format("2006-01-02 15:04:05")
 	m.UpdateTime = timeStr
@@ -363,5 +364,134 @@ func (rrs *ResponseResourceWorker) WorkerRoutineJobRunningHeartAddHandler(reques
 		return
 	}
 	retlst := make([]interface{}, 0)
+	util.ApiResponse(response.ResponseWriter, 200, "", retlst)
+}
+
+func (rrs *ResponseResourceWorker) WorkerExecAddHandler(request *restful.Request, response *restful.Response) {
+	p := new(module.MetaParaWorkerExecAddBean)
+	err := request.ReadEntity(&p)
+	if err != nil {
+		glog.Glog(LogF, fmt.Sprint(err))
+		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("Parse json error.%v", err), nil)
+		return
+	}
+	if len(p.WorkerId) == 0 {
+		glog.Glog(LogF, fmt.Sprintf("parameter missed."))
+		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
+		return
+	}
+	rrs.Lock()
+	defer rrs.Unlock()
+	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_WORKER_HEART)
+	defer bt.Close()
+	strlist := bt.Scan()
+
+	retlst := make([]interface{}, 0)
+	for _, v := range strlist {
+		for k1, v1 := range v.(map[string]interface{}) {
+			m := new(module.MetaWorkerMgrBean)
+			err := json.Unmarshal([]byte(v1.(string)), &m)
+			if err != nil {
+				glog.Glog(LogF, fmt.Sprint(err))
+				continue
+			}
+			timeStr := time.Now().Format("2006-01-02 15:04:05")
+			ise, _ := util.IsExpired(m.UpdateTime, timeStr, 300)
+			if ise {
+				glog.Glog(LogF, fmt.Sprintf("%v timeout %v:%v.", m.WorkerId, m.Ip, m.Port))
+				bt.Remove(k1)
+				continue
+			}
+			if m.WorkerId != p.WorkerId {
+				continue
+			}
+			if m.MaxCnt <= m.CurrentExecCnt {
+				util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("Worker %v has reached limit.", p.WorkerId), retlst)
+				return
+			}
+			cnt, err := strconv.Atoi(m.CurrentExecCnt)
+			if err != nil {
+				glog.Glog(LogF, fmt.Sprintf("conv currentexeccnt fail.%v", err))
+				util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("conv currentexeccnt fail.%v", err), retlst)
+				return
+			}
+			cnt++
+			m.CurrentExecCnt = fmt.Sprint(cnt)
+			jsonstr, _ := json.Marshal(m)
+			err = bt.Set(k1, string(jsonstr))
+			if err != nil {
+				glog.Glog(LogF, fmt.Sprintf("data in db update error.%v", err))
+				util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("data in db update error.%v", err), nil)
+				return
+			}
+			retlst = append(retlst, m)
+			util.ApiResponse(response.ResponseWriter, 200, "", retlst)
+			return
+		}
+	}
+	util.ApiResponse(response.ResponseWriter, 200, "", retlst)
+}
+
+func (rrs *ResponseResourceWorker) WorkerExecSubHandler(request *restful.Request, response *restful.Response) {
+	p := new(module.MetaParaWorkerExecAddBean)
+	err := request.ReadEntity(&p)
+	if err != nil {
+		glog.Glog(LogF, fmt.Sprint(err))
+		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("Parse json error.%v", err), nil)
+		return
+	}
+	if len(p.WorkerId) == 0 {
+		glog.Glog(LogF, fmt.Sprintf("parameter missed."))
+		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
+		return
+	}
+	rrs.Lock()
+	defer rrs.Unlock()
+	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_WORKER_HEART)
+	defer bt.Close()
+	strlist := bt.Scan()
+
+	retlst := make([]interface{}, 0)
+	for _, v := range strlist {
+		for k1, v1 := range v.(map[string]interface{}) {
+			m := new(module.MetaWorkerMgrBean)
+			err := json.Unmarshal([]byte(v1.(string)), &m)
+			if err != nil {
+				glog.Glog(LogF, fmt.Sprint(err))
+				continue
+			}
+			timeStr := time.Now().Format("2006-01-02 15:04:05")
+			ise, _ := util.IsExpired(m.UpdateTime, timeStr, 300)
+			if ise {
+				glog.Glog(LogF, fmt.Sprintf("%v timeout %v:%v.", m.WorkerId, m.Ip, m.Port))
+				bt.Remove(k1)
+				continue
+			}
+			if m.WorkerId != p.WorkerId {
+				continue
+			}
+			cnt, err := strconv.Atoi(m.CurrentExecCnt)
+			if err != nil {
+				glog.Glog(LogF, fmt.Sprintf("conv currentexeccnt fail.%v", err))
+				util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("conv currentexeccnt fail.%v", err), retlst)
+				return
+			}
+			cnt--
+			if cnt < 0 {
+				cnt = 0
+			}
+			m.CurrentExecCnt = fmt.Sprint(cnt)
+			jsonstr, _ := json.Marshal(m)
+			err = bt.Set(k1, string(jsonstr))
+			if err != nil {
+				glog.Glog(LogF, fmt.Sprintf("data in db update error.%v", err))
+				util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("data in db update error.%v", err), nil)
+				return
+			}
+			retlst = append(retlst, m)
+			util.ApiResponse(response.ResponseWriter, 200, "", retlst)
+			return
+		}
+	}
 	util.ApiResponse(response.ResponseWriter, 200, "", retlst)
 }

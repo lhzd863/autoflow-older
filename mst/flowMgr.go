@@ -573,6 +573,27 @@ func (m *FlowMgr) updateStatusEnd(sys string, job string, status string) error {
 	return nil
 }
 
+func (m *FlowMgr) ApplicationExec(workerid string) error {
+        url := fmt.Sprintf("http://%v:%v/api/v1/flow/job/status/update/end?accesstoken=%v", m.ApiServerIp, m.ApiServerPort, m.AccessToken)
+        para := fmt.Sprintf("{\"workerid\":\"%v\"}",workerid)
+        jsonstr, err := util.Api_RequestPost(url, para)
+        if err != nil {
+                glog.Glog(m.LogF, fmt.Sprint(err))
+                return err
+        }
+        retbn := new(module.RetBean)
+        err = json.Unmarshal([]byte(jsonstr), &retbn)
+        if err != nil {
+                glog.Glog(LogF, fmt.Sprint(err))
+                return err
+        }
+        if retbn.Status_Code != 200 {
+                glog.Glog(LogF, fmt.Sprintf("post url return err:%v", retbn.Status_Txt))
+                return errors.New(fmt.Sprintf("post url return err:%v", retbn.Status_Txt))
+        }
+        return nil
+}
+
 func (m *FlowMgr) jobInfo(sys string, job string) []interface{} {
 	retarr := make([]interface{}, 0)
 	url := fmt.Sprintf("http://%v:%v/api/v1/flow/job/get?accesstoken=%v", m.ApiServerIp, m.ApiServerPort, m.AccessToken)
