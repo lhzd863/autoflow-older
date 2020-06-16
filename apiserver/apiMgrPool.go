@@ -58,8 +58,8 @@ func (mp *MgrPool) JobPool() {
 		flag := 0
 		for i := 0; i < len(retarr); i++ {
 			v := retarr[i].(map[string]interface{})
-			s,sst,err := mp.ObtJobServer(serverlst, v["dynamicserver"].(string),v["server"].(string))
-                        serverlst = sst
+			s, sst, err := mp.ObtJobServer(serverlst, v["dynamicserver"].(string), v["server"].(string))
+			serverlst = sst
 			if err != nil {
 				glog.Glog(LogF, fmt.Sprint(err))
 				continue
@@ -164,50 +164,51 @@ func (mp *MgrPool) ObtSlvRunningJobCnt() []interface{} {
 	return retarr
 }
 
-func (mp *MgrPool) ObtJobServer(arr []interface{}, dynamicserver string,workerid string) ([]interface{},[]interface{}, error) {
-        mp.Lock()
-        mp.Unlock()
-        var tmap map[string]interface{}
-        pct:=10000
-        tpct:=0
-        tindex := 0
+func (mp *MgrPool) ObtJobServer(arr []interface{}, dynamicserver string, workerid string) ([]interface{}, []interface{}, error) {
+	mp.Lock()
+	mp.Unlock()
+	var tmap map[string]interface{}
+	pct := 10000
+	tpct := 0
+	tindex := 0
+	tcnt := 0
 	retlst := make([]interface{}, 0)
 	for i := 0; i < len(arr); i++ {
 		v := arr[i].(map[string]interface{})
 		var maxcnt, runningcnt, currentexeccnt, currentsubmitcnt int
-                var err error
+		var err error
 		if dynamicserver == "N" {
-                        if len(workerid) == 0 {
-                                return retlst, arr,errors.New(fmt.Sprintf("worker server is null."))
-                        }
+			if len(workerid) == 0 {
+				return retlst, arr, errors.New(fmt.Sprintf("worker server is null."))
+			}
 			if v["workerid"] != workerid {
 				continue
 			}
 			maxcnt, err = strconv.Atoi(v["maxcnt"].(string))
 			if err != nil {
-				return retlst,arr ,errors.New(fmt.Sprintf("string conv int %v err.%v", v["maxcnt"], err))
+				return retlst, arr, errors.New(fmt.Sprintf("string conv int %v err.%v", v["maxcnt"], err))
 			}
 			runningcnt, err = strconv.Atoi(v["runningcnt"].(string))
 			if err != nil {
-				return retlst,arr ,errors.New(fmt.Sprintf("string conv int %v err.%v", v["runningcnt"], err))
+				return retlst, arr, errors.New(fmt.Sprintf("string conv int %v err.%v", v["runningcnt"], err))
 			}
 			currentexeccnt, err = strconv.Atoi(v["currentexeccnt"].(string))
 			if err != nil {
 				glog.Glog(LogF, fmt.Sprintf("string conv int %v err.%v", v["currenexectcnt"], err))
-				return retlst,arr ,errors.New(fmt.Sprintf("string conv int %v err.%v", v["currentcnt"], err))
+				return retlst, arr, errors.New(fmt.Sprintf("string conv int %v err.%v", v["currentcnt"], err))
 			}
 			currentsubmitcnt, err = strconv.Atoi(v["currentsubmitcnt"].(string))
 			if err != nil {
 				glog.Glog(LogF, fmt.Sprintf("string conv currentsubmitcnt int %v err.%v", v["currentsubmitcnt"], err))
-				return retlst,arr ,errors.New(fmt.Sprintf("string conv currentsubmitcnt int %v err.%v", v["currentsubmitcnt"], err))
+				return retlst, arr, errors.New(fmt.Sprintf("string conv currentsubmitcnt int %v err.%v", v["currentsubmitcnt"], err))
 			}
 			if 5*maxcnt < runningcnt+currentexeccnt+currentsubmitcnt {
-				return retlst,arr, errors.New(fmt.Sprintf("submit has reached limit total,wait for next time."))
+				return retlst, arr, errors.New(fmt.Sprintf("submit has reached limit total,wait for next time."))
 			}
-                        v["currentexeccnt"] = fmt.Sprint(currentsubmitcnt+1)
-                        arr[i] = v
-                        retlst = append(retlst, arr[i])
-                        return  retlst,arr,nil
+			v["currentexeccnt"] = fmt.Sprint(currentsubmitcnt + 1)
+			arr[i] = v
+			retlst = append(retlst, arr[i])
+			return retlst, arr, nil
 		} else {
 			maxcnt, err = strconv.Atoi(v["maxcnt"].(string))
 			if err != nil {
@@ -232,19 +233,21 @@ func (mp *MgrPool) ObtJobServer(arr []interface{}, dynamicserver string,workerid
 			if 5*maxcnt < runningcnt+currentexeccnt+currentsubmitcnt {
 				continue
 			}
-                        tpct = (runningcnt+currentexeccnt+currentsubmitcnt+1)*100/(maxcnt+1)
-                        if tpct < pct {
-                            pct = tpct
-                            tmap = arr[i].(map[string]interface{})
-                            tindex = i
-                        }
+			tpct = (runningcnt + currentexeccnt + currentsubmitcnt + 1) * 100 / (maxcnt + 1)
+			if tpct < pct {
+				pct = tpct
+				tmap = arr[i].(map[string]interface{})
+				tindex = i
+				tcnt = currentsubmitcnt
+			}
 		}
 	}
-        retlst = append(retlst, tmap)
-        cnt, _ := strconv.Atoi(tmap["currentsubmitcnt"].(string))
-        tmap["currentsubmitcnt"] = fmt.Sprint(cnt+1)
-        arr[tindex] = tmap
-	return retlst,arr ,nil
+	if tmap != nil {
+		retlst = append(retlst, tmap)
+		tmap["currentsubmitcnt"] = fmt.Sprint(tcnt + 1)
+		arr[tindex] = tmap
+	}
+	return retlst, arr, nil
 }
 
 func (mp *MgrPool) ServerRoutineStatus() {

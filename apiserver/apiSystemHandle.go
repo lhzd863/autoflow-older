@@ -262,7 +262,7 @@ func (rrs *ResponseResourceSystem) JobPoolListHandler(request *restful.Request, 
 
 func (rrs *ResponseResourceSystem) JobPoolRemoveHandler(request *restful.Request, response *restful.Response) {
 
-        p := new(module.MetaJobPoolBean)
+	p := new(module.MetaJobPoolBean)
 	err := request.ReadEntity(&p)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("Parse json error.%v", err))

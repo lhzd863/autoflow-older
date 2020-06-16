@@ -127,15 +127,15 @@ func (rrs *ResponseResourceJob) FlowJobAddHandle(request *restful.Request, respo
 	mj := new(module.MetaJobBean)
 	mj.Sys = p.Sys
 	mj.Job = p.Job
-        mj.SServer = p.SServer
-        mj.Sip = p.Sip
-        mj.Sport = p.Sport
+	mj.SServer = p.SServer
+	mj.Sip = p.Sip
+	mj.Sport = p.Sport
 	mj.Enable = p.Enable
 	mj.TimeWindow = p.TimeWindow
 	mj.RetryCnt = p.RetryCnt
 	mj.Alert = p.Alert
 	mj.TimeTrigger = p.TimeTrigger
-        mj.DynamicServer = p.DynamicServer
+	mj.DynamicServer = p.DynamicServer
 	mj.JobType = p.JobType
 	mj.Frequency = p.Frequency
 	mj.CheckBatStatus = p.CheckBatStatus
@@ -180,15 +180,15 @@ func (rrs *ResponseResourceJob) FlowJobUpdateHandle(request *restful.Request, re
 		if err != nil {
 			glog.Glog(LogF, fmt.Sprint(err))
 		}
-                mj.SServer = p.SServer
-                mj.Sip = p.Sip
-                mj.Sport = p.Sport
+		mj.SServer = p.SServer
+		mj.Sip = p.Sip
+		mj.Sport = p.Sport
 		mj.Enable = p.Enable
 		mj.TimeWindow = p.TimeWindow
 		mj.RetryCnt = p.RetryCnt
 		mj.Alert = p.Alert
 		mj.TimeTrigger = p.TimeTrigger
-                mj.DynamicServer = p.DynamicServer
+		mj.DynamicServer = p.DynamicServer
 		mj.JobType = p.JobType
 		mj.Frequency = p.Frequency
 		mj.CheckBatStatus = p.CheckBatStatus
