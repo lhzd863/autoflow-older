@@ -1,6 +1,6 @@
 package module
 
 type MetaParaFlowJobStatusAllUpdateBean struct {
-	flowid string `json:"flowid"`
-	status string `json:"status"`
+	FlowId string `json:"flowid"`
+	Status string `json:"status"`
 }
