@@ -140,6 +140,14 @@ func (rrs *ResponseResourceJob) FlowJobAddHandle(request *restful.Request, respo
 	mj.Frequency = p.Frequency
 	mj.CheckBatStatus = p.CheckBatStatus
 	mj.Priority = p.Priority
+	mj.Server = make([]interface{}, 0)
+	s := new(module.MetaJobServerBean)
+	s.Server = p.SServer
+	s.Ip = p.Sip
+	s.Port = p.Sport
+	s.Type = ""
+	mj.Server = append(mj.Server, s)
+
 	jsonstr, _ := json.Marshal(mj)
 	err = bt.Set(mj.Sys+"."+mj.Job, string(jsonstr))
 	if err != nil {
@@ -194,6 +202,29 @@ func (rrs *ResponseResourceJob) FlowJobUpdateHandle(request *restful.Request, re
 		mj.CheckBatStatus = p.CheckBatStatus
 		mj.Priority = p.Priority
 		mj.Status = p.Status
+		if mj.Server == nil {
+			mj.Server = make([]interface{}, 0)
+		}
+		flag := 0
+		for k, v := range mj.Server {
+			v1 := v.(module.MetaJobServerBean)
+			if v1.Server != p.SServer {
+				continue
+			}
+			flag = 1
+			v1.Ip = p.Sip
+			v1.Port = p.Sport
+			v1.Type = ""
+			mj.Server[k] = v1
+		}
+		if flag == 0 {
+			s := new(module.MetaJobServerBean)
+			s.Server = p.SServer
+			s.Ip = p.Sip
+			s.Port = p.Sport
+			s.Type = ""
+			mj.Server = append(mj.Server, s)
+		}
 		jsonstr, _ := json.Marshal(mj)
 		err = bt.Set(mj.Sys+"."+mj.Job, string(jsonstr))
 		if err != nil {
@@ -1405,19 +1436,19 @@ func (rrs *ResponseResourceJob) FlowJobStatusUpdateSubmitHandler(request *restfu
 func (rrs *ResponseResourceJob) FlowJobStatusUpdateGoHandler(request *restful.Request, response *restful.Response) {
 	rrs.Lock()
 	defer rrs.Unlock()
-	jobpara := new(module.MetaParaFlowJobStatusUpdateGoBean)
-	err := request.ReadEntity(&jobpara)
+	p := new(module.MetaParaFlowJobStatusUpdateGoBean)
+	err := request.ReadEntity(&p)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprint(err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("Parse json error.%v", err), nil)
 		return
 	}
-	if len(jobpara.FlowId) == 0 || len(jobpara.Sys) == 0 || len(jobpara.Job) == 0 {
+	if len(p.FlowId) == 0 || len(p.Sys) == 0 || len(p.Job) == 0 {
 		glog.Glog(LogF, fmt.Sprintf("parameter missed."))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(jobpara.FlowId)
+	dbf, err := rrf.flowDbFile(p.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -1427,7 +1458,7 @@ func (rrs *ResponseResourceJob) FlowJobStatusUpdateGoHandler(request *restful.Re
 	defer bt.Close()
 
 	jobbn := new(module.MetaJobBean)
-	jobn := bt.Get(jobpara.Sys + "." + jobpara.Job)
+	jobn := bt.Get(p.Sys + "." + p.Job)
 	if jobn != nil {
 		err := json.Unmarshal([]byte(jobn.(string)), &jobbn)
 		if err != nil {
@@ -1436,10 +1467,42 @@ func (rrs *ResponseResourceJob) FlowJobStatusUpdateGoHandler(request *restful.Re
 			return
 		}
 	}
-	jobbn.Status = jobpara.Status
-	jobbn.SServer = jobpara.SServer
-	jobbn.Sip = jobpara.Ip
-	jobbn.Sport = jobpara.Port
+	jobbn.Status = p.Status
+	jobbn.SServer = p.SServer
+	jobbn.Sip = p.Ip
+	jobbn.Sport = p.Port
+	if jobbn.Server == nil {
+		jobbn.Server = make([]interface{}, 0)
+	}
+	flag := 0
+	for k, v := range jobbn.Server {
+		v1 := v.(module.MetaJobServerBean)
+                if v1.Type == "main" {
+                       v1.Type = ""
+                       jobbn.Server[k] = v1
+                }
+		if v1.Server != p.SServer {
+			continue
+		}
+		flag = 1
+		v1.Ip = p.Ip
+		v1.Port = p.Port
+		v1.Type = "main"
+		jobbn.Server[k] = v1
+	}
+	if flag == 0 {
+		s := new(module.MetaJobServerBean)
+		s.Server = p.SServer
+		s.Ip = p.Ip
+		s.Port = p.Port
+		s.Type = "main"
+		jobbn.Server = append(jobbn.Server, s)
+	}
+	s := new(module.MetaJobServerBean)
+	s.Server = p.SServer
+	s.Ip = p.Ip
+	s.Port = p.Port
+	s.Type = "main"
 	jsonstr, _ := json.Marshal(jobbn)
 	err = bt.Set(jobbn.Sys+"."+jobbn.Job, string(jsonstr))
 	if err != nil {
@@ -2278,5 +2341,59 @@ func (rrs *ResponseResourceJob) FlowJobStatusAllUpdateHandler(request *restful.R
 			}
 		}
 	}
+	util.ApiResponse(response.ResponseWriter, 200, "", retlst)
+}
+
+func (rrs *ResponseResourceJob) FlowJobStatusUpdate2ServerHandler(request *restful.Request, response *restful.Response) {
+	p := new(module.MetaParaFlowJobStatus2ServerBean)
+	err := request.ReadEntity(&p)
+	if err != nil {
+		glog.Glog(LogF, fmt.Sprint(err))
+		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("Parse json error.%v", err), nil)
+		return
+	}
+	if len(p.FlowId) == 0 || len(p.Sys) == 0 || len(p.Job) == 0 {
+		glog.Glog(LogF, fmt.Sprintf("parameter missed."))
+		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
+		return
+	}
+	dbf, err := rrf.flowDbFile(p.FlowId)
+	if err != nil {
+		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
+		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
+		return
+	}
+	bt := db.NewBoltDB(dbf, util.TABLE_AUTO_JOB)
+	defer bt.Close()
+
+	m := new(module.MetaJobBean)
+	jobn := bt.Get(p.Sys + "." + p.Job)
+	if jobn != nil {
+		err := json.Unmarshal([]byte(jobn.(string)), &m)
+		if err != nil {
+			glog.Glog(LogF, fmt.Sprint(err))
+			util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("%v", err), nil)
+			return
+		}
+	}
+	timeStr := time.Now().Format("2006-01-02 15:04:05")
+	m.EndTime = timeStr
+	m.Status = p.Status
+	if m.Server == nil {
+		m.Server = make([]interface{}, 0)
+	}
+        s := new(module.MetaJobServerBean)
+        s.Server = p.Server
+        s.Type = "F"
+	m.Server = append(m.Server, s.Server)
+	jsonstr, _ := json.Marshal(m)
+	err = bt.Set(m.Sys+"."+m.Job, string(jsonstr))
+	if err != nil {
+		glog.Glog(LogF, fmt.Sprintf("data in db update error.%v", err))
+		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("data in db update error.%v", err), nil)
+		return
+	}
+	jobpool.Remove(p.FlowId + "," + p.Sys + "," + p.Job)
+	retlst := make([]interface{}, 0)
 	util.ApiResponse(response.ResponseWriter, 200, "", retlst)
 }

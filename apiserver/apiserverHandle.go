@@ -926,6 +926,16 @@ func (rrs ResponseResource) WebService() *restful.WebService {
 		Returns(200, "OK", module.RetBean{}).
 		Returns(404, "Not Found", nil))
 
+	ws.Route(ws.POST("/flow/job/status/update/2server").To(rrj.FlowJobStatusUpdate2ServerHandler).
+		// docs
+		Doc("更新实例作业状态并记录失败节点").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
+		Reads(module.MetaParaFlowJobStatus2ServerBean{}).
+		Writes(module.RetBean{}). // on the response
+		Returns(200, "OK", module.RetBean{}).
+		Returns(404, "Not Found", nil))
+
 	tags = []string{"mst-heart"}
 	ws.Route(ws.POST("/mst/heart/add").To(rrl.MstHeartAddHandler).
 		// docs

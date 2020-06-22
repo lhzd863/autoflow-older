@@ -585,6 +585,39 @@ func (m *FlowMgr) updateStatusEnd(sys string, job string, status string) error {
 	return nil
 }
 
+func (m *FlowMgr) updateStatus2Server(sys string, job string, status string,server string) error {
+        url := fmt.Sprintf("http://%v:%v/api/v1/flow/job/status/update/2server"?accesstoken=%v", m.ApiServerIp, m.ApiServerPort, m.AccessToken)
+        s := new(module.MetaParaFlowJobStatus2ServerBean)
+        s.FlowId = m.FlowId
+        s.Sys = sys
+        s.Job = job
+        s.Status = status
+        s.Server = server
+        jsonstr0, err := json.Marshal(s)
+        if err != nil {
+                glog.Glog(LogF, fmt.Sprint(err))
+                return false
+        }
+        jsonstr, err := util.Api_RequestPost(url, string(jsonstr0))
+        if err != nil {
+                _, cfile, cline, _ := runtime.Caller(1)
+                glog.Glog(m.LogF, fmt.Sprintf("%v %v %v", cfile, cline, err))
+                return err
+        }
+        retbn := new(module.RetBean)
+        err = json.Unmarshal([]byte(jsonstr), &retbn)
+        if err != nil {
+                _, cfile, cline, _ := runtime.Caller(1)
+                glog.Glog(LogF, fmt.Sprintf("%v %v %v", cfile, cline, err))
+                return err
+        }
+        if retbn.Status_Code != 200 {
+                glog.Glog(LogF, fmt.Sprintf("post url return status code:%v", retbn.Status_Code))
+                return errors.New(fmt.Sprintf("post url return status code:%v", retbn.Status_Code))
+        }
+        return nil
+}
+
 func (m *FlowMgr) workerExecApplication(workerid string) error {
         url := fmt.Sprintf("http://%v:%v/api/v1/worker/exec/add?accesstoken=%v", m.ApiServerIp, m.ApiServerPort, m.AccessToken)
         para := fmt.Sprintf("{\"workerid\":\"%v\"}",workerid)

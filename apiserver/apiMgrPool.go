@@ -234,7 +234,6 @@ func (mp *MgrPool) ObtJobServer(arr []interface{}, dynamicserver string, workeri
 				continue
 			}
 			tpct = (runningcnt + currentexeccnt + currentsubmitcnt + 1) * 100 / (maxcnt + 1)
-                         glog.Glog(LogF, fmt.Sprintf("%v-> %v",tpc,pct))
 			if tpct < pct {
 				pct = tpct
 				tmap = arr[i].(map[string]interface{})
