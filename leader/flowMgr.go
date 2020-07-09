@@ -16,10 +16,10 @@ import (
 
 	"github.com/satori/go.uuid"
 
-	"github.com/lhzd863/autoflow/internal/glog"
-	"github.com/lhzd863/autoflow/internal/gproto"
-	"github.com/lhzd863/autoflow/internal/module"
-	"github.com/lhzd863/autoflow/internal/util"
+	"github.com/lhzd863/autoflow/glog"
+	"github.com/lhzd863/autoflow/gproto"
+	"github.com/lhzd863/autoflow/module"
+	"github.com/lhzd863/autoflow/util"
 )
 
 type FlowMgr struct {
@@ -73,7 +73,7 @@ func NewFlowMgr(flowid string, apiserverip string, apiserverport string, mstid s
 func (m *FlowMgr) checkGo() bool {
 	glog.Glog(m.LogF, "Checking Status Go.")
 	url := fmt.Sprintf("http://%v:%v/api/v1/flow/job/status/get/go?accesstoken=%v", m.ApiServerIp, m.ApiServerPort, m.AccessToken)
-	u1 := uuid.Must(uuid.NewV4())
+	u1 := uuid.Must(uuid.NewV4(),nil)
 	para := fmt.Sprintf("{\"id\":\"%v\",\"flowid\":\"%v\",\"ishash\":\"0\",\"status\":\"%v\"}", u1, m.FlowId, util.STATUS_AUTO_GO)
 
 	jsonstr, err := util.Api_RequestPost(url, para)
@@ -322,7 +322,7 @@ func (m *FlowMgr) invokeRealJob(job map[string]interface{}) {
 	var waitGroup util.WaitGroupWrapper
 	exitChan := make(chan int)
 	mf := new(module.MetaParaSystemMstFlowRoutineJobRunningHeartAddBean)
-	u1 := uuid.Must(uuid.NewV4())
+	u1 := uuid.Must(uuid.NewV4(),nil)
 	mf.Id = fmt.Sprint(u1)
 	mf.Sys = job["sys"].(string)
 	mf.Job = job["job"].(string)
@@ -359,7 +359,7 @@ func (m *FlowMgr) invokeRealJob(job map[string]interface{}) {
 	})
 
 	mjwb := new(module.MetaJobWorkerBean)
-	u1 = uuid.Must(uuid.NewV4())
+	u1 = uuid.Must(uuid.NewV4(),nil)
 	mjwb.Id = fmt.Sprint(u1)
 	mjwb.FlowId = m.FlowId
 	mjwb.Sys = job["sys"].(string)
@@ -586,7 +586,7 @@ func (m *FlowMgr) updateStatusEnd(sys string, job string, status string) error {
 }
 
 func (m *FlowMgr) updateStatus2Server(sys string, job string, status string,server string) error {
-        url := fmt.Sprintf("http://%v:%v/api/v1/flow/job/status/update/2server"?accesstoken=%v", m.ApiServerIp, m.ApiServerPort, m.AccessToken)
+        url := fmt.Sprintf("http://%v:%v/api/v1/flow/job/status/update/2server?accesstoken=%v", m.ApiServerIp, m.ApiServerPort, m.AccessToken)
         s := new(module.MetaParaFlowJobStatus2ServerBean)
         s.FlowId = m.FlowId
         s.Sys = sys
@@ -596,7 +596,7 @@ func (m *FlowMgr) updateStatus2Server(sys string, job string, status string,serv
         jsonstr0, err := json.Marshal(s)
         if err != nil {
                 glog.Glog(LogF, fmt.Sprint(err))
-                return false
+                return err
         }
         jsonstr, err := util.Api_RequestPost(url, string(jsonstr0))
         if err != nil {
@@ -694,7 +694,7 @@ func (m *FlowMgr) checkPending() bool {
 	timeStr := time.Now().Format("2006-01-02 15:04:05")
 	glog.Glog(m.LogF, fmt.Sprintf("%v %v %v Checking %v Status Pending.", m.MstId, m.FlowId, m.RoutineId, timeStr))
 	url := fmt.Sprintf("http://%v:%v/api/v1/flow/job/status/get/pending?accesstoken=%v", m.ApiServerIp, m.ApiServerPort, m.AccessToken)
-	u1 := uuid.Must(uuid.NewV4())
+	u1 := uuid.Must(uuid.NewV4(),nil)
 	para := fmt.Sprintf("{\"id\":\"%v\",\"flowid\":\"%v\",\"ishash\":\"0\",\"status\":\"%v\"}", u1, m.FlowId, util.STATUS_AUTO_PENDING)
 	jsonstr, err := util.Api_RequestPost(url, para)
 	if err != nil {

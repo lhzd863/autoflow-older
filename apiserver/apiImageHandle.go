@@ -8,10 +8,10 @@ import (
 
 	"github.com/emicklei/go-restful"
 
-	"github.com/lhzd863/autoflow/internal/db"
-	"github.com/lhzd863/autoflow/internal/glog"
-	"github.com/lhzd863/autoflow/internal/module"
-	"github.com/lhzd863/autoflow/internal/util"
+	"github.com/lhzd863/autoflow/db"
+	"github.com/lhzd863/autoflow/glog"
+	"github.com/lhzd863/autoflow/module"
+	"github.com/lhzd863/autoflow/util"
 
 	"github.com/satori/go.uuid"
 )
@@ -61,7 +61,7 @@ func (rrs *ResponseResourceImage) ImageAddHandler(request *restful.Request, resp
 	m.CreateTime = timeStr
 	m.User = username
 
-	u1 := uuid.Must(uuid.NewV4())
+	u1 := uuid.Must(uuid.NewV4(),nil)
 	imageid := fmt.Sprint(u1)
 	m.ImageId = imageid
 	m.Tag = p.Tag

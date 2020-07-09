@@ -1,7 +1,7 @@
 package module
 
 import (
-	"github.com/lhzd863/autoflow/internal/workpool"
+	"github.com/lhzd863/autoflow/workpool"
 )
 
 type MetaWorkerPoolMemBean struct {

@@ -15,11 +15,11 @@ import (
 
 	"github.com/emicklei/go-restful"
 
-	"github.com/lhzd863/autoflow/internal/db"
-	"github.com/lhzd863/autoflow/internal/glog"
-	"github.com/lhzd863/autoflow/internal/gproto"
-	"github.com/lhzd863/autoflow/internal/module"
-	"github.com/lhzd863/autoflow/internal/util"
+	"github.com/lhzd863/autoflow/db"
+	"github.com/lhzd863/autoflow/glog"
+	"github.com/lhzd863/autoflow/gproto"
+	"github.com/lhzd863/autoflow/module"
+	"github.com/lhzd863/autoflow/util"
 )
 
 type ResponseResourceFlow struct {

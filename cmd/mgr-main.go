@@ -8,8 +8,8 @@ import (
 
 	"gopkg.in/yaml.v2"
 
-	"github.com/lhzd863/autoflow/internal/util"
-	"github.com/lhzd863/autoflow/mst"
+	"github.com/lhzd863/autoflow/util"
+	"github.com/lhzd863/autoflow/leader"
 )
 
 var (

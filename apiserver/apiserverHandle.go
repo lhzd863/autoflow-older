@@ -16,11 +16,11 @@ import (
 	restfulspec "github.com/emicklei/go-restful-openapi"
 	"github.com/go-openapi/spec"
 
-	"github.com/lhzd863/autoflow/internal/db"
-	"github.com/lhzd863/autoflow/internal/glog"
-	"github.com/lhzd863/autoflow/internal/jwt"
-	"github.com/lhzd863/autoflow/internal/module"
-	"github.com/lhzd863/autoflow/internal/util"
+	"github.com/lhzd863/autoflow/db"
+	"github.com/lhzd863/autoflow/glog"
+	"github.com/lhzd863/autoflow/jwt"
+	"github.com/lhzd863/autoflow/module"
+	"github.com/lhzd863/autoflow/util"
 )
 
 // JobResource is the REST layer to the
@@ -1718,13 +1718,8 @@ func enrichSwaggerObject(swo *spec.Swagger) {
 			Title:       "Autoflow",
 			Description: "Resource for managing Api",
 			Contact: &spec.ContactInfo{
-				Name:  "lhzd863",
-				Email: "lhzd863@126.com",
-				URL:   "http://lhzd863.com",
 			},
 			License: &spec.License{
-				Name: "MIT",
-				URL:  "http://lhzd863.com",
 			},
 			Version: "1.0.0",
 		},

@@ -3,7 +3,7 @@ package util
 import (
 	"log"
 
-	"github.com/lhzd863/autoflow/internal/jwt"
+	"github.com/lhzd863/autoflow/jwt"
 )
 
 func JwtAccessTokenUserName(accesstoken string, jwtkey string) (string, error) {

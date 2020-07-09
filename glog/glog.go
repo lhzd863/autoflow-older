@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/lhzd863/autoflow/internal/util"
+	"github.com/lhzd863/autoflow/util"
 )
 
 func Glog(f string, context string) {

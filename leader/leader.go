@@ -18,12 +18,12 @@ import (
 
 	"github.com/satori/go.uuid"
 
-	"github.com/lhzd863/autoflow/internal/db"
-	"github.com/lhzd863/autoflow/internal/glog"
-	"github.com/lhzd863/autoflow/internal/gproto"
-	"github.com/lhzd863/autoflow/internal/module"
-	"github.com/lhzd863/autoflow/internal/util"
-	"github.com/lhzd863/autoflow/internal/workpool"
+	"github.com/lhzd863/autoflow/db"
+	"github.com/lhzd863/autoflow/glog"
+	"github.com/lhzd863/autoflow/gproto"
+	"github.com/lhzd863/autoflow/module"
+	"github.com/lhzd863/autoflow/util"
+	"github.com/lhzd863/autoflow/workpool"
 )
 
 var (
@@ -464,7 +464,7 @@ func (ms *MServer) Main() bool {
 	exitChan := make(chan int)
 	signalChan := make(chan os.Signal, 1)
 	m := new(module.MetaParaMstHeartAddBean)
-	u1 := uuid.Must(uuid.NewV4())
+	u1 := uuid.Must(uuid.NewV4(),nil)
 	m.Id = fmt.Sprint(u1)
 	m.MstId = MstId
 	m.Ip = Ip
@@ -620,7 +620,7 @@ type MyWork struct {
 func (workPool *MyWork) DoWork(workRoutine int) {
 	var waitGroup util.WaitGroupWrapper
 	m := new(module.MetaMstFlowRoutineHeartBean)
-	u1 := uuid.Must(uuid.NewV4())
+	u1 := uuid.Must(uuid.NewV4(),nil)
 	m.Id = fmt.Sprint(u1)
 	m.FlowId = workPool.Mmw.FlowId
 	m.MstId = MstId
