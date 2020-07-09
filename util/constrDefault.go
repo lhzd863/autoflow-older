@@ -50,5 +50,12 @@ const (
 	CONST_SYS      = "AUTO_SYS"
 	CONST_JOB      = "AUTO_JOB"
 	CONST_FLOW     = "AUTO_FLOW"
-        
+        //
+        ENV_VAR_CTX_DATE = "CTX_DATE"
+        ENV_VAR_CTX_TIME = "CTX_TIME"
+        ENV_VAR_CTX_TIMESTAMP = "CTX_TIMESTAMP"
+        ENV_VAR_CTX_CTL = "CTX_CTL"
+        ENV_VAR_CTX_SYS = "CTX_SYS"
+        ENV_VAR_CTX_JOB = "CTX_JOB"
+        EVN_VAR_CTX_STR = "CTX_STR"       
 )
