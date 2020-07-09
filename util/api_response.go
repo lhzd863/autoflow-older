@@ -25,7 +25,7 @@ func ApiResponse(w http.ResponseWriter, statusCode int, statusTxt string, data i
 	w.Header().Set("Content-Length", strconv.Itoa(len(response)))
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Headers", "*")
-        w.Header().Set("Access-Control-Allow-Methods", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "*")
 	w.WriteHeader(statusCode)
 	w.Write(response)
 }
