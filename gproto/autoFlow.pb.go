@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.21.0-devel
 // 	protoc        v3.11.3
-// source: tmp/autoFlow.proto
+// source: autoFlow.proto
 
 // 定义包名
 
@@ -44,7 +44,7 @@ type Req struct {
 func (x *Req) Reset() {
 	*x = Req{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_tmp_autoFlow_proto_msgTypes[0]
+		mi := &file_autoFlow_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -57,7 +57,7 @@ func (x *Req) String() string {
 func (*Req) ProtoMessage() {}
 
 func (x *Req) ProtoReflect() protoreflect.Message {
-	mi := &file_tmp_autoFlow_proto_msgTypes[0]
+	mi := &file_autoFlow_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -70,7 +70,7 @@ func (x *Req) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Req.ProtoReflect.Descriptor instead.
 func (*Req) Descriptor() ([]byte, []int) {
-	return file_tmp_autoFlow_proto_rawDescGZIP(), []int{0}
+	return file_autoFlow_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *Req) GetJsonStr() string {
@@ -94,7 +94,7 @@ type Res struct {
 func (x *Res) Reset() {
 	*x = Res{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_tmp_autoFlow_proto_msgTypes[1]
+		mi := &file_autoFlow_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -107,7 +107,7 @@ func (x *Res) String() string {
 func (*Res) ProtoMessage() {}
 
 func (x *Res) ProtoReflect() protoreflect.Message {
-	mi := &file_tmp_autoFlow_proto_msgTypes[1]
+	mi := &file_autoFlow_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -120,7 +120,7 @@ func (x *Res) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Res.ProtoReflect.Descriptor instead.
 func (*Res) Descriptor() ([]byte, []int) {
-	return file_tmp_autoFlow_proto_rawDescGZIP(), []int{1}
+	return file_autoFlow_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *Res) GetStatus_Txt() string {
@@ -144,22 +144,58 @@ func (x *Res) GetData() string {
 	return ""
 }
 
-var File_tmp_autoFlow_proto protoreflect.FileDescriptor
+var File_autoFlow_proto protoreflect.FileDescriptor
 
-var file_tmp_autoFlow_proto_rawDesc = []byte{
-	0x0a, 0x12, 0x74, 0x6d, 0x70, 0x2f, 0x61, 0x75, 0x74, 0x6f, 0x46, 0x6c, 0x6f, 0x77, 0x2e, 0x70,
-	0x72, 0x6f, 0x74, 0x6f, 0x12, 0x06, 0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x1f, 0x0a, 0x03,
-	0x52, 0x65, 0x71, 0x12, 0x18, 0x0a, 0x07, 0x4a, 0x73, 0x6f, 0x6e, 0x53, 0x74, 0x72, 0x18, 0x01,
-	0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x4a, 0x73, 0x6f, 0x6e, 0x53, 0x74, 0x72, 0x22, 0x59, 0x0a,
-	0x03, 0x52, 0x65, 0x73, 0x12, 0x1d, 0x0a, 0x0a, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x5f, 0x54,
-	0x78, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73,
-	0x54, 0x78, 0x74, 0x12, 0x1f, 0x0a, 0x0b, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x5f, 0x43, 0x6f,
-	0x64, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x0a, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73,
-	0x43, 0x6f, 0x64, 0x65, 0x12, 0x12, 0x0a, 0x04, 0x44, 0x61, 0x74, 0x61, 0x18, 0x03, 0x20, 0x01,
-	0x28, 0x09, 0x52, 0x04, 0x44, 0x61, 0x74, 0x61, 0x32, 0x8d, 0x05, 0x0a, 0x0a, 0x46, 0x6c, 0x6f,
-	0x77, 0x4d, 0x61, 0x73, 0x74, 0x65, 0x72, 0x12, 0x23, 0x0a, 0x05, 0x44, 0x6f, 0x43, 0x6d, 0x64,
+var file_autoFlow_proto_rawDesc = []byte{
+	0x0a, 0x0e, 0x61, 0x75, 0x74, 0x6f, 0x46, 0x6c, 0x6f, 0x77, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f,
+	0x12, 0x06, 0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x1f, 0x0a, 0x03, 0x52, 0x65, 0x71, 0x12,
+	0x18, 0x0a, 0x07, 0x4a, 0x73, 0x6f, 0x6e, 0x53, 0x74, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x07, 0x4a, 0x73, 0x6f, 0x6e, 0x53, 0x74, 0x72, 0x22, 0x59, 0x0a, 0x03, 0x52, 0x65, 0x73,
+	0x12, 0x1d, 0x0a, 0x0a, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x5f, 0x54, 0x78, 0x74, 0x18, 0x01,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x54, 0x78, 0x74, 0x12,
+	0x1f, 0x0a, 0x0b, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x5f, 0x43, 0x6f, 0x64, 0x65, 0x18, 0x02,
+	0x20, 0x01, 0x28, 0x05, 0x52, 0x0a, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x43, 0x6f, 0x64, 0x65,
+	0x12, 0x12, 0x0a, 0x04, 0x44, 0x61, 0x74, 0x61, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04,
+	0x44, 0x61, 0x74, 0x61, 0x32, 0xea, 0x04, 0x0a, 0x06, 0x4c, 0x65, 0x61, 0x64, 0x65, 0x72, 0x12,
+	0x22, 0x0a, 0x04, 0x50, 0x69, 0x6e, 0x67, 0x12, 0x0b, 0x2e, 0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f,
+	0x2e, 0x52, 0x65, 0x71, 0x1a, 0x0b, 0x2e, 0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65,
+	0x73, 0x22, 0x00, 0x12, 0x26, 0x0a, 0x08, 0x4a, 0x6f, 0x62, 0x53, 0x74, 0x61, 0x72, 0x74, 0x12,
+	0x0b, 0x2e, 0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65, 0x71, 0x1a, 0x0b, 0x2e, 0x67,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65, 0x73, 0x22, 0x00, 0x12, 0x25, 0x0a, 0x07, 0x4a,
+	0x6f, 0x62, 0x53, 0x74, 0x6f, 0x70, 0x12, 0x0b, 0x2e, 0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e,
+	0x52, 0x65, 0x71, 0x1a, 0x0b, 0x2e, 0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65, 0x73,
+	0x22, 0x00, 0x12, 0x27, 0x0a, 0x09, 0x4a, 0x6f, 0x62, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x12,
+	0x0b, 0x2e, 0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65, 0x71, 0x1a, 0x0b, 0x2e, 0x67,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65, 0x73, 0x22, 0x00, 0x12, 0x29, 0x0a, 0x0b, 0x4a,
+	0x6f, 0x62, 0x45, 0x78, 0x65, 0x63, 0x75, 0x74, 0x65, 0x72, 0x12, 0x0b, 0x2e, 0x67, 0x70, 0x72,
+	0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65, 0x71, 0x1a, 0x0b, 0x2e, 0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f,
+	0x2e, 0x52, 0x65, 0x73, 0x22, 0x00, 0x12, 0x27, 0x0a, 0x09, 0x46, 0x6c, 0x6f, 0x77, 0x53, 0x74,
+	0x61, 0x72, 0x74, 0x12, 0x0b, 0x2e, 0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65, 0x71,
+	0x1a, 0x0b, 0x2e, 0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65, 0x73, 0x22, 0x00, 0x12,
+	0x26, 0x0a, 0x08, 0x46, 0x6c, 0x6f, 0x77, 0x53, 0x74, 0x6f, 0x70, 0x12, 0x0b, 0x2e, 0x67, 0x70,
+	0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65, 0x71, 0x1a, 0x0b, 0x2e, 0x67, 0x70, 0x72, 0x6f, 0x74,
+	0x6f, 0x2e, 0x52, 0x65, 0x73, 0x22, 0x00, 0x12, 0x28, 0x0a, 0x0a, 0x46, 0x6c, 0x6f, 0x77, 0x53,
+	0x74, 0x61, 0x74, 0x75, 0x73, 0x12, 0x0b, 0x2e, 0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52,
+	0x65, 0x71, 0x1a, 0x0b, 0x2e, 0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65, 0x73, 0x22,
+	0x00, 0x12, 0x2c, 0x0a, 0x0e, 0x46, 0x6c, 0x6f, 0x77, 0x52, 0x6f, 0x75, 0x74, 0x69, 0x6e, 0x65,
+	0x41, 0x64, 0x64, 0x12, 0x0b, 0x2e, 0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65, 0x71,
+	0x1a, 0x0b, 0x2e, 0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65, 0x73, 0x22, 0x00, 0x12,
+	0x2c, 0x0a, 0x0e, 0x46, 0x6c, 0x6f, 0x77, 0x52, 0x6f, 0x75, 0x74, 0x69, 0x6e, 0x65, 0x53, 0x75,
+	0x62, 0x12, 0x0b, 0x2e, 0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65, 0x71, 0x1a, 0x0b,
+	0x2e, 0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65, 0x73, 0x22, 0x00, 0x12, 0x2d, 0x0a,
+	0x0f, 0x46, 0x6c, 0x6f, 0x77, 0x52, 0x6f, 0x75, 0x74, 0x69, 0x6e, 0x65, 0x4c, 0x69, 0x73, 0x74,
 	0x12, 0x0b, 0x2e, 0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65, 0x71, 0x1a, 0x0b, 0x2e,
-	0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65, 0x73, 0x22, 0x00, 0x12, 0x22, 0x0a, 0x04,
+	0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65, 0x73, 0x22, 0x00, 0x12, 0x28, 0x0a, 0x0a,
+	0x46, 0x6c, 0x6f, 0x77, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x12, 0x0b, 0x2e, 0x67, 0x70, 0x72,
+	0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65, 0x71, 0x1a, 0x0b, 0x2e, 0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f,
+	0x2e, 0x52, 0x65, 0x73, 0x22, 0x00, 0x12, 0x33, 0x0a, 0x15, 0x4c, 0x65, 0x61, 0x64, 0x65, 0x72,
+	0x46, 0x6c, 0x6f, 0x77, 0x52, 0x6f, 0x75, 0x74, 0x69, 0x6e, 0x65, 0x53, 0x74, 0x6f, 0x70, 0x12,
+	0x0b, 0x2e, 0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65, 0x71, 0x1a, 0x0b, 0x2e, 0x67,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65, 0x73, 0x22, 0x00, 0x12, 0x34, 0x0a, 0x16, 0x4c,
+	0x65, 0x61, 0x64, 0x65, 0x72, 0x46, 0x6c, 0x6f, 0x77, 0x52, 0x6f, 0x75, 0x74, 0x69, 0x6e, 0x65,
+	0x53, 0x74, 0x61, 0x72, 0x74, 0x12, 0x0b, 0x2e, 0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52,
+	0x65, 0x71, 0x1a, 0x0b, 0x2e, 0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65, 0x73, 0x22,
+	0x00, 0x32, 0xd2, 0x01, 0x0a, 0x06, 0x57, 0x6f, 0x72, 0x6b, 0x65, 0x72, 0x12, 0x22, 0x0a, 0x04,
 	0x50, 0x69, 0x6e, 0x67, 0x12, 0x0b, 0x2e, 0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65,
 	0x71, 0x1a, 0x0b, 0x2e, 0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65, 0x73, 0x22, 0x00,
 	0x12, 0x26, 0x0a, 0x08, 0x4a, 0x6f, 0x62, 0x53, 0x74, 0x61, 0x72, 0x74, 0x12, 0x0b, 0x2e, 0x67,
@@ -169,122 +205,82 @@ var file_tmp_autoFlow_proto_rawDesc = []byte{
 	0x1a, 0x0b, 0x2e, 0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65, 0x73, 0x22, 0x00, 0x12,
 	0x27, 0x0a, 0x09, 0x4a, 0x6f, 0x62, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x12, 0x0b, 0x2e, 0x67,
 	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65, 0x71, 0x1a, 0x0b, 0x2e, 0x67, 0x70, 0x72, 0x6f,
-	0x74, 0x6f, 0x2e, 0x52, 0x65, 0x73, 0x22, 0x00, 0x12, 0x29, 0x0a, 0x0b, 0x4a, 0x6f, 0x62, 0x45,
-	0x78, 0x65, 0x63, 0x75, 0x74, 0x65, 0x72, 0x12, 0x0b, 0x2e, 0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f,
-	0x2e, 0x52, 0x65, 0x71, 0x1a, 0x0b, 0x2e, 0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65,
-	0x73, 0x22, 0x00, 0x12, 0x27, 0x0a, 0x09, 0x46, 0x6c, 0x6f, 0x77, 0x53, 0x74, 0x61, 0x72, 0x74,
-	0x12, 0x0b, 0x2e, 0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65, 0x71, 0x1a, 0x0b, 0x2e,
-	0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65, 0x73, 0x22, 0x00, 0x12, 0x26, 0x0a, 0x08,
-	0x46, 0x6c, 0x6f, 0x77, 0x53, 0x74, 0x6f, 0x70, 0x12, 0x0b, 0x2e, 0x67, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x2e, 0x52, 0x65, 0x71, 0x1a, 0x0b, 0x2e, 0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52,
-	0x65, 0x73, 0x22, 0x00, 0x12, 0x28, 0x0a, 0x0a, 0x46, 0x6c, 0x6f, 0x77, 0x53, 0x74, 0x61, 0x74,
-	0x75, 0x73, 0x12, 0x0b, 0x2e, 0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65, 0x71, 0x1a,
-	0x0b, 0x2e, 0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65, 0x73, 0x22, 0x00, 0x12, 0x2c,
-	0x0a, 0x0e, 0x46, 0x6c, 0x6f, 0x77, 0x52, 0x6f, 0x75, 0x74, 0x69, 0x6e, 0x65, 0x41, 0x64, 0x64,
-	0x12, 0x0b, 0x2e, 0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65, 0x71, 0x1a, 0x0b, 0x2e,
-	0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65, 0x73, 0x22, 0x00, 0x12, 0x2c, 0x0a, 0x0e,
-	0x46, 0x6c, 0x6f, 0x77, 0x52, 0x6f, 0x75, 0x74, 0x69, 0x6e, 0x65, 0x53, 0x75, 0x62, 0x12, 0x0b,
-	0x2e, 0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65, 0x71, 0x1a, 0x0b, 0x2e, 0x67, 0x70,
-	0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65, 0x73, 0x22, 0x00, 0x12, 0x2d, 0x0a, 0x0f, 0x46, 0x6c,
-	0x6f, 0x77, 0x52, 0x6f, 0x75, 0x74, 0x69, 0x6e, 0x65, 0x4c, 0x69, 0x73, 0x74, 0x12, 0x0b, 0x2e,
-	0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65, 0x71, 0x1a, 0x0b, 0x2e, 0x67, 0x70, 0x72,
-	0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65, 0x73, 0x22, 0x00, 0x12, 0x28, 0x0a, 0x0a, 0x46, 0x6c, 0x6f,
-	0x77, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x12, 0x0b, 0x2e, 0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f,
-	0x2e, 0x52, 0x65, 0x71, 0x1a, 0x0b, 0x2e, 0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65,
-	0x73, 0x22, 0x00, 0x12, 0x30, 0x0a, 0x12, 0x4d, 0x73, 0x74, 0x46, 0x6c, 0x6f, 0x77, 0x52, 0x6f,
-	0x75, 0x74, 0x69, 0x6e, 0x65, 0x53, 0x74, 0x6f, 0x70, 0x12, 0x0b, 0x2e, 0x67, 0x70, 0x72, 0x6f,
-	0x74, 0x6f, 0x2e, 0x52, 0x65, 0x71, 0x1a, 0x0b, 0x2e, 0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e,
-	0x52, 0x65, 0x73, 0x22, 0x00, 0x12, 0x31, 0x0a, 0x13, 0x4d, 0x73, 0x74, 0x46, 0x6c, 0x6f, 0x77,
-	0x52, 0x6f, 0x75, 0x74, 0x69, 0x6e, 0x65, 0x53, 0x74, 0x61, 0x72, 0x74, 0x12, 0x0b, 0x2e, 0x67,
-	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65, 0x71, 0x1a, 0x0b, 0x2e, 0x67, 0x70, 0x72, 0x6f,
-	0x74, 0x6f, 0x2e, 0x52, 0x65, 0x73, 0x22, 0x00, 0x32, 0xc9, 0x01, 0x0a, 0x06, 0x53, 0x6c, 0x61,
-	0x76, 0x65, 0x72, 0x12, 0x23, 0x0a, 0x05, 0x44, 0x6f, 0x43, 0x6d, 0x64, 0x12, 0x0b, 0x2e, 0x67,
-	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65, 0x71, 0x1a, 0x0b, 0x2e, 0x67, 0x70, 0x72, 0x6f,
-	0x74, 0x6f, 0x2e, 0x52, 0x65, 0x73, 0x22, 0x00, 0x12, 0x22, 0x0a, 0x04, 0x50, 0x69, 0x6e, 0x67,
-	0x12, 0x0b, 0x2e, 0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65, 0x71, 0x1a, 0x0b, 0x2e,
-	0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65, 0x73, 0x22, 0x00, 0x12, 0x26, 0x0a, 0x08,
-	0x4a, 0x6f, 0x62, 0x53, 0x74, 0x61, 0x72, 0x74, 0x12, 0x0b, 0x2e, 0x67, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x2e, 0x52, 0x65, 0x71, 0x1a, 0x0b, 0x2e, 0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52,
-	0x65, 0x73, 0x22, 0x00, 0x12, 0x25, 0x0a, 0x07, 0x4a, 0x6f, 0x62, 0x53, 0x74, 0x6f, 0x70, 0x12,
-	0x0b, 0x2e, 0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65, 0x71, 0x1a, 0x0b, 0x2e, 0x67,
-	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65, 0x73, 0x22, 0x00, 0x12, 0x27, 0x0a, 0x09, 0x4a,
-	0x6f, 0x62, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x12, 0x0b, 0x2e, 0x67, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x2e, 0x52, 0x65, 0x71, 0x1a, 0x0b, 0x2e, 0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52,
-	0x65, 0x73, 0x22, 0x00, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x74, 0x6f, 0x2e, 0x52, 0x65, 0x73, 0x22, 0x00, 0x12, 0x2c, 0x0a, 0x0a, 0x4a, 0x6f, 0x62, 0x45,
+	0x78, 0x65, 0x63, 0x4c, 0x6f, 0x67, 0x12, 0x0b, 0x2e, 0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e,
+	0x52, 0x65, 0x71, 0x1a, 0x0b, 0x2e, 0x67, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65, 0x73,
+	0x22, 0x00, 0x28, 0x01, 0x30, 0x01, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
-	file_tmp_autoFlow_proto_rawDescOnce sync.Once
-	file_tmp_autoFlow_proto_rawDescData = file_tmp_autoFlow_proto_rawDesc
+	file_autoFlow_proto_rawDescOnce sync.Once
+	file_autoFlow_proto_rawDescData = file_autoFlow_proto_rawDesc
 )
 
-func file_tmp_autoFlow_proto_rawDescGZIP() []byte {
-	file_tmp_autoFlow_proto_rawDescOnce.Do(func() {
-		file_tmp_autoFlow_proto_rawDescData = protoimpl.X.CompressGZIP(file_tmp_autoFlow_proto_rawDescData)
+func file_autoFlow_proto_rawDescGZIP() []byte {
+	file_autoFlow_proto_rawDescOnce.Do(func() {
+		file_autoFlow_proto_rawDescData = protoimpl.X.CompressGZIP(file_autoFlow_proto_rawDescData)
 	})
-	return file_tmp_autoFlow_proto_rawDescData
+	return file_autoFlow_proto_rawDescData
 }
 
-var file_tmp_autoFlow_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
-var file_tmp_autoFlow_proto_goTypes = []interface{}{
+var file_autoFlow_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_autoFlow_proto_goTypes = []interface{}{
 	(*Req)(nil), // 0: gproto.Req
 	(*Res)(nil), // 1: gproto.Res
 }
-var file_tmp_autoFlow_proto_depIdxs = []int32{
-	0,  // 0: gproto.FlowMaster.DoCmd:input_type -> gproto.Req
-	0,  // 1: gproto.FlowMaster.Ping:input_type -> gproto.Req
-	0,  // 2: gproto.FlowMaster.JobStart:input_type -> gproto.Req
-	0,  // 3: gproto.FlowMaster.JobStop:input_type -> gproto.Req
-	0,  // 4: gproto.FlowMaster.JobStatus:input_type -> gproto.Req
-	0,  // 5: gproto.FlowMaster.JobExecuter:input_type -> gproto.Req
-	0,  // 6: gproto.FlowMaster.FlowStart:input_type -> gproto.Req
-	0,  // 7: gproto.FlowMaster.FlowStop:input_type -> gproto.Req
-	0,  // 8: gproto.FlowMaster.FlowStatus:input_type -> gproto.Req
-	0,  // 9: gproto.FlowMaster.FlowRoutineAdd:input_type -> gproto.Req
-	0,  // 10: gproto.FlowMaster.FlowRoutineSub:input_type -> gproto.Req
-	0,  // 11: gproto.FlowMaster.FlowRoutineList:input_type -> gproto.Req
-	0,  // 12: gproto.FlowMaster.FlowCreate:input_type -> gproto.Req
-	0,  // 13: gproto.FlowMaster.MstFlowRoutineStop:input_type -> gproto.Req
-	0,  // 14: gproto.FlowMaster.MstFlowRoutineStart:input_type -> gproto.Req
-	0,  // 15: gproto.Slaver.DoCmd:input_type -> gproto.Req
-	0,  // 16: gproto.Slaver.Ping:input_type -> gproto.Req
-	0,  // 17: gproto.Slaver.JobStart:input_type -> gproto.Req
-	0,  // 18: gproto.Slaver.JobStop:input_type -> gproto.Req
-	0,  // 19: gproto.Slaver.JobStatus:input_type -> gproto.Req
-	1,  // 20: gproto.FlowMaster.DoCmd:output_type -> gproto.Res
-	1,  // 21: gproto.FlowMaster.Ping:output_type -> gproto.Res
-	1,  // 22: gproto.FlowMaster.JobStart:output_type -> gproto.Res
-	1,  // 23: gproto.FlowMaster.JobStop:output_type -> gproto.Res
-	1,  // 24: gproto.FlowMaster.JobStatus:output_type -> gproto.Res
-	1,  // 25: gproto.FlowMaster.JobExecuter:output_type -> gproto.Res
-	1,  // 26: gproto.FlowMaster.FlowStart:output_type -> gproto.Res
-	1,  // 27: gproto.FlowMaster.FlowStop:output_type -> gproto.Res
-	1,  // 28: gproto.FlowMaster.FlowStatus:output_type -> gproto.Res
-	1,  // 29: gproto.FlowMaster.FlowRoutineAdd:output_type -> gproto.Res
-	1,  // 30: gproto.FlowMaster.FlowRoutineSub:output_type -> gproto.Res
-	1,  // 31: gproto.FlowMaster.FlowRoutineList:output_type -> gproto.Res
-	1,  // 32: gproto.FlowMaster.FlowCreate:output_type -> gproto.Res
-	1,  // 33: gproto.FlowMaster.MstFlowRoutineStop:output_type -> gproto.Res
-	1,  // 34: gproto.FlowMaster.MstFlowRoutineStart:output_type -> gproto.Res
-	1,  // 35: gproto.Slaver.DoCmd:output_type -> gproto.Res
-	1,  // 36: gproto.Slaver.Ping:output_type -> gproto.Res
-	1,  // 37: gproto.Slaver.JobStart:output_type -> gproto.Res
-	1,  // 38: gproto.Slaver.JobStop:output_type -> gproto.Res
-	1,  // 39: gproto.Slaver.JobStatus:output_type -> gproto.Res
-	20, // [20:40] is the sub-list for method output_type
-	0,  // [0:20] is the sub-list for method input_type
+var file_autoFlow_proto_depIdxs = []int32{
+	0,  // 0: gproto.Leader.Ping:input_type -> gproto.Req
+	0,  // 1: gproto.Leader.JobStart:input_type -> gproto.Req
+	0,  // 2: gproto.Leader.JobStop:input_type -> gproto.Req
+	0,  // 3: gproto.Leader.JobStatus:input_type -> gproto.Req
+	0,  // 4: gproto.Leader.JobExecuter:input_type -> gproto.Req
+	0,  // 5: gproto.Leader.FlowStart:input_type -> gproto.Req
+	0,  // 6: gproto.Leader.FlowStop:input_type -> gproto.Req
+	0,  // 7: gproto.Leader.FlowStatus:input_type -> gproto.Req
+	0,  // 8: gproto.Leader.FlowRoutineAdd:input_type -> gproto.Req
+	0,  // 9: gproto.Leader.FlowRoutineSub:input_type -> gproto.Req
+	0,  // 10: gproto.Leader.FlowRoutineList:input_type -> gproto.Req
+	0,  // 11: gproto.Leader.FlowCreate:input_type -> gproto.Req
+	0,  // 12: gproto.Leader.LeaderFlowRoutineStop:input_type -> gproto.Req
+	0,  // 13: gproto.Leader.LeaderFlowRoutineStart:input_type -> gproto.Req
+	0,  // 14: gproto.Worker.Ping:input_type -> gproto.Req
+	0,  // 15: gproto.Worker.JobStart:input_type -> gproto.Req
+	0,  // 16: gproto.Worker.JobStop:input_type -> gproto.Req
+	0,  // 17: gproto.Worker.JobStatus:input_type -> gproto.Req
+	0,  // 18: gproto.Worker.JobExecLog:input_type -> gproto.Req
+	1,  // 19: gproto.Leader.Ping:output_type -> gproto.Res
+	1,  // 20: gproto.Leader.JobStart:output_type -> gproto.Res
+	1,  // 21: gproto.Leader.JobStop:output_type -> gproto.Res
+	1,  // 22: gproto.Leader.JobStatus:output_type -> gproto.Res
+	1,  // 23: gproto.Leader.JobExecuter:output_type -> gproto.Res
+	1,  // 24: gproto.Leader.FlowStart:output_type -> gproto.Res
+	1,  // 25: gproto.Leader.FlowStop:output_type -> gproto.Res
+	1,  // 26: gproto.Leader.FlowStatus:output_type -> gproto.Res
+	1,  // 27: gproto.Leader.FlowRoutineAdd:output_type -> gproto.Res
+	1,  // 28: gproto.Leader.FlowRoutineSub:output_type -> gproto.Res
+	1,  // 29: gproto.Leader.FlowRoutineList:output_type -> gproto.Res
+	1,  // 30: gproto.Leader.FlowCreate:output_type -> gproto.Res
+	1,  // 31: gproto.Leader.LeaderFlowRoutineStop:output_type -> gproto.Res
+	1,  // 32: gproto.Leader.LeaderFlowRoutineStart:output_type -> gproto.Res
+	1,  // 33: gproto.Worker.Ping:output_type -> gproto.Res
+	1,  // 34: gproto.Worker.JobStart:output_type -> gproto.Res
+	1,  // 35: gproto.Worker.JobStop:output_type -> gproto.Res
+	1,  // 36: gproto.Worker.JobStatus:output_type -> gproto.Res
+	1,  // 37: gproto.Worker.JobExecLog:output_type -> gproto.Res
+	19, // [19:38] is the sub-list for method output_type
+	0,  // [0:19] is the sub-list for method input_type
 	0,  // [0:0] is the sub-list for extension type_name
 	0,  // [0:0] is the sub-list for extension extendee
 	0,  // [0:0] is the sub-list for field type_name
 }
 
-func init() { file_tmp_autoFlow_proto_init() }
-func file_tmp_autoFlow_proto_init() {
-	if File_tmp_autoFlow_proto != nil {
+func init() { file_autoFlow_proto_init() }
+func file_autoFlow_proto_init() {
+	if File_autoFlow_proto != nil {
 		return
 	}
 	if !protoimpl.UnsafeEnabled {
-		file_tmp_autoFlow_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
+		file_autoFlow_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Req); i {
 			case 0:
 				return &v.state
@@ -296,7 +292,7 @@ func file_tmp_autoFlow_proto_init() {
 				return nil
 			}
 		}
-		file_tmp_autoFlow_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
+		file_autoFlow_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Res); i {
 			case 0:
 				return &v.state
@@ -313,20 +309,20 @@ func file_tmp_autoFlow_proto_init() {
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: file_tmp_autoFlow_proto_rawDesc,
+			RawDescriptor: file_autoFlow_proto_rawDesc,
 			NumEnums:      0,
 			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   2,
 		},
-		GoTypes:           file_tmp_autoFlow_proto_goTypes,
-		DependencyIndexes: file_tmp_autoFlow_proto_depIdxs,
-		MessageInfos:      file_tmp_autoFlow_proto_msgTypes,
+		GoTypes:           file_autoFlow_proto_goTypes,
+		DependencyIndexes: file_autoFlow_proto_depIdxs,
+		MessageInfos:      file_autoFlow_proto_msgTypes,
 	}.Build()
-	File_tmp_autoFlow_proto = out.File
-	file_tmp_autoFlow_proto_rawDesc = nil
-	file_tmp_autoFlow_proto_goTypes = nil
-	file_tmp_autoFlow_proto_depIdxs = nil
+	File_autoFlow_proto = out.File
+	file_autoFlow_proto_rawDesc = nil
+	file_autoFlow_proto_goTypes = nil
+	file_autoFlow_proto_depIdxs = nil
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -337,13 +333,12 @@ var _ grpc.ClientConnInterface
 // is compatible with the grpc package it is being compiled against.
 const _ = grpc.SupportPackageIsVersion6
 
-// FlowMasterClient is the client API for FlowMaster service.
+// LeaderClient is the client API for Leader service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
-type FlowMasterClient interface {
+type LeaderClient interface {
 	// 定义接口 (结构体可以复用)
 	// 方法 (请求消息结构体) returns (返回消息结构体) {}
-	DoCmd(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error)
 	Ping(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error)
 	JobStart(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error)
 	JobStop(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error)
@@ -356,158 +351,148 @@ type FlowMasterClient interface {
 	FlowRoutineSub(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error)
 	FlowRoutineList(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error)
 	FlowCreate(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error)
-	MstFlowRoutineStop(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error)
-	MstFlowRoutineStart(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error)
+	LeaderFlowRoutineStop(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error)
+	LeaderFlowRoutineStart(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error)
 }
 
-type flowMasterClient struct {
+type leaderClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewFlowMasterClient(cc grpc.ClientConnInterface) FlowMasterClient {
-	return &flowMasterClient{cc}
+func NewLeaderClient(cc grpc.ClientConnInterface) LeaderClient {
+	return &leaderClient{cc}
 }
 
-func (c *flowMasterClient) DoCmd(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error) {
+func (c *leaderClient) Ping(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error) {
 	out := new(Res)
-	err := c.cc.Invoke(ctx, "/gproto.FlowMaster/DoCmd", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/gproto.Leader/Ping", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *flowMasterClient) Ping(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error) {
+func (c *leaderClient) JobStart(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error) {
 	out := new(Res)
-	err := c.cc.Invoke(ctx, "/gproto.FlowMaster/Ping", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/gproto.Leader/JobStart", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *flowMasterClient) JobStart(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error) {
+func (c *leaderClient) JobStop(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error) {
 	out := new(Res)
-	err := c.cc.Invoke(ctx, "/gproto.FlowMaster/JobStart", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/gproto.Leader/JobStop", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *flowMasterClient) JobStop(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error) {
+func (c *leaderClient) JobStatus(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error) {
 	out := new(Res)
-	err := c.cc.Invoke(ctx, "/gproto.FlowMaster/JobStop", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/gproto.Leader/JobStatus", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *flowMasterClient) JobStatus(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error) {
+func (c *leaderClient) JobExecuter(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error) {
 	out := new(Res)
-	err := c.cc.Invoke(ctx, "/gproto.FlowMaster/JobStatus", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/gproto.Leader/JobExecuter", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *flowMasterClient) JobExecuter(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error) {
+func (c *leaderClient) FlowStart(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error) {
 	out := new(Res)
-	err := c.cc.Invoke(ctx, "/gproto.FlowMaster/JobExecuter", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/gproto.Leader/FlowStart", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *flowMasterClient) FlowStart(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error) {
+func (c *leaderClient) FlowStop(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error) {
 	out := new(Res)
-	err := c.cc.Invoke(ctx, "/gproto.FlowMaster/FlowStart", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/gproto.Leader/FlowStop", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *flowMasterClient) FlowStop(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error) {
+func (c *leaderClient) FlowStatus(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error) {
 	out := new(Res)
-	err := c.cc.Invoke(ctx, "/gproto.FlowMaster/FlowStop", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/gproto.Leader/FlowStatus", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *flowMasterClient) FlowStatus(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error) {
+func (c *leaderClient) FlowRoutineAdd(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error) {
 	out := new(Res)
-	err := c.cc.Invoke(ctx, "/gproto.FlowMaster/FlowStatus", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/gproto.Leader/FlowRoutineAdd", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *flowMasterClient) FlowRoutineAdd(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error) {
+func (c *leaderClient) FlowRoutineSub(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error) {
 	out := new(Res)
-	err := c.cc.Invoke(ctx, "/gproto.FlowMaster/FlowRoutineAdd", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/gproto.Leader/FlowRoutineSub", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *flowMasterClient) FlowRoutineSub(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error) {
+func (c *leaderClient) FlowRoutineList(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error) {
 	out := new(Res)
-	err := c.cc.Invoke(ctx, "/gproto.FlowMaster/FlowRoutineSub", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/gproto.Leader/FlowRoutineList", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *flowMasterClient) FlowRoutineList(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error) {
+func (c *leaderClient) FlowCreate(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error) {
 	out := new(Res)
-	err := c.cc.Invoke(ctx, "/gproto.FlowMaster/FlowRoutineList", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/gproto.Leader/FlowCreate", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *flowMasterClient) FlowCreate(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error) {
+func (c *leaderClient) LeaderFlowRoutineStop(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error) {
 	out := new(Res)
-	err := c.cc.Invoke(ctx, "/gproto.FlowMaster/FlowCreate", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/gproto.Leader/LeaderFlowRoutineStop", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *flowMasterClient) MstFlowRoutineStop(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error) {
+func (c *leaderClient) LeaderFlowRoutineStart(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error) {
 	out := new(Res)
-	err := c.cc.Invoke(ctx, "/gproto.FlowMaster/MstFlowRoutineStop", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/gproto.Leader/LeaderFlowRoutineStart", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *flowMasterClient) MstFlowRoutineStart(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error) {
-	out := new(Res)
-	err := c.cc.Invoke(ctx, "/gproto.FlowMaster/MstFlowRoutineStart", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// FlowMasterServer is the server API for FlowMaster service.
-type FlowMasterServer interface {
+// LeaderServer is the server API for Leader service.
+type LeaderServer interface {
 	// 定义接口 (结构体可以复用)
 	// 方法 (请求消息结构体) returns (返回消息结构体) {}
-	DoCmd(context.Context, *Req) (*Res, error)
 	Ping(context.Context, *Req) (*Res, error)
 	JobStart(context.Context, *Req) (*Res, error)
 	JobStop(context.Context, *Req) (*Res, error)
@@ -520,619 +505,627 @@ type FlowMasterServer interface {
 	FlowRoutineSub(context.Context, *Req) (*Res, error)
 	FlowRoutineList(context.Context, *Req) (*Res, error)
 	FlowCreate(context.Context, *Req) (*Res, error)
-	MstFlowRoutineStop(context.Context, *Req) (*Res, error)
-	MstFlowRoutineStart(context.Context, *Req) (*Res, error)
+	LeaderFlowRoutineStop(context.Context, *Req) (*Res, error)
+	LeaderFlowRoutineStart(context.Context, *Req) (*Res, error)
 }
 
-// UnimplementedFlowMasterServer can be embedded to have forward compatible implementations.
-type UnimplementedFlowMasterServer struct {
+// UnimplementedLeaderServer can be embedded to have forward compatible implementations.
+type UnimplementedLeaderServer struct {
 }
 
-func (*UnimplementedFlowMasterServer) DoCmd(context.Context, *Req) (*Res, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DoCmd not implemented")
-}
-func (*UnimplementedFlowMasterServer) Ping(context.Context, *Req) (*Res, error) {
+func (*UnimplementedLeaderServer) Ping(context.Context, *Req) (*Res, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Ping not implemented")
 }
-func (*UnimplementedFlowMasterServer) JobStart(context.Context, *Req) (*Res, error) {
+func (*UnimplementedLeaderServer) JobStart(context.Context, *Req) (*Res, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method JobStart not implemented")
 }
-func (*UnimplementedFlowMasterServer) JobStop(context.Context, *Req) (*Res, error) {
+func (*UnimplementedLeaderServer) JobStop(context.Context, *Req) (*Res, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method JobStop not implemented")
 }
-func (*UnimplementedFlowMasterServer) JobStatus(context.Context, *Req) (*Res, error) {
+func (*UnimplementedLeaderServer) JobStatus(context.Context, *Req) (*Res, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method JobStatus not implemented")
 }
-func (*UnimplementedFlowMasterServer) JobExecuter(context.Context, *Req) (*Res, error) {
+func (*UnimplementedLeaderServer) JobExecuter(context.Context, *Req) (*Res, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method JobExecuter not implemented")
 }
-func (*UnimplementedFlowMasterServer) FlowStart(context.Context, *Req) (*Res, error) {
+func (*UnimplementedLeaderServer) FlowStart(context.Context, *Req) (*Res, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FlowStart not implemented")
 }
-func (*UnimplementedFlowMasterServer) FlowStop(context.Context, *Req) (*Res, error) {
+func (*UnimplementedLeaderServer) FlowStop(context.Context, *Req) (*Res, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FlowStop not implemented")
 }
-func (*UnimplementedFlowMasterServer) FlowStatus(context.Context, *Req) (*Res, error) {
+func (*UnimplementedLeaderServer) FlowStatus(context.Context, *Req) (*Res, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FlowStatus not implemented")
 }
-func (*UnimplementedFlowMasterServer) FlowRoutineAdd(context.Context, *Req) (*Res, error) {
+func (*UnimplementedLeaderServer) FlowRoutineAdd(context.Context, *Req) (*Res, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FlowRoutineAdd not implemented")
 }
-func (*UnimplementedFlowMasterServer) FlowRoutineSub(context.Context, *Req) (*Res, error) {
+func (*UnimplementedLeaderServer) FlowRoutineSub(context.Context, *Req) (*Res, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FlowRoutineSub not implemented")
 }
-func (*UnimplementedFlowMasterServer) FlowRoutineList(context.Context, *Req) (*Res, error) {
+func (*UnimplementedLeaderServer) FlowRoutineList(context.Context, *Req) (*Res, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FlowRoutineList not implemented")
 }
-func (*UnimplementedFlowMasterServer) FlowCreate(context.Context, *Req) (*Res, error) {
+func (*UnimplementedLeaderServer) FlowCreate(context.Context, *Req) (*Res, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FlowCreate not implemented")
 }
-func (*UnimplementedFlowMasterServer) MstFlowRoutineStop(context.Context, *Req) (*Res, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method MstFlowRoutineStop not implemented")
+func (*UnimplementedLeaderServer) LeaderFlowRoutineStop(context.Context, *Req) (*Res, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LeaderFlowRoutineStop not implemented")
 }
-func (*UnimplementedFlowMasterServer) MstFlowRoutineStart(context.Context, *Req) (*Res, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method MstFlowRoutineStart not implemented")
-}
-
-func RegisterFlowMasterServer(s *grpc.Server, srv FlowMasterServer) {
-	s.RegisterService(&_FlowMaster_serviceDesc, srv)
+func (*UnimplementedLeaderServer) LeaderFlowRoutineStart(context.Context, *Req) (*Res, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LeaderFlowRoutineStart not implemented")
 }
 
-func _FlowMaster_DoCmd_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func RegisterLeaderServer(s *grpc.Server, srv LeaderServer) {
+	s.RegisterService(&_Leader_serviceDesc, srv)
+}
+
+func _Leader_Ping_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Req)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FlowMasterServer).DoCmd(ctx, in)
+		return srv.(LeaderServer).Ping(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/gproto.FlowMaster/DoCmd",
+		FullMethod: "/gproto.Leader/Ping",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FlowMasterServer).DoCmd(ctx, req.(*Req))
+		return srv.(LeaderServer).Ping(ctx, req.(*Req))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _FlowMaster_Ping_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Leader_JobStart_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Req)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FlowMasterServer).Ping(ctx, in)
+		return srv.(LeaderServer).JobStart(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/gproto.FlowMaster/Ping",
+		FullMethod: "/gproto.Leader/JobStart",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FlowMasterServer).Ping(ctx, req.(*Req))
+		return srv.(LeaderServer).JobStart(ctx, req.(*Req))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _FlowMaster_JobStart_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Leader_JobStop_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Req)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FlowMasterServer).JobStart(ctx, in)
+		return srv.(LeaderServer).JobStop(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/gproto.FlowMaster/JobStart",
+		FullMethod: "/gproto.Leader/JobStop",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FlowMasterServer).JobStart(ctx, req.(*Req))
+		return srv.(LeaderServer).JobStop(ctx, req.(*Req))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _FlowMaster_JobStop_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Leader_JobStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Req)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FlowMasterServer).JobStop(ctx, in)
+		return srv.(LeaderServer).JobStatus(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/gproto.FlowMaster/JobStop",
+		FullMethod: "/gproto.Leader/JobStatus",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FlowMasterServer).JobStop(ctx, req.(*Req))
+		return srv.(LeaderServer).JobStatus(ctx, req.(*Req))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _FlowMaster_JobStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Leader_JobExecuter_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Req)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FlowMasterServer).JobStatus(ctx, in)
+		return srv.(LeaderServer).JobExecuter(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/gproto.FlowMaster/JobStatus",
+		FullMethod: "/gproto.Leader/JobExecuter",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FlowMasterServer).JobStatus(ctx, req.(*Req))
+		return srv.(LeaderServer).JobExecuter(ctx, req.(*Req))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _FlowMaster_JobExecuter_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Leader_FlowStart_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Req)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FlowMasterServer).JobExecuter(ctx, in)
+		return srv.(LeaderServer).FlowStart(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/gproto.FlowMaster/JobExecuter",
+		FullMethod: "/gproto.Leader/FlowStart",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FlowMasterServer).JobExecuter(ctx, req.(*Req))
+		return srv.(LeaderServer).FlowStart(ctx, req.(*Req))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _FlowMaster_FlowStart_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Leader_FlowStop_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Req)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FlowMasterServer).FlowStart(ctx, in)
+		return srv.(LeaderServer).FlowStop(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/gproto.FlowMaster/FlowStart",
+		FullMethod: "/gproto.Leader/FlowStop",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FlowMasterServer).FlowStart(ctx, req.(*Req))
+		return srv.(LeaderServer).FlowStop(ctx, req.(*Req))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _FlowMaster_FlowStop_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Leader_FlowStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Req)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FlowMasterServer).FlowStop(ctx, in)
+		return srv.(LeaderServer).FlowStatus(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/gproto.FlowMaster/FlowStop",
+		FullMethod: "/gproto.Leader/FlowStatus",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FlowMasterServer).FlowStop(ctx, req.(*Req))
+		return srv.(LeaderServer).FlowStatus(ctx, req.(*Req))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _FlowMaster_FlowStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Leader_FlowRoutineAdd_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Req)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FlowMasterServer).FlowStatus(ctx, in)
+		return srv.(LeaderServer).FlowRoutineAdd(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/gproto.FlowMaster/FlowStatus",
+		FullMethod: "/gproto.Leader/FlowRoutineAdd",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FlowMasterServer).FlowStatus(ctx, req.(*Req))
+		return srv.(LeaderServer).FlowRoutineAdd(ctx, req.(*Req))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _FlowMaster_FlowRoutineAdd_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Leader_FlowRoutineSub_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Req)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FlowMasterServer).FlowRoutineAdd(ctx, in)
+		return srv.(LeaderServer).FlowRoutineSub(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/gproto.FlowMaster/FlowRoutineAdd",
+		FullMethod: "/gproto.Leader/FlowRoutineSub",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FlowMasterServer).FlowRoutineAdd(ctx, req.(*Req))
+		return srv.(LeaderServer).FlowRoutineSub(ctx, req.(*Req))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _FlowMaster_FlowRoutineSub_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Leader_FlowRoutineList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Req)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FlowMasterServer).FlowRoutineSub(ctx, in)
+		return srv.(LeaderServer).FlowRoutineList(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/gproto.FlowMaster/FlowRoutineSub",
+		FullMethod: "/gproto.Leader/FlowRoutineList",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FlowMasterServer).FlowRoutineSub(ctx, req.(*Req))
+		return srv.(LeaderServer).FlowRoutineList(ctx, req.(*Req))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _FlowMaster_FlowRoutineList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Leader_FlowCreate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Req)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FlowMasterServer).FlowRoutineList(ctx, in)
+		return srv.(LeaderServer).FlowCreate(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/gproto.FlowMaster/FlowRoutineList",
+		FullMethod: "/gproto.Leader/FlowCreate",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FlowMasterServer).FlowRoutineList(ctx, req.(*Req))
+		return srv.(LeaderServer).FlowCreate(ctx, req.(*Req))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _FlowMaster_FlowCreate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Leader_LeaderFlowRoutineStop_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Req)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FlowMasterServer).FlowCreate(ctx, in)
+		return srv.(LeaderServer).LeaderFlowRoutineStop(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/gproto.FlowMaster/FlowCreate",
+		FullMethod: "/gproto.Leader/LeaderFlowRoutineStop",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FlowMasterServer).FlowCreate(ctx, req.(*Req))
+		return srv.(LeaderServer).LeaderFlowRoutineStop(ctx, req.(*Req))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _FlowMaster_MstFlowRoutineStop_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Leader_LeaderFlowRoutineStart_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Req)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FlowMasterServer).MstFlowRoutineStop(ctx, in)
+		return srv.(LeaderServer).LeaderFlowRoutineStart(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/gproto.FlowMaster/MstFlowRoutineStop",
+		FullMethod: "/gproto.Leader/LeaderFlowRoutineStart",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FlowMasterServer).MstFlowRoutineStop(ctx, req.(*Req))
+		return srv.(LeaderServer).LeaderFlowRoutineStart(ctx, req.(*Req))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _FlowMaster_MstFlowRoutineStart_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Req)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(FlowMasterServer).MstFlowRoutineStart(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/gproto.FlowMaster/MstFlowRoutineStart",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FlowMasterServer).MstFlowRoutineStart(ctx, req.(*Req))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-var _FlowMaster_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "gproto.FlowMaster",
-	HandlerType: (*FlowMasterServer)(nil),
+var _Leader_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "gproto.Leader",
+	HandlerType: (*LeaderServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "DoCmd",
-			Handler:    _FlowMaster_DoCmd_Handler,
-		},
-		{
 			MethodName: "Ping",
-			Handler:    _FlowMaster_Ping_Handler,
+			Handler:    _Leader_Ping_Handler,
 		},
 		{
 			MethodName: "JobStart",
-			Handler:    _FlowMaster_JobStart_Handler,
+			Handler:    _Leader_JobStart_Handler,
 		},
 		{
 			MethodName: "JobStop",
-			Handler:    _FlowMaster_JobStop_Handler,
+			Handler:    _Leader_JobStop_Handler,
 		},
 		{
 			MethodName: "JobStatus",
-			Handler:    _FlowMaster_JobStatus_Handler,
+			Handler:    _Leader_JobStatus_Handler,
 		},
 		{
 			MethodName: "JobExecuter",
-			Handler:    _FlowMaster_JobExecuter_Handler,
+			Handler:    _Leader_JobExecuter_Handler,
 		},
 		{
 			MethodName: "FlowStart",
-			Handler:    _FlowMaster_FlowStart_Handler,
+			Handler:    _Leader_FlowStart_Handler,
 		},
 		{
 			MethodName: "FlowStop",
-			Handler:    _FlowMaster_FlowStop_Handler,
+			Handler:    _Leader_FlowStop_Handler,
 		},
 		{
 			MethodName: "FlowStatus",
-			Handler:    _FlowMaster_FlowStatus_Handler,
+			Handler:    _Leader_FlowStatus_Handler,
 		},
 		{
 			MethodName: "FlowRoutineAdd",
-			Handler:    _FlowMaster_FlowRoutineAdd_Handler,
+			Handler:    _Leader_FlowRoutineAdd_Handler,
 		},
 		{
 			MethodName: "FlowRoutineSub",
-			Handler:    _FlowMaster_FlowRoutineSub_Handler,
+			Handler:    _Leader_FlowRoutineSub_Handler,
 		},
 		{
 			MethodName: "FlowRoutineList",
-			Handler:    _FlowMaster_FlowRoutineList_Handler,
+			Handler:    _Leader_FlowRoutineList_Handler,
 		},
 		{
 			MethodName: "FlowCreate",
-			Handler:    _FlowMaster_FlowCreate_Handler,
+			Handler:    _Leader_FlowCreate_Handler,
 		},
 		{
-			MethodName: "MstFlowRoutineStop",
-			Handler:    _FlowMaster_MstFlowRoutineStop_Handler,
+			MethodName: "LeaderFlowRoutineStop",
+			Handler:    _Leader_LeaderFlowRoutineStop_Handler,
 		},
 		{
-			MethodName: "MstFlowRoutineStart",
-			Handler:    _FlowMaster_MstFlowRoutineStart_Handler,
+			MethodName: "LeaderFlowRoutineStart",
+			Handler:    _Leader_LeaderFlowRoutineStart_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "tmp/autoFlow.proto",
+	Metadata: "autoFlow.proto",
 }
 
-// SlaverClient is the client API for Slaver service.
+// WorkerClient is the client API for Worker service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
-type SlaverClient interface {
+type WorkerClient interface {
 	// 定义接口 (结构体可以复用)
 	// 方法 (请求消息结构体) returns (返回消息结构体) {}
-	DoCmd(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error)
 	Ping(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error)
 	JobStart(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error)
 	JobStop(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error)
 	JobStatus(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error)
+	JobExecLog(ctx context.Context, opts ...grpc.CallOption) (Worker_JobExecLogClient, error)
 }
 
-type slaverClient struct {
+type workerClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewSlaverClient(cc grpc.ClientConnInterface) SlaverClient {
-	return &slaverClient{cc}
+func NewWorkerClient(cc grpc.ClientConnInterface) WorkerClient {
+	return &workerClient{cc}
 }
 
-func (c *slaverClient) DoCmd(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error) {
+func (c *workerClient) Ping(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error) {
 	out := new(Res)
-	err := c.cc.Invoke(ctx, "/gproto.Slaver/DoCmd", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/gproto.Worker/Ping", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *slaverClient) Ping(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error) {
+func (c *workerClient) JobStart(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error) {
 	out := new(Res)
-	err := c.cc.Invoke(ctx, "/gproto.Slaver/Ping", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/gproto.Worker/JobStart", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *slaverClient) JobStart(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error) {
+func (c *workerClient) JobStop(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error) {
 	out := new(Res)
-	err := c.cc.Invoke(ctx, "/gproto.Slaver/JobStart", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/gproto.Worker/JobStop", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *slaverClient) JobStop(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error) {
+func (c *workerClient) JobStatus(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error) {
 	out := new(Res)
-	err := c.cc.Invoke(ctx, "/gproto.Slaver/JobStop", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/gproto.Worker/JobStatus", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *slaverClient) JobStatus(ctx context.Context, in *Req, opts ...grpc.CallOption) (*Res, error) {
-	out := new(Res)
-	err := c.cc.Invoke(ctx, "/gproto.Slaver/JobStatus", in, out, opts...)
+func (c *workerClient) JobExecLog(ctx context.Context, opts ...grpc.CallOption) (Worker_JobExecLogClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_Worker_serviceDesc.Streams[0], "/gproto.Worker/JobExecLog", opts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &workerJobExecLogClient{stream}
+	return x, nil
 }
 
-// SlaverServer is the server API for Slaver service.
-type SlaverServer interface {
+type Worker_JobExecLogClient interface {
+	Send(*Req) error
+	Recv() (*Res, error)
+	grpc.ClientStream
+}
+
+type workerJobExecLogClient struct {
+	grpc.ClientStream
+}
+
+func (x *workerJobExecLogClient) Send(m *Req) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *workerJobExecLogClient) Recv() (*Res, error) {
+	m := new(Res)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+// WorkerServer is the server API for Worker service.
+type WorkerServer interface {
 	// 定义接口 (结构体可以复用)
 	// 方法 (请求消息结构体) returns (返回消息结构体) {}
-	DoCmd(context.Context, *Req) (*Res, error)
 	Ping(context.Context, *Req) (*Res, error)
 	JobStart(context.Context, *Req) (*Res, error)
 	JobStop(context.Context, *Req) (*Res, error)
 	JobStatus(context.Context, *Req) (*Res, error)
+	JobExecLog(Worker_JobExecLogServer) error
 }
 
-// UnimplementedSlaverServer can be embedded to have forward compatible implementations.
-type UnimplementedSlaverServer struct {
+// UnimplementedWorkerServer can be embedded to have forward compatible implementations.
+type UnimplementedWorkerServer struct {
 }
 
-func (*UnimplementedSlaverServer) DoCmd(context.Context, *Req) (*Res, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DoCmd not implemented")
-}
-func (*UnimplementedSlaverServer) Ping(context.Context, *Req) (*Res, error) {
+func (*UnimplementedWorkerServer) Ping(context.Context, *Req) (*Res, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Ping not implemented")
 }
-func (*UnimplementedSlaverServer) JobStart(context.Context, *Req) (*Res, error) {
+func (*UnimplementedWorkerServer) JobStart(context.Context, *Req) (*Res, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method JobStart not implemented")
 }
-func (*UnimplementedSlaverServer) JobStop(context.Context, *Req) (*Res, error) {
+func (*UnimplementedWorkerServer) JobStop(context.Context, *Req) (*Res, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method JobStop not implemented")
 }
-func (*UnimplementedSlaverServer) JobStatus(context.Context, *Req) (*Res, error) {
+func (*UnimplementedWorkerServer) JobStatus(context.Context, *Req) (*Res, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method JobStatus not implemented")
 }
-
-func RegisterSlaverServer(s *grpc.Server, srv SlaverServer) {
-	s.RegisterService(&_Slaver_serviceDesc, srv)
+func (*UnimplementedWorkerServer) JobExecLog(Worker_JobExecLogServer) error {
+	return status.Errorf(codes.Unimplemented, "method JobExecLog not implemented")
 }
 
-func _Slaver_DoCmd_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func RegisterWorkerServer(s *grpc.Server, srv WorkerServer) {
+	s.RegisterService(&_Worker_serviceDesc, srv)
+}
+
+func _Worker_Ping_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Req)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(SlaverServer).DoCmd(ctx, in)
+		return srv.(WorkerServer).Ping(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/gproto.Slaver/DoCmd",
+		FullMethod: "/gproto.Worker/Ping",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SlaverServer).DoCmd(ctx, req.(*Req))
+		return srv.(WorkerServer).Ping(ctx, req.(*Req))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Slaver_Ping_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Worker_JobStart_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Req)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(SlaverServer).Ping(ctx, in)
+		return srv.(WorkerServer).JobStart(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/gproto.Slaver/Ping",
+		FullMethod: "/gproto.Worker/JobStart",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SlaverServer).Ping(ctx, req.(*Req))
+		return srv.(WorkerServer).JobStart(ctx, req.(*Req))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Slaver_JobStart_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Worker_JobStop_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Req)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(SlaverServer).JobStart(ctx, in)
+		return srv.(WorkerServer).JobStop(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/gproto.Slaver/JobStart",
+		FullMethod: "/gproto.Worker/JobStop",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SlaverServer).JobStart(ctx, req.(*Req))
+		return srv.(WorkerServer).JobStop(ctx, req.(*Req))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Slaver_JobStop_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Worker_JobStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Req)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(SlaverServer).JobStop(ctx, in)
+		return srv.(WorkerServer).JobStatus(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/gproto.Slaver/JobStop",
+		FullMethod: "/gproto.Worker/JobStatus",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SlaverServer).JobStop(ctx, req.(*Req))
+		return srv.(WorkerServer).JobStatus(ctx, req.(*Req))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Slaver_JobStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Req)
-	if err := dec(in); err != nil {
+func _Worker_JobExecLog_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(WorkerServer).JobExecLog(&workerJobExecLogServer{stream})
+}
+
+type Worker_JobExecLogServer interface {
+	Send(*Res) error
+	Recv() (*Req, error)
+	grpc.ServerStream
+}
+
+type workerJobExecLogServer struct {
+	grpc.ServerStream
+}
+
+func (x *workerJobExecLogServer) Send(m *Res) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *workerJobExecLogServer) Recv() (*Req, error) {
+	m := new(Req)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
-	if interceptor == nil {
-		return srv.(SlaverServer).JobStatus(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/gproto.Slaver/JobStatus",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SlaverServer).JobStatus(ctx, req.(*Req))
-	}
-	return interceptor(ctx, in, info, handler)
+	return m, nil
 }
 
-var _Slaver_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "gproto.Slaver",
-	HandlerType: (*SlaverServer)(nil),
+var _Worker_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "gproto.Worker",
+	HandlerType: (*WorkerServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "DoCmd",
-			Handler:    _Slaver_DoCmd_Handler,
-		},
-		{
 			MethodName: "Ping",
-			Handler:    _Slaver_Ping_Handler,
+			Handler:    _Worker_Ping_Handler,
 		},
 		{
 			MethodName: "JobStart",
-			Handler:    _Slaver_JobStart_Handler,
+			Handler:    _Worker_JobStart_Handler,
 		},
 		{
 			MethodName: "JobStop",
-			Handler:    _Slaver_JobStop_Handler,
+			Handler:    _Worker_JobStop_Handler,
 		},
 		{
 			MethodName: "JobStatus",
-			Handler:    _Slaver_JobStatus_Handler,
+			Handler:    _Worker_JobStatus_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
-	Metadata: "tmp/autoFlow.proto",
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "JobExecLog",
+			Handler:       _Worker_JobExecLog_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
+		},
+	},
+	Metadata: "autoFlow.proto",
 }

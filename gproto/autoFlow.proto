@@ -3,10 +3,9 @@
   package gproto;
   
   // 可以定义多个服务，每个服务内可以定义多个接口
-  service FlowMaster {
+  service Leader {
     // 定义接口 (结构体可以复用)
     // 方法 (请求消息结构体) returns (返回消息结构体) {}
-    rpc DoCmd (Req) returns (Res) {}
     rpc Ping (Req) returns (Res) {}
     rpc JobStart (Req) returns (Res) {}
     rpc JobStop (Req) returns (Res) {}
@@ -19,18 +18,18 @@
     rpc FlowRoutineSub (Req) returns (Res) {}
     rpc FlowRoutineList (Req) returns (Res) {}
     rpc FlowCreate (Req) returns (Res) {}
-    rpc MstFlowRoutineStop (Req) returns (Res) {}
-    rpc MstFlowRoutineStart (Req) returns (Res) {}
+    rpc LeaderFlowRoutineStop (Req) returns (Res) {}
+    rpc LeaderFlowRoutineStart (Req) returns (Res) {}
   }
   
-  service Slaver {
+  service Worker {
     // 定义接口 (结构体可以复用)
     // 方法 (请求消息结构体) returns (返回消息结构体) {}
-    rpc DoCmd (Req) returns (Res) {}
     rpc Ping (Req) returns (Res) {}
     rpc JobStart (Req) returns (Res) {}
     rpc JobStop (Req) returns (Res) {}
     rpc JobStatus (Req) returns (Res) {}
+    rpc JobExecLog (stream Req) returns (stream Res) {}
   }
 
   // 定义 Req 消息结构
