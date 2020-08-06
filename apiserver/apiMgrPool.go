@@ -288,7 +288,7 @@ func (mp *MgrPool) ServerRoutineStatus() {
 			defer conn.Close()
 
 			// 创建Waiter服务的客户端
-			t := gproto.NewFlowMasterClient(conn)
+			t := gproto.NewLeaderClient(conn)
 
 			mifb := new(module.MetaInstanceFlowBean)
 			jsonstr, err := json.Marshal(mifb)

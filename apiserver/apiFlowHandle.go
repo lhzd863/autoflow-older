@@ -136,7 +136,7 @@ func (rrs *ResponseResourceFlow) InstanceCreateHandler(request *restful.Request,
 		defer conn.Close()
 
 		// 创建Waiter服务的客户端
-		t := gproto.NewFlowMasterClient(conn)
+		t := gproto.NewLeaderClient(conn)
 
 		mifb := new(module.MetaInstanceFlowBean)
 		mifb.ProcessNum = mh.ProcessNum
@@ -253,7 +253,7 @@ func (rrs *ResponseResourceFlow) InstanceStartHandler(request *restful.Request, 
 		defer conn.Close()
 
 		// 创建Waiter服务的客户端
-		t := gproto.NewFlowMasterClient(conn)
+		t := gproto.NewLeaderClient(conn)
 
 		mifb := new(module.MetaInstanceFlowBean)
 		mifb.ProcessNum = mjfbean.ProcessNum
@@ -317,7 +317,7 @@ func (rrs *ResponseResourceFlow) FlowListHandler(request *restful.Request, respo
 		defer conn.Close()
 
 		// 创建Waiter服务的客户端
-		t := gproto.NewFlowMasterClient(conn)
+		t := gproto.NewLeaderClient(conn)
 
 		mifb := new(module.MetaInstanceFlowBean)
 		jsonstr, err := json.Marshal(mifb)
@@ -520,7 +520,7 @@ func (rrs *ResponseResourceFlow) MstInstanceStartHandler(request *restful.Reques
 	defer conn.Close()
 
 	// 创建Waiter服务的客户端
-	t := gproto.NewFlowMasterClient(conn)
+	t := gproto.NewLeaderClient(conn)
 
 	mifb := new(module.MetaInstanceFlowBean)
 	mifb.ProcessNum = m.ProcessNum
@@ -578,7 +578,7 @@ func (rrs *ResponseResourceFlow) InstanceStopHandler(request *restful.Request, r
 		defer conn.Close()
 
 		// 创建Waiter服务的客户端
-		t := gproto.NewFlowMasterClient(conn)
+		t := gproto.NewLeaderClient(conn)
 
 		mifb := new(module.MetaInstanceFlowBean)
 		mifb.FlowId = fp.FlowId
@@ -656,7 +656,7 @@ func (rrs *ResponseResourceFlow) MstInstanceStopHandler(request *restful.Request
 	defer conn.Close()
 
 	// 创建Waiter服务的客户端
-	t := gproto.NewFlowMasterClient(conn)
+	t := gproto.NewLeaderClient(conn)
 
 	mifb := new(module.MetaInstanceFlowBean)
 	mifb.FlowId = p.FlowId
@@ -780,7 +780,7 @@ func (rrs *ResponseResourceFlow) MstFlowRoutineStartHandler(request *restful.Req
 	defer conn.Close()
 
 	// 创建Waiter服务的客户端
-	t := gproto.NewFlowMasterClient(conn)
+	t := gproto.NewLeaderClient(conn)
 
 	mifb := new(module.MetaInstanceFlowBean)
 	mifb.ProcessNum = "1"
@@ -794,7 +794,7 @@ func (rrs *ResponseResourceFlow) MstFlowRoutineStartHandler(request *restful.Req
 		return
 	}
 	// 调用gRPC接口
-	tr, err := t.MstFlowRoutineStart(context.Background(), &gproto.Req{JsonStr: string(jsonstr)})
+	tr, err := t.LeaderFlowRoutineStart(context.Background(), &gproto.Req{JsonStr: string(jsonstr)})
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("could not greet: %v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("%v:%v could not greet: %v", m.Ip, m.Port, err), nil)
@@ -838,7 +838,7 @@ func (rrs *ResponseResourceFlow) MstFlowRoutineStopHandler(request *restful.Requ
 	defer conn.Close()
 
 	// 创建Waiter服务的客户端
-	t := gproto.NewFlowMasterClient(conn)
+	t := gproto.NewLeaderClient(conn)
 
 	mifb := new(module.MetaInstanceFlowBean)
 	mifb.ProcessNum = "1"
@@ -852,7 +852,7 @@ func (rrs *ResponseResourceFlow) MstFlowRoutineStopHandler(request *restful.Requ
 		return
 	}
 	// 调用gRPC接口
-	tr, err := t.MstFlowRoutineStop(context.Background(), &gproto.Req{JsonStr: string(jsonstr)})
+	tr, err := t.LeaderFlowRoutineStop(context.Background(), &gproto.Req{JsonStr: string(jsonstr)})
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("could not greet: %v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("%v:%v could not greet: %v", m.Ip, m.Port, err), nil)
@@ -1035,7 +1035,7 @@ func (rrs *ResponseResourceFlow) FlowRoutineStatusHandler(request *restful.Reque
 		defer conn.Close()
 
 		// 创建Waiter服务的客户端
-		t := gproto.NewFlowMasterClient(conn)
+		t := gproto.NewLeaderClient(conn)
 
 		mifb := new(module.MetaInstanceFlowBean)
 		jsonstr, err := json.Marshal(mifb)
@@ -1135,7 +1135,7 @@ func (rrs *ResponseResourceFlow) FlowRoutineAddHandler(request *restful.Request,
 		defer conn.Close()
 
 		// 创建Waiter服务的客户端
-		t := gproto.NewFlowMasterClient(conn)
+		t := gproto.NewLeaderClient(conn)
 
 		mifb := new(module.MetaInstanceFlowBean)
 		mifb.ProcessNum = p.ProcessNum
@@ -1194,7 +1194,7 @@ func (rrs *ResponseResourceFlow) FlowRoutineSubHandler(request *restful.Request,
 		defer conn.Close()
 
 		// 创建Waiter服务的客户端
-		t := gproto.NewFlowMasterClient(conn)
+		t := gproto.NewLeaderClient(conn)
 
 		mifb := new(module.MetaInstanceFlowBean)
 		mifb.ProcessNum = p.ProcessNum

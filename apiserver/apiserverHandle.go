@@ -1827,15 +1827,16 @@ func globalOauth(req *restful.Request, resp *restful.Response, chain *restful.Fi
 	}
 	reqParams, err := url.ParseQuery(req.Request.URL.RawQuery)
 	if err != nil {
-		glog.Glog(LogF, fmt.Sprintf("Failed to decode: %v", err))
-		util.ApiResponse(resp.ResponseWriter, 700, fmt.Sprintf("Failed decode error.%v", err), nil)
+		glog.Glog(LogF, fmt.Sprintf("Failed to parse url: %v", err))
+		util.ApiResponse(resp.ResponseWriter, 700, fmt.Sprintf("Failed to parse url.%v", err), nil)
 		return
 	}
 	tokenstring := fmt.Sprint(reqParams["accesstoken"][0])
 	var claimsDecoded map[string]interface{}
+      
 	decodeErr := jwt.Decode([]byte(tokenstring), &claimsDecoded, []byte(conf.JwtKey))
 	if decodeErr != nil {
-		glog.Glog(LogF, fmt.Sprintf("Failed to decode: %s (%s)", decodeErr, tokenstring))
+		glog.Glog(LogF, fmt.Sprintf("Failed to decode: %s ,accesstoken=%s", decodeErr, tokenstring))
 		util.ApiResponse(resp.ResponseWriter, 700, fmt.Sprintf("Failed to decode.%v", decodeErr), nil)
 		return
 	}
@@ -1844,7 +1845,7 @@ func globalOauth(req *restful.Request, resp *restful.Response, chain *restful.Fi
 	exp1, _ := strconv.ParseFloat(fmt.Sprintf("%v", time.Now().Unix()+0), 64)
 
 	if (exp - exp1) < 0 {
-		glog.Glog(LogF, fmt.Sprintf("Failed to decode: %v %v %v", exp, exp1, (exp-exp1)))
+		glog.Glog(LogF, fmt.Sprintf("Failed to decode: %v %v %v,accesstoken=%s", exp, exp1, (exp-exp1),tokenstring))
 		util.ApiResponse(resp.ResponseWriter, 700, "Not Authorized AccessToken Expired ,Please login", nil)
 		return
 	}
