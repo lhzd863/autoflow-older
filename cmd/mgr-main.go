@@ -8,20 +8,20 @@ import (
 
 	"gopkg.in/yaml.v2"
 
-	"github.com/lhzd863/autoflow/util"
 	"github.com/lhzd863/autoflow/leader"
+	"github.com/lhzd863/autoflow/util"
 )
 
 var (
-	cfg  = flag.String("conf", "conf.yaml", "basic config")
-	conf *mst.MetaConf
+	cfg1 = flag.String("conf", "conf.yaml", "basic config")
+	conf *leader.MetaConf
 	LogF string
 )
 
 func main() {
 	flag.Parse()
-	conf = new(mst.MetaConf)
-	yamlFile, err := ioutil.ReadFile(*cfg)
+	conf = new(leader.MetaConf)
+	yamlFile, err := ioutil.ReadFile(*cfg1)
 	if err != nil {
 		log.Printf("error: %s", err)
 		return
@@ -36,7 +36,7 @@ func main() {
 		os.Mkdir(conf.HomeDir+"/LOG", os.ModePerm)
 	}
 	mpara := make(map[string]interface{})
-	mpara["mstid"] = conf.Name
+	mpara["leaderid"] = conf.Name
 	mpara["ip"] = conf.Ip
 	mpara["port"] = conf.Port
 	mpara["homedir"] = conf.HomeDir
@@ -45,6 +45,6 @@ func main() {
 	mpara["apiserverport"] = conf.ApiServerPort
 	mpara["processnum"] = conf.ProcessNum
 
-	m := mst.NewMServer(mpara)
+	m := leader.NewLServer(mpara)
 	m.Main()
 }

@@ -1,4 +1,4 @@
-package mst
+package leader
 
 type MetaConf struct {
 	Apiversion    string `yaml:"apiversion"`
@@ -24,7 +24,7 @@ type MetaJob struct {
 	CheckLastStatus  string `json:"checklaststatus"`
 	CheckTimeTrigger string `json:"checktimetrigger"`
 	CheckTimeWindows string `json:"checktimewindows"`
-	RetryCnt         string `json:"retrycnt"`
+	Retry            string `json:"retry"`
 	ErrAlert         string `json:"erralert"`
 	Owner            string `json:"owner"`
 	Enable           string `json:"enable"`
@@ -45,7 +45,7 @@ type MetaJobCTL struct {
 	CheckTimeWindows     string        `yaml:"checktimewindows"`
 	TimeWindowsStartHour string        `yaml:"timewindowsstarthour"`
 	TimeWindowsEndHour   string        `yaml:"timewindowsendhour"`
-	RetryCnt             string        `yaml:"retrycnt"`
+	Retry                string        `yaml:"retry"`
 	ErrAlert             string        `yaml:"erralert"`
 	Owner                string        `yaml:"owner"`
 	Txts                 string        `yaml:"txts"`
@@ -63,10 +63,10 @@ type MetaMyWork struct {
 	HomeDir       string `json:"homedir"`
 	FlowId        string `json:"flowid"`
 	ApiServerIp   string `json:"apiserverip"`
-	ApiServerPort string `json:"apiserverpor`
+	ApiServerPort string `json:"apiserverpor"`
 	LogF          string `json:"logf"`
-	MstIp         string `json:"mstip"`
-	MstPort       string `json:"mstport"`
+	LeaderIp      string `json:"leaderip"`
+	LeaderPort    string `json:"leaderport"`
 	AccessToken   string `json:"accesstoken"`
 }
 

@@ -5,7 +5,7 @@ type MetaParaFlowJobStatusUpdateGoBean struct {
 	Sys     string `json:"sys"`
 	Job     string `json:"job"`
 	Status  string `json:"status"`
-	SServer string `json:"sserver"`
-	Ip      string `json:"ip"`
-	Port    string `json:"port"`
+	WServer string `json:"wserver"` //worker server
+	WIp     string `json:"wip"`
+	WPort   string `json:"wport"`
 }

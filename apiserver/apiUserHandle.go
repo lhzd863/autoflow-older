@@ -10,24 +10,26 @@ import (
 	"fmt"
 	"net/url"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/emicklei/go-restful"
+	uuid "github.com/satori/go.uuid"
 
 	"github.com/lhzd863/autoflow/db"
 	"github.com/lhzd863/autoflow/glog"
 	"github.com/lhzd863/autoflow/jwt"
 	"github.com/lhzd863/autoflow/module"
 	"github.com/lhzd863/autoflow/util"
-
-	"github.com/satori/go.uuid"
 )
 
 type ResponseResourceUser struct {
+	sync.Mutex
+	Conf *module.MetaApiServerBean
 }
 
-func NewResponseResourceUser() *ResponseResourceUser {
-	return &ResponseResourceUser{}
+func NewResponseResourceUser(conf *module.MetaApiServerBean) *ResponseResourceUser {
+	return &ResponseResourceUser{Conf: conf}
 }
 
 func (rrs *ResponseResourceUser) SystemUserRemoveHandler(request *restful.Request, response *restful.Response) {
@@ -160,7 +162,7 @@ func (rrs *ResponseResourceUser) SystemUserAddHandler(request *restful.Request, 
 	m.CreateTime = timeStr
 	m.UpdateTime = timeStr
 	m.Enable = p.Enable
-	u1 := uuid.Must(uuid.NewV4(),nil)
+	u1 := uuid.Must(uuid.NewV4(), nil)
 	m.Id = fmt.Sprint(u1)
 
 	jsonstr, _ := json.Marshal(m)
@@ -404,7 +406,7 @@ func (rrs *ResponseResourceUser) SystemRoleAddHandler(request *restful.Request, 
 	m.CreateTime = timeStr
 	m.UpdateTime = timeStr
 	m.Enable = p.Enable
-	u1 := uuid.Must(uuid.NewV4(),nil)
+	u1 := uuid.Must(uuid.NewV4(), nil)
 	m.Id = fmt.Sprint(u1)
 
 	jsonstr, _ := json.Marshal(m)
@@ -562,7 +564,7 @@ func (rrs *ResponseResourceUser) SystemRightAddHandler(request *restful.Request,
 	m.CreateTime = timeStr
 	m.UpdateTime = timeStr
 	m.Enable = p.Enable
-	u1 := uuid.Must(uuid.NewV4(),nil)
+	u1 := uuid.Must(uuid.NewV4(), nil)
 	m.Id = fmt.Sprint(u1)
 
 	jsonstr, _ := json.Marshal(m)
@@ -722,7 +724,7 @@ func (rrs *ResponseResourceUser) SystemUserRoleAddHandler(request *restful.Reque
 	m.CreateTime = timeStr
 	m.UpdateTime = timeStr
 	m.Enable = p.Enable
-	u1 := uuid.Must(uuid.NewV4(),nil)
+	u1 := uuid.Must(uuid.NewV4(), nil)
 	m.Id = fmt.Sprint(u1)
 
 	jsonstr, _ := json.Marshal(m)
@@ -883,7 +885,7 @@ func (rrs *ResponseResourceUser) SystemRoleRightAddHandler(request *restful.Requ
 	m.CreateTime = timeStr
 	m.UpdateTime = timeStr
 	m.Enable = p.Enable
-	u1 := uuid.Must(uuid.NewV4(),nil)
+	u1 := uuid.Must(uuid.NewV4(), nil)
 	m.Id = fmt.Sprint(u1)
 
 	jsonstr, _ := json.Marshal(m)
@@ -1218,7 +1220,7 @@ func (rrs *ResponseResourceUser) SystemRolePathAddHandler(request *restful.Reque
 	m.CreateTime = timeStr
 	m.UpdateTime = timeStr
 	m.Enable = p.Enable
-	u1 := uuid.Must(uuid.NewV4(),nil)
+	u1 := uuid.Must(uuid.NewV4(), nil)
 	m.Id = fmt.Sprint(u1)
 
 	jsonstr, _ := json.Marshal(m)

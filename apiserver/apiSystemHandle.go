@@ -3,6 +3,7 @@ package apiserver
 import (
 	"encoding/json"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/emicklei/go-restful"
@@ -14,10 +15,12 @@ import (
 )
 
 type ResponseResourceSystem struct {
+	sync.Mutex
+	Conf *module.MetaApiServerBean
 }
 
-func NewResponseResourceSystem() *ResponseResourceSystem {
-	return &ResponseResourceSystem{}
+func NewResponseResourceSystem(conf *module.MetaApiServerBean) *ResponseResourceSystem {
+	return &ResponseResourceSystem{Conf: conf}
 }
 
 func (rrs *ResponseResourceSystem) SystemParameterListHandler(request *restful.Request, response *restful.Response) {
@@ -149,21 +152,21 @@ func (rrs *ResponseResourceSystem) SystemParameterAddHandler(request *restful.Re
 
 func (rrs *ResponseResourceSystem) SysListPortHandler(request *restful.Request, response *restful.Response) {
 	retlst := make([]interface{}, 0)
-	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_FLOW_MASTER)
+	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_FLOW_LEADER)
 	defer bt.Close()
 
 	strlist := bt.Scan()
 	for _, v := range strlist {
 		for k1, v1 := range v.(map[string]interface{}) {
-			mmf := new(module.MetaMstFlowBean)
+			mmf := new(module.MetaLeaderFlowBean)
 			err := json.Unmarshal([]byte(v1.(string)), &mmf)
 			if err != nil {
 				glog.Glog(LogF, fmt.Sprint(err))
 				continue
 			}
-			ism, _ := rrf.IsExpiredMst(mmf.MstId)
+			ism, _ := rrf.IsExpiredLeader(mmf.LeaderId)
 			if ism {
-				glog.Glog(LogF, fmt.Sprintf("%v timeout %v,%v.", mmf.MstId, mmf.Ip, mmf.Port))
+				glog.Glog(LogF, fmt.Sprintf("%v timeout %v,%v.", mmf.LeaderId, mmf.Ip, mmf.Port))
 				bt.Remove(k1)
 				continue
 			}

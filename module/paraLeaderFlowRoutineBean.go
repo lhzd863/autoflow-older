@@ -1,8 +1,14 @@
 package module
 
-type MetaMstFlowRoutineHeartBean struct {
+type MetaParaLeaderFlowRoutineRemoveBean struct {
+	LeaderId  string `json:"leaderid"`
+	FlowId    string `json:"flowid"`
+	RoutineId string `json:"routineid"`
+}
+
+type MetaParaLeaderFlowRoutineHeartAddBean struct {
 	Id         string        `json:"id"`
-	MstId      string        `json:"mstid"`
+	LeaderId   string        `json:"leaderid"`
 	FlowId     string        `json:"flowid"`
 	RoutineId  string        `json:"routineid"`
 	Ip         string        `json:"ip"`
@@ -12,4 +18,12 @@ type MetaMstFlowRoutineHeartBean struct {
 	Duration   string        `json:"duration"`
 	JobNum     string        `json:"jobnum"`
 	Lst        []interface{} `json:"lst"`
+}
+
+type MetaParaLeaderFlowRoutineHeartGetBean struct {
+	Id string `json:"id"`
+}
+
+type MetaParaLeaderFlowRoutineHeartRemoveBean struct {
+	Id string `json:"id"`
 }

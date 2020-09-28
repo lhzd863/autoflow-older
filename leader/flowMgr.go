@@ -1,4 +1,4 @@
-package mst
+package leader
 
 import (
 	"encoding/json"
@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"os"
 	"runtime"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -14,18 +15,17 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
-	"github.com/satori/go.uuid"
-
 	"github.com/lhzd863/autoflow/glog"
 	"github.com/lhzd863/autoflow/gproto"
 	"github.com/lhzd863/autoflow/module"
 	"github.com/lhzd863/autoflow/util"
+	uuid "github.com/satori/go.uuid"
 )
 
 type FlowMgr struct {
-	MstId                        string
-	Mip                          string
-	Mport                        string
+	LeaderId                     string
+	Lip                          string
+	Lport                        string
 	FlowId                       string
 	RoutineId                    string
 	ApiServerIp                  string
@@ -47,23 +47,23 @@ type FlowMgr struct {
 	sync.RWMutex
 }
 
-func NewFlowMgr(flowid string, apiserverip string, apiserverport string, mstid string, homeDir string, mstip string, mstport string, accesstoken string, routineid string) *FlowMgr {
+func NewFlowMgr(flowid string, apiserverip string, apiserverport string, LeaderId string, homeDir string, leaderip string, leaderport string, accesstoken string, routineid string) *FlowMgr {
 	return &FlowMgr{
-		MstId:         mstid,
-		Mip:           mstip,
-		Mport:         mstport,
+		LeaderId:      LeaderId,
+		Lip:           leaderip,
+		Lport:         leaderport,
 		FlowId:        flowid,
 		RoutineId:     routineid,
 		ApiServerIp:   apiserverip,
 		ApiServerPort: apiserverport,
-		Name:          "mst",
+		Name:          "leader",
 		Timestamp:     time.Now().Unix(),
 		Attempts:      0,
 		StopFlag:      false,
 		QueueDir:      homeDir + "/queue",
 		SleepTime:     10,
 		MaxJobCount:   100,
-		LogF:          homeDir + "/mst_" + flowid + ".log",
+		LogF:          homeDir + "/leader_" + flowid + ".log",
 		HomeDir:       homeDir,
 		AccessToken:   accesstoken,
 	}
@@ -73,7 +73,7 @@ func NewFlowMgr(flowid string, apiserverip string, apiserverport string, mstid s
 func (m *FlowMgr) checkGo() bool {
 	glog.Glog(m.LogF, "Checking Status Go.")
 	url := fmt.Sprintf("http://%v:%v/api/v1/flow/job/status/get/go?accesstoken=%v", m.ApiServerIp, m.ApiServerPort, m.AccessToken)
-	u1 := uuid.Must(uuid.NewV4(),nil)
+	u1 := uuid.Must(uuid.NewV4(), nil)
 	para := fmt.Sprintf("{\"id\":\"%v\",\"flowid\":\"%v\",\"ishash\":\"0\",\"status\":\"%v\"}", u1, m.FlowId, util.STATUS_AUTO_GO)
 
 	jsonstr, err := util.Api_RequestPost(url, para)
@@ -120,11 +120,11 @@ func (m *FlowMgr) checkGo() bool {
 				waitGroup.Wrap(func() { m.invokeVirtualJob(jobv[0].(map[string]interface{})) })
 			} else {
 				//var waitGroup util.WaitGroupWrapper
-                                err = m.workerExecApplication(v["sserver"].(string))
-                                if err != nil {
-                                   glog.Glog(m.LogF, fmt.Sprint(err))
-                                   continue
-                                }
+				err = m.workerExecApplication(v["wserver"].(string))
+				if err != nil {
+					glog.Glog(m.LogF, fmt.Sprint(err))
+					continue
+				}
 				waitGroup.Wrap(func() { m.invokeRealJob(jobv[0].(map[string]interface{})) })
 			}
 		}
@@ -316,19 +316,48 @@ func (m *FlowMgr) jobStreamJob(sys string, job string) error {
 }
 
 func (m *FlowMgr) invokeRealJob(job map[string]interface{}) {
-	glog.Glog(m.LogF, fmt.Sprintf("exec %v.%v on slave %v [%v:%v].", job["sys"], job["job"], job["sserver"], job["sip"], job["sport"]))
+	glog.Glog(m.LogF, fmt.Sprintf("exec %v.%v on slave %v [%v:%v].", job["sys"], job["job"], job["wserver"], job["wip"], job["wport"]))
 	SFlag := 0
 	timeStr := time.Now().Format("2006-01-02 15:04:05")
 	var waitGroup util.WaitGroupWrapper
 	exitChan := make(chan int)
-	mf := new(module.MetaParaSystemMstFlowRoutineJobRunningHeartAddBean)
-	u1 := uuid.Must(uuid.NewV4(),nil)
+	mf := new(module.MetaParaSystemLeaderFlowRoutineJobRunningHeartAddBean)
+	u1 := uuid.Must(uuid.NewV4(), nil)
 	mf.Id = fmt.Sprint(u1)
+	_, ok := job["sys"]
+	if !ok {
+		glog.Glog(m.LogF, fmt.Sprintf("job sys att is null"))
+		return
+	}
 	mf.Sys = job["sys"].(string)
+
+	_, ok = job["job"]
+	if !ok {
+		glog.Glog(m.LogF, fmt.Sprintf("job job att is null"))
+		return
+	}
 	mf.Job = job["job"].(string)
-	mf.Sip = job["sip"].(string)
-	mf.Sport = job["sport"].(string)
-	mf.WorkerId = job["sserver"].(string)
+
+	_, ok = job["wip"]
+	if !ok {
+		glog.Glog(m.LogF, fmt.Sprintf("job wip att is null"))
+		return
+	}
+	mf.Wip = job["wip"].(string)
+
+	_, ok = job["wport"]
+	if !ok {
+		glog.Glog(m.LogF, fmt.Sprintf("job wport att is null"))
+		return
+	}
+	mf.Wport = job["wport"].(string)
+
+	_, ok = job["wserver"]
+	if !ok {
+		glog.Glog(m.LogF, fmt.Sprintf("job wserver att is null"))
+		return
+	}
+	mf.WorkerId = job["wserver"].(string)
 	mf.StartTime = timeStr
 
 	waitGroup.Wrap(func() {
@@ -348,7 +377,7 @@ func (m *FlowMgr) invokeRealJob(job map[string]interface{}) {
 			if et-st > 30 {
 				ret := m.Register(mf)
 				if !ret {
-					glog.Glog(LogF, "register mst fail.")
+					glog.Glog(LogF, "register leader fail.")
 				}
 				st = time.Now().Unix()
 			}
@@ -359,21 +388,44 @@ func (m *FlowMgr) invokeRealJob(job map[string]interface{}) {
 	})
 
 	mjwb := new(module.MetaJobWorkerBean)
-	u1 = uuid.Must(uuid.NewV4(),nil)
+	u1 = uuid.Must(uuid.NewV4(), nil)
 	mjwb.Id = fmt.Sprint(u1)
 	mjwb.FlowId = m.FlowId
 	mjwb.Sys = job["sys"].(string)
 	mjwb.Job = job["job"].(string)
-	mjwb.RetryCnt = job["retrycnt"].(string)
+
+	_, ok = job["retry"]
+	if !ok {
+		glog.Glog(m.LogF, fmt.Sprintf("job retry att is null"))
+		return
+	}
+	retry, err := strconv.Atoi(job["retry"].(string))
+	if err != nil {
+		glog.Glog(m.LogF, fmt.Sprintf("job retry is nil ,will set default 1."))
+		retry = 1
+	}
+	mjwb.Retry = retry
+
+	_, ok = job["alert"]
+	if !ok {
+		glog.Glog(m.LogF, fmt.Sprintf("job alert att is null"))
+		return
+	}
 	mjwb.Alert = job["alert"].(string)
 	mjwb.Status = util.STATUS_AUTO_RUNNING
 	mjwb.StartTime = timeStr
-	mjwb.SlaveIp = job["sip"].(string)
-	mjwb.SlavePort = job["sport"].(string)
+	mjwb.WorkerIp = job["wip"].(string)
+	mjwb.WorkerPort = job["wport"].(string)
 	arrstep := m.jobStepCmd(job["sys"].(string), job["job"].(string))
 	mjwb.Cmd = make([]interface{}, 0)
 	for i := 0; i < len(arrstep); i++ {
 		ast := arrstep[i].(map[string]interface{})
+
+		_, ok = ast["cmd"]
+		if !ok {
+			glog.Glog(m.LogF, fmt.Sprintf("job step cmd att is null"))
+			return
+		}
 		mjwb.Cmd = append(mjwb.Cmd, ast["cmd"].(string))
 	}
 	arrparameter := m.jobParameter(job["sys"].(string), job["job"].(string))
@@ -381,7 +433,18 @@ func (m *FlowMgr) invokeRealJob(job map[string]interface{}) {
 	for i := 0; i < len(arrparameter); i++ {
 		ast := arrparameter[i].(map[string]interface{})
 		b := new(module.KVBean)
+		_, ok = ast["key"]
+		if !ok {
+			glog.Glog(m.LogF, fmt.Sprintf("key att is null"))
+			return
+		}
 		b.K = ast["key"].(string)
+
+		_, ok = ast["val"]
+		if !ok {
+			glog.Glog(m.LogF, fmt.Sprintf("val att is null"))
+			return
+		}
 		b.V = ast["val"].(string)
 		jsonstr0, err := json.Marshal(b)
 		if err != nil {
@@ -408,7 +471,7 @@ func (m *FlowMgr) invokeRealJob(job map[string]interface{}) {
 		return
 	}
 	// 建立连接到gRPC服务
-	conn, err := grpc.Dial(job["sip"].(string)+":"+job["sport"].(string), grpc.WithInsecure())
+	conn, err := grpc.Dial(job["wip"].(string)+":"+job["wport"].(string), grpc.WithInsecure())
 	if err != nil {
 		_, cfile, cline, _ := runtime.Caller(1)
 		glog.Glog(m.LogF, fmt.Sprintf("%v %v did not connect: %v", cfile, cline, err))
@@ -421,10 +484,10 @@ func (m *FlowMgr) invokeRealJob(job map[string]interface{}) {
 	defer conn.Close()
 
 	// 创建Waiter服务的客户端
-	t := gproto.NewSlaverClient(conn)
+	t := gproto.NewWorkerClient(conn)
 
-        ctx, cancel := context.WithTimeout(context.Background(), 60 * time.Second)
-        defer cancel()
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
 
 	// 调用gRPC接口
 	tr, err := t.JobStart(ctx, &gproto.Req{JsonStr: string(jsonstr)})
@@ -453,24 +516,24 @@ func (m *FlowMgr) invokeRealJob(job map[string]interface{}) {
 		waitGroup.Wait()
 		return
 	}
-        err = m.workerExecApplicationLogout(job["sserver"].(string))
-        if err!=nil {
-                glog.Glog(m.LogF, fmt.Sprint(err))
-        }
+	err = m.workerExecApplicationLogout(job["wserver"].(string))
+	if err != nil {
+		glog.Glog(m.LogF, fmt.Sprint(err))
+	}
 	exitChan <- 1
 	waitGroup.Wait()
 	m.streamJob(job)
 }
 
-func (m *FlowMgr) Register(mf *module.MetaParaSystemMstFlowRoutineJobRunningHeartAddBean) bool {
-	glog.Glog(LogF, fmt.Sprintf("Register job %v %v:%v", MstId, Ip, Port))
+func (m *FlowMgr) Register(mf *module.MetaParaSystemLeaderFlowRoutineJobRunningHeartAddBean) bool {
+	// glog.Glog(LogF, fmt.Sprintf("Register job %v %v:%v", LeaderId, Ip, Port))
 	timeStr := time.Now().Format("2006-01-02 15:04:05")
-	url := fmt.Sprintf("http://%v:%v/api/v1/mst/flow/routine/job/running/heart/add?accesstoken=%v", ApiServerIp, ApiServerPort, AccessToken)
-	mf.MstId = m.MstId
+	url := fmt.Sprintf("http://%v:%v/api/v1/leader/flow/routine/job/running/heart/add?accesstoken=%v", ApiServerIp, ApiServerPort, AccessToken)
+	mf.LeaderId = m.LeaderId
 	mf.FlowId = m.FlowId
 	mf.RoutineId = m.RoutineId
-	mf.Mip = m.Mip
-	mf.Mport = m.Mport
+	mf.Mip = m.Lip
+	mf.Mport = m.Lport
 
 	loc, _ := time.LoadLocation("Local")
 	timeLayout := "2006-01-02 15:04:05"
@@ -509,10 +572,10 @@ func (m *FlowMgr) Register(mf *module.MetaParaSystemMstFlowRoutineJobRunningHear
 	return true
 }
 
-func (m *FlowMgr) RegisterRemove(mf *module.MetaParaSystemMstFlowRoutineJobRunningHeartAddBean) bool {
-	glog.Glog(LogF, fmt.Sprintf("Register job %v %v:%v", MstId, Ip, Port))
-	url := fmt.Sprintf("http://%v:%v/api/v1/mst/flow/routine/job/running/heart/rm?accesstoken=%v", ApiServerIp, ApiServerPort, AccessToken)
-	mf.MstId = m.MstId
+func (m *FlowMgr) RegisterRemove(mf *module.MetaParaSystemLeaderFlowRoutineJobRunningHeartAddBean) bool {
+	// glog.Glog(LogF, fmt.Sprintf("Register job %v %v:%v", LeaderId, Ip, Port))
+	url := fmt.Sprintf("http://%v:%v/api/v1/leader/flow/routine/job/running/heart/rm?accesstoken=%v", ApiServerIp, ApiServerPort, AccessToken)
+	mf.LeaderId = m.LeaderId
 	mf.FlowId = m.FlowId
 	mf.RoutineId = m.RoutineId
 
@@ -585,81 +648,80 @@ func (m *FlowMgr) updateStatusEnd(sys string, job string, status string) error {
 	return nil
 }
 
-func (m *FlowMgr) updateStatus2Server(sys string, job string, status string,server string) error {
-        url := fmt.Sprintf("http://%v:%v/api/v1/flow/job/status/update/2server?accesstoken=%v", m.ApiServerIp, m.ApiServerPort, m.AccessToken)
-        s := new(module.MetaParaFlowJobStatus2ServerBean)
-        s.FlowId = m.FlowId
-        s.Sys = sys
-        s.Job = job
-        s.Status = status
-        s.Server = server
-        jsonstr0, err := json.Marshal(s)
-        if err != nil {
-                glog.Glog(LogF, fmt.Sprint(err))
-                return err
-        }
-        jsonstr, err := util.Api_RequestPost(url, string(jsonstr0))
-        if err != nil {
-                _, cfile, cline, _ := runtime.Caller(1)
-                glog.Glog(m.LogF, fmt.Sprintf("%v %v %v", cfile, cline, err))
-                return err
-        }
-        retbn := new(module.RetBean)
-        err = json.Unmarshal([]byte(jsonstr), &retbn)
-        if err != nil {
-                _, cfile, cline, _ := runtime.Caller(1)
-                glog.Glog(LogF, fmt.Sprintf("%v %v %v", cfile, cline, err))
-                return err
-        }
-        if retbn.Status_Code != 200 {
-                glog.Glog(LogF, fmt.Sprintf("post url return status code:%v", retbn.Status_Code))
-                return errors.New(fmt.Sprintf("post url return status code:%v", retbn.Status_Code))
-        }
-        return nil
+func (m *FlowMgr) updateStatus2Server(sys string, job string, status string, server string) error {
+	url := fmt.Sprintf("http://%v:%v/api/v1/flow/job/status/update/2server?accesstoken=%v", m.ApiServerIp, m.ApiServerPort, m.AccessToken)
+	s := new(module.MetaParaFlowJobStatus2ServerBean)
+	s.FlowId = m.FlowId
+	s.Sys = sys
+	s.Job = job
+	s.Status = status
+	s.Server = server
+	jsonstr0, err := json.Marshal(s)
+	if err != nil {
+		glog.Glog(LogF, fmt.Sprint(err))
+		return err
+	}
+	jsonstr, err := util.Api_RequestPost(url, string(jsonstr0))
+	if err != nil {
+		_, cfile, cline, _ := runtime.Caller(1)
+		glog.Glog(m.LogF, fmt.Sprintf("%v %v %v", cfile, cline, err))
+		return err
+	}
+	retbn := new(module.RetBean)
+	err = json.Unmarshal([]byte(jsonstr), &retbn)
+	if err != nil {
+		_, cfile, cline, _ := runtime.Caller(1)
+		glog.Glog(LogF, fmt.Sprintf("%v %v %v", cfile, cline, err))
+		return err
+	}
+	if retbn.Status_Code != 200 {
+		glog.Glog(LogF, fmt.Sprintf("post url return status code:%v", retbn.Status_Code))
+		return errors.New(fmt.Sprintf("post url return status code:%v", retbn.Status_Code))
+	}
+	return nil
 }
 
 func (m *FlowMgr) workerExecApplication(workerid string) error {
-        url := fmt.Sprintf("http://%v:%v/api/v1/worker/exec/add?accesstoken=%v", m.ApiServerIp, m.ApiServerPort, m.AccessToken)
-        para := fmt.Sprintf("{\"workerid\":\"%v\"}",workerid)
-        jsonstr, err := util.Api_RequestPost(url, para)
-        if err != nil {
-                return err
-        }
-        retbn := new(module.RetBean)
-        err = json.Unmarshal([]byte(jsonstr), &retbn)
-        if err != nil {
-                return err
-        }
-        if retbn.Status_Code != 200 {
-                return errors.New(fmt.Sprintf("post url return err:%v", retbn.Status_Txt))
-        }
-        if retbn.Data == nil {
-                return errors.New("application exec err.")
-        }
-        if len((retbn.Data).([]interface{})) == 0 {
-                return errors.New("application 0 exec.")
-        }
-        return nil
+	url := fmt.Sprintf("http://%v:%v/api/v1/worker/exec/add?accesstoken=%v", m.ApiServerIp, m.ApiServerPort, m.AccessToken)
+	para := fmt.Sprintf("{\"workerid\":\"%v\"}", workerid)
+	jsonstr, err := util.Api_RequestPost(url, para)
+	if err != nil {
+		return err
+	}
+	retbn := new(module.RetBean)
+	err = json.Unmarshal([]byte(jsonstr), &retbn)
+	if err != nil {
+		return err
+	}
+	if retbn.Status_Code != 200 {
+		return errors.New(fmt.Sprintf("post url return err:%v", retbn.Status_Txt))
+	}
+	if retbn.Data == nil {
+		return errors.New("application exec err.")
+	}
+	if len((retbn.Data).([]interface{})) == 0 {
+		return errors.New("application 0 exec.")
+	}
+	return nil
 }
 
 func (m *FlowMgr) workerExecApplicationLogout(workerid string) error {
-        url := fmt.Sprintf("http://%v:%v/api/v1/worker/exec/sub?accesstoken=%v", m.ApiServerIp, m.ApiServerPort, m.AccessToken)
-        para := fmt.Sprintf("{\"workerid\":\"%v\"}",workerid)
-        jsonstr, err := util.Api_RequestPost(url, para)
-        if err != nil {
-                return err
-        }
-        retbn := new(module.RetBean)
-        err = json.Unmarshal([]byte(jsonstr), &retbn)
-        if err != nil {
-                return err
-        }
-        if retbn.Status_Code != 200 {
-                return errors.New(fmt.Sprintf("post url return err:%v", retbn.Status_Txt))
-        }
-        return nil
+	url := fmt.Sprintf("http://%v:%v/api/v1/worker/exec/sub?accesstoken=%v", m.ApiServerIp, m.ApiServerPort, m.AccessToken)
+	para := fmt.Sprintf("{\"workerid\":\"%v\"}", workerid)
+	jsonstr, err := util.Api_RequestPost(url, para)
+	if err != nil {
+		return err
+	}
+	retbn := new(module.RetBean)
+	err = json.Unmarshal([]byte(jsonstr), &retbn)
+	if err != nil {
+		return err
+	}
+	if retbn.Status_Code != 200 {
+		return errors.New(fmt.Sprintf("post url return err:%v", retbn.Status_Txt))
+	}
+	return nil
 }
-
 
 func (m *FlowMgr) jobInfo(sys string, job string) []interface{} {
 	retarr := make([]interface{}, 0)
@@ -692,9 +754,9 @@ func (m *FlowMgr) jobInfo(sys string, job string) []interface{} {
 //Check the status pending
 func (m *FlowMgr) checkPending() bool {
 	timeStr := time.Now().Format("2006-01-02 15:04:05")
-	glog.Glog(m.LogF, fmt.Sprintf("%v %v %v Checking %v Status Pending.", m.MstId, m.FlowId, m.RoutineId, timeStr))
+	glog.Glog(m.LogF, fmt.Sprintf("%v %v %v Checking %v Status Pending.", m.LeaderId, m.FlowId, m.RoutineId, timeStr))
 	url := fmt.Sprintf("http://%v:%v/api/v1/flow/job/status/get/pending?accesstoken=%v", m.ApiServerIp, m.ApiServerPort, m.AccessToken)
-	u1 := uuid.Must(uuid.NewV4(),nil)
+	u1 := uuid.Must(uuid.NewV4(), nil)
 	para := fmt.Sprintf("{\"id\":\"%v\",\"flowid\":\"%v\",\"ishash\":\"0\",\"status\":\"%v\"}", u1, m.FlowId, util.STATUS_AUTO_PENDING)
 	jsonstr, err := util.Api_RequestPost(url, para)
 	if err != nil {
@@ -737,7 +799,7 @@ func (m *FlowMgr) checkPending() bool {
 			continue
 		}
 		if err = m.submitJob(v); err != nil {
-			glog.Glog(m.LogF, fmt.Sprintf("Submit job is not ok.", err))
+			glog.Glog(m.LogF, fmt.Sprint("Submit job is not ok.", err))
 		}
 	}
 	if len(retarr) == 0 {
@@ -775,7 +837,7 @@ func (m *FlowMgr) pendingRemoveRing(id string) bool {
 
 func (m *FlowMgr) submitJob(job map[string]interface{}) error {
 	url0 := fmt.Sprintf("http://%v:%v/api/v1/job/pool/add?accesstoken=%v", m.ApiServerIp, m.ApiServerPort, m.AccessToken)
-	para0 := fmt.Sprintf("{\"sys\":\"%v\",\"job\":\"%v\",\"flowid\":\"%v\",\"priority\":\"%v\",\"dynamicserver\":\"%v\",\"server\":\"%v\"}", job["sys"], job["job"], m.FlowId, job["priority"],job["dynamicserver"],job["sserver"])
+	para0 := fmt.Sprintf("{\"sys\":\"%v\",\"job\":\"%v\",\"flowid\":\"%v\",\"priority\":\"%v\",\"dynamicserver\":\"%v\",\"server\":\"%v\"}", job["sys"], job["job"], m.FlowId, job["priority"], job["dynamicserver"], job["wserver"])
 	jsonstr0, err := util.Api_RequestPost(url0, para0)
 	if err != nil {
 		return err
@@ -836,7 +898,7 @@ func (m *FlowMgr) isControlFile(filename string) bool {
 	}
 }
 
-func (m *FlowMgr) mstCtlMarshal() ([]byte, error) {
+func (m *FlowMgr) LeaderCtlMarshal() ([]byte, error) {
 	ctl := new(MetaJobCTL)
 	data, err := json.Marshal(ctl)
 	if err != nil {
@@ -845,7 +907,7 @@ func (m *FlowMgr) mstCtlMarshal() ([]byte, error) {
 	return data, nil
 }
 
-func (m *FlowMgr) mstCtlUnmarshal(data []byte) (MetaJobCTL, error) {
+func (m *FlowMgr) leaderCtlUnmarshal(data []byte) (MetaJobCTL, error) {
 	var ctl MetaJobCTL
 	err := json.Unmarshal(data, &ctl)
 	if err != nil {
@@ -854,7 +916,7 @@ func (m *FlowMgr) mstCtlUnmarshal(data []byte) (MetaJobCTL, error) {
 	return ctl, nil
 }
 
-func (m *FlowMgr) mstCtlRead(f string) ([]byte, error) {
+func (m *FlowMgr) leaderCtlRead(f string) ([]byte, error) {
 	fp, err := os.OpenFile(f, os.O_RDONLY, 0755)
 	defer fp.Close()
 	if err != nil {
@@ -868,7 +930,7 @@ func (m *FlowMgr) mstCtlRead(f string) ([]byte, error) {
 	return data[:n], nil
 }
 
-func (m *FlowMgr) mstCtlWrite(f string, data []byte) error {
+func (m *FlowMgr) leaderCtlWrite(f string, data []byte) error {
 	fp, err := os.OpenFile(f, os.O_RDWR|os.O_CREATE, 0755)
 	if err != nil {
 		return err

@@ -6,9 +6,9 @@ type MetaParaFlowJobLogAddBean struct {
 	Sys       string   `json:"sys"`
 	Job       string   `json:"job"`
 	Step      string   `json:"step"`
-	SServer   string   `json:"sserver"`
-	Sip       string   `json:"sip"`
-	Sport     string   `json:"sport"`
+	WServer   string   `json:"wserver"` //worker server
+	Wip       string   `json:"wip"`
+	Wport     string   `json:"wport"`
 	StartTime string   `json:"starttime"`
 	EndTime   string   `json:"endtime"`
 	Content   []string `json:"content"`

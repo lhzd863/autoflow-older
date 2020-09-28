@@ -3,7 +3,6 @@ package apiserver
 import (
 	"encoding/json"
 	"fmt"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -11,6 +10,8 @@ import (
 	"strconv"
 	"sync"
 	"time"
+
+	"gopkg.in/yaml.v2"
 
 	"github.com/emicklei/go-restful"
 	restfulspec "github.com/emicklei/go-restful-openapi"
@@ -35,7 +36,7 @@ func (rrs ResponseResource) WebService() *restful.WebService {
 	ws := new(restful.WebService)
 	ws.
 		Path("/api/v1").
-		Consumes("*/*").
+		Consumes("application/json").
 		Produces(restful.MIME_JSON, restful.MIME_JSON) // you can specify this per route as well
 
 	tags := []string{"system"}
@@ -576,23 +577,23 @@ func (rrs ResponseResource) WebService() *restful.WebService {
 		Returns(200, "OK", module.RetBean{}).
 		Returns(404, "Not Found", nil))
 
-	tags = []string{"mst-flow"}
-	ws.Route(ws.POST("/mst/instance/start").To(rrf.MstInstanceStartHandler).
+	tags = []string{"leader-flow"}
+	ws.Route(ws.POST("/leader/instance/start").To(rrf.LeaderInstanceStartHandler).
 		// docs
 		Doc("实例开启").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
-		Reads(module.MetaParaMstFlowStartBean{}).
+		Reads(module.MetaParaLeaderFlowStartBean{}).
 		Writes(module.RetBean{}). // on the response
 		Returns(200, "OK", module.RetBean{}).
 		Returns(404, "Not Found", nil))
 
-	ws.Route(ws.POST("/mst/instance/stop").To(rrf.MstInstanceStopHandler).
+	ws.Route(ws.POST("/leader/instance/stop").To(rrf.LeaderInstanceStopHandler).
 		// docs
 		Doc("实例开启").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
-		Reads(module.MetaParaMstFlowStopBean{}).
+		Reads(module.MetaParaLeaderFlowStopBean{}).
 		Writes(module.RetBean{}). // on the response
 		Returns(200, "OK", module.RetBean{}).
 		Returns(404, "Not Found", nil))
@@ -627,19 +628,19 @@ func (rrs ResponseResource) WebService() *restful.WebService {
 		Returns(200, "OK", module.RetBean{}).
 		Returns(404, "Not Found", nil))
 
-	tags = []string{"mst-flow-routine"}
-	ws.Route(ws.POST("/mst/flow/routine/start").To(rrf.MstFlowRoutineStartHandler).
+	tags = []string{"leader-flow-routine"}
+	ws.Route(ws.POST("/leader/flow/routine/start").To(rrf.LeaderFlowRoutineStartHandler).
 		// docs
-		Doc("指定mst实例新增处理线程").
+		Doc("指定Leader实例新增处理线程").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
 		Writes(module.RetBean{}). // on the response
 		Returns(200, "OK", module.RetBean{}).
 		Returns(404, "Not Found", nil))
 
-	ws.Route(ws.POST("/mst/flow/routine/stop").To(rrf.MstFlowRoutineStopHandler).
+	ws.Route(ws.POST("/leader/flow/routine/stop").To(rrf.LeaderFlowRoutineStopHandler).
 		// docs
-		Doc("指定mst实例停止处理线程").
+		Doc("指定Leader实例停止处理线程").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
 		Writes(module.RetBean{}). // on the response
@@ -686,13 +687,13 @@ func (rrs ResponseResource) WebService() *restful.WebService {
 		Returns(200, "OK", module.RetBean{}).
 		Returns(404, "Not Found", nil))
 
-	tags = []string{"mst"}
-	ws.Route(ws.POST("/mst/flow/rm").To(rrf.MstFlowRemoveHandler).
+	tags = []string{"Leader"}
+	ws.Route(ws.POST("/leader/flow/rm").To(rrf.LeaderFlowRemoveHandler).
 		// docs
-		Doc("删除实例MST映射").
+		Doc("删除实例Leader映射").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
-		Reads(module.MetaParaMstFlowRemoveBean{}).
+		Reads(module.MetaParaLeaderFlowRemoveBean{}).
 		Writes(module.RetBean{}). // on the response
 		Returns(200, "OK", module.RetBean{}).
 		Returns(404, "Not Found", nil))
@@ -936,82 +937,82 @@ func (rrs ResponseResource) WebService() *restful.WebService {
 		Returns(200, "OK", module.RetBean{}).
 		Returns(404, "Not Found", nil))
 
-	tags = []string{"mst-heart"}
-	ws.Route(ws.POST("/mst/heart/add").To(rrl.MstHeartAddHandler).
+	tags = []string{"leader-heart"}
+	ws.Route(ws.POST("/leader/heart/add").To(rrl.LeaderHeartAddHandler).
 		// docs
-		Doc("新增Mst心跳信息").
+		Doc("新增Leader心跳信息").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
-		Reads(module.MetaParaMstHeartAddBean{}).
+		Reads(module.MetaParaLeaderHeartAddBean{}).
 		Writes(module.RetBean{}). // on the response
 		Returns(200, "OK", module.RetBean{}).
 		Returns(404, "Not Found", nil))
 
-	ws.Route(ws.POST("/mst/heart/ls").To(rrl.MstHeartListHandler).
+	ws.Route(ws.POST("/leader/heart/ls").To(rrl.LeaderHeartListHandler).
 		// docs
-		Doc("列表Mst心跳信息").
-		Metadata(restfulspec.KeyOpenAPITags, tags).
-		Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
-		Writes(module.RetBean{}). // on the response
-		Returns(200, "OK", module.RetBean{}).
-		Returns(404, "Not Found", nil))
-
-	ws.Route(ws.POST("/mst/heart/rm").To(rrl.MstHeartRemoveHandler).
-		// docs
-		Doc("删除Mst心跳信息").
-		Metadata(restfulspec.KeyOpenAPITags, tags).
-		Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
-		Reads(module.MetaParaMstHeartRemoveBean{}).
-		Writes(module.RetBean{}). // on the response
-		Returns(200, "OK", module.RetBean{}).
-		Returns(404, "Not Found", nil))
-
-	ws.Route(ws.POST("/mst/heart/get").To(rrl.MstHeartGetHandler).
-		// docs
-		Doc("获取Mst心跳信息").
-		Metadata(restfulspec.KeyOpenAPITags, tags).
-		Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
-		Reads(module.MetaParaMstHeartGetBean{}).
-		Writes(module.RetBean{}). // on the response
-		Returns(200, "OK", module.RetBean{}).
-		Returns(404, "Not Found", nil))
-
-	tags = []string{"mst-flow-routine-heart"}
-	ws.Route(ws.POST("/mst/flow/routine/heart/add").To(rrl.MstFlowRoutineHeartAddHandler).
-		// docs
-		Doc("新增Mst节点实例线程心跳信息").
-		Metadata(restfulspec.KeyOpenAPITags, tags).
-		Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
-		Reads(module.MetaParaMstFlowRoutineHeartAddBean{}).
-		Writes(module.RetBean{}). // on the response
-		Returns(200, "OK", module.RetBean{}).
-		Returns(404, "Not Found", nil))
-
-	ws.Route(ws.POST("/mst/flow/routine/heart/ls").To(rrl.MstFlowRoutineHeartListHandler).
-		// docs
-		Doc("列表Mst节点实例线程心跳信息").
+		Doc("列表Leader心跳信息").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
 		Writes(module.RetBean{}). // on the response
 		Returns(200, "OK", module.RetBean{}).
 		Returns(404, "Not Found", nil))
 
-	ws.Route(ws.POST("/mst/flow/routine/heart/rm").To(rrl.MstFlowRoutineHeartRemoveHandler).
+	ws.Route(ws.POST("/leader/heart/rm").To(rrl.LeaderHeartRemoveHandler).
 		// docs
-		Doc("删除Mst节点实例线程心跳信息").
+		Doc("删除Leader心跳信息").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
-		Reads(module.MetaParaMstFlowRoutineHeartRemoveBean{}).
+		Reads(module.MetaParaLeaderHeartRemoveBean{}).
 		Writes(module.RetBean{}). // on the response
 		Returns(200, "OK", module.RetBean{}).
 		Returns(404, "Not Found", nil))
 
-	ws.Route(ws.POST("/mst/flow/routine/heart/get").To(rrl.MstFlowRoutineHeartGetHandler).
+	ws.Route(ws.POST("/leader/heart/get").To(rrl.LeaderHeartGetHandler).
 		// docs
-		Doc("获取Mst节点实例线程心跳信息").
+		Doc("获取Leader心跳信息").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
-		Reads(module.MetaParaMstFlowRoutineHeartGetBean{}).
+		Reads(module.MetaParaLeaderHeartGetBean{}).
+		Writes(module.RetBean{}). // on the response
+		Returns(200, "OK", module.RetBean{}).
+		Returns(404, "Not Found", nil))
+
+	tags = []string{"Leader-flow-routine-heart"}
+	ws.Route(ws.POST("/leader/flow/routine/heart/add").To(rrl.LeaderFlowRoutineHeartAddHandler).
+		// docs
+		Doc("新增Leader节点实例线程心跳信息").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
+		Reads(module.MetaParaLeaderFlowRoutineHeartAddBean{}).
+		Writes(module.RetBean{}). // on the response
+		Returns(200, "OK", module.RetBean{}).
+		Returns(404, "Not Found", nil))
+
+	ws.Route(ws.POST("/leader/flow/routine/heart/ls").To(rrl.LeaderFlowRoutineHeartListHandler).
+		// docs
+		Doc("列表Leader节点实例线程心跳信息").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
+		Writes(module.RetBean{}). // on the response
+		Returns(200, "OK", module.RetBean{}).
+		Returns(404, "Not Found", nil))
+
+	ws.Route(ws.POST("/leader/flow/routine/heart/rm").To(rrl.LeaderFlowRoutineHeartRemoveHandler).
+		// docs
+		Doc("删除Leader节点实例线程心跳信息").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
+		Reads(module.MetaParaLeaderFlowRoutineHeartRemoveBean{}).
+		Writes(module.RetBean{}). // on the response
+		Returns(200, "OK", module.RetBean{}).
+		Returns(404, "Not Found", nil))
+
+	ws.Route(ws.POST("/leader/flow/routine/heart/get").To(rrl.LeaderFlowRoutineHeartGetHandler).
+		// docs
+		Doc("获取Leader节点实例线程心跳信息").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
+		Reads(module.MetaParaLeaderFlowRoutineHeartGetBean{}).
 		Writes(module.RetBean{}). // on the response
 		Returns(200, "OK", module.RetBean{}).
 		Returns(404, "Not Found", nil))
@@ -1433,38 +1434,38 @@ func (rrs ResponseResource) WebService() *restful.WebService {
 		Returns(200, "OK", module.RetBean{}).
 		Returns(404, "Not Found", nil))
 
-	tags = []string{"mst-flow-routine-job-running-heart"}
-	ws.Route(ws.POST("/mst/flow/routine/job/running/heart/add").To(rrl.MstFlowRoutineJobRunningHeartAddHandler).
+	tags = []string{"leader-flow-routine-job-running-heart"}
+	ws.Route(ws.POST("/leader/flow/routine/job/running/heart/add").To(rrl.LeaderFlowRoutineJobRunningHeartAddHandler).
 		// docs
 		Doc("新增Running作业").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
-		Reads(module.MetaParaSystemMstFlowRoutineJobRunningHeartAddBean{}).
+		Reads(module.MetaParaSystemLeaderFlowRoutineJobRunningHeartAddBean{}).
 		Writes(module.RetBean{}). // on the response
 		Returns(200, "OK", module.RetBean{}).
 		Returns(404, "Not Found", nil))
 
-	ws.Route(ws.POST("/mst/flow/routine/job/running/heart/rm").To(rrl.MstFlowRoutineJobRunningHeartRemoveHandler).
+	ws.Route(ws.POST("/leader/flow/routine/job/running/heart/rm").To(rrl.LeaderFlowRoutineJobRunningHeartRemoveHandler).
 		// docs
 		Doc("新增Running作业").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
-		Reads(module.MetaParaSystemMstFlowRoutineJobRunningHeartRemoveBean{}).
+		Reads(module.MetaParaSystemLeaderFlowRoutineJobRunningHeartRemoveBean{}).
 		Writes(module.RetBean{}). // on the response
 		Returns(200, "OK", module.RetBean{}).
 		Returns(404, "Not Found", nil))
 
-	ws.Route(ws.POST("/mst/flow/routine/job/running/heart/get").To(rrl.MstFlowRoutineJobRunningHeartGetHandler).
+	ws.Route(ws.POST("/leader/flow/routine/job/running/heart/get").To(rrl.LeaderFlowRoutineJobRunningHeartGetHandler).
 		// docs
 		Doc("新增Running作业").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
-		Reads(module.MetaParaSystemMstFlowRoutineJobRunningHeartGetBean{}).
+		Reads(module.MetaParaSystemLeaderFlowRoutineJobRunningHeartGetBean{}).
 		Writes(module.RetBean{}). // on the response
 		Returns(200, "OK", module.RetBean{}).
 		Returns(404, "Not Found", nil))
 
-	ws.Route(ws.POST("/mst/flow/routine/job/running/heart/ls").To(rrl.MstFlowRoutineJobRunningHeartListHandler).
+	ws.Route(ws.POST("/leader/flow/routine/job/running/heart/ls").To(rrl.LeaderFlowRoutineJobRunningHeartListHandler).
 		// docs
 		Doc("新增Running作业").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
@@ -1488,7 +1489,7 @@ func (rrs ResponseResource) WebService() *restful.WebService {
 		Doc("Worker Running作业列表").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
-		Reads(module.MetaParaSystemMstFlowRoutineJobRunningHeartGetBean{}).
+		Reads(module.MetaParaSystemLeaderFlowRoutineJobRunningHeartGetBean{}).
 		Writes(module.RetBean{}). // on the response
 		Returns(200, "OK", module.RetBean{}).
 		Returns(404, "Not Found", nil))
@@ -1498,7 +1499,7 @@ func (rrs ResponseResource) WebService() *restful.WebService {
 		Doc("Worker Running作业列表").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
-		Reads(module.MetaParaSystemMstFlowRoutineJobRunningHeartRemoveBean{}).
+		Reads(module.MetaParaSystemLeaderFlowRoutineJobRunningHeartRemoveBean{}).
 		Writes(module.RetBean{}). // on the response
 		Returns(200, "OK", module.RetBean{}).
 		Returns(404, "Not Found", nil))
@@ -1508,7 +1509,7 @@ func (rrs ResponseResource) WebService() *restful.WebService {
 		Doc("Worker Running作业列表").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Param(ws.QueryParameter("accesstoken", "access token").DataType("string")).
-		Reads(module.MetaParaSystemMstFlowRoutineJobRunningHeartAddBean{}).
+		Reads(module.MetaParaSystemLeaderFlowRoutineJobRunningHeartAddBean{}).
 		Writes(module.RetBean{}). // on the response
 		Returns(200, "OK", module.RetBean{}).
 		Returns(404, "Not Found", nil))
@@ -1581,30 +1582,30 @@ func (rrs *ResponseResource) HealthHandler(request *restful.Request, response *r
 	util.ApiResponse(response.ResponseWriter, 200, "", retlst)
 }
 
-func (rrs *ResponseResource) getMstFlowRoutinePort(flowid string, mstid string, routineid string) []*module.MetaMstFlowRoutineHeartBean {
+func (rrs *ResponseResource) getLeaderFlowRoutinePort(flowid string, Leaderid string, routineid string) []*module.MetaLeaderFlowRoutineHeartBean {
 	rrs.Lock()
 	rrs.Unlock()
-	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_MASTER_ROUTINE_HEART)
+	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_LEADER_ROUTINE_HEART)
 	defer bt.Close()
 
 	strlist := bt.Scan()
-	retlst := make([]*module.MetaMstFlowRoutineHeartBean, 0)
+	retlst := make([]*module.MetaLeaderFlowRoutineHeartBean, 0)
 	for _, v := range strlist {
 		for k1, v1 := range v.(map[string]interface{}) {
-			mmf := new(module.MetaMstFlowRoutineHeartBean)
+			mmf := new(module.MetaLeaderFlowRoutineHeartBean)
 			err := json.Unmarshal([]byte(v1.(string)), &mmf)
 			if err != nil {
 				glog.Glog(LogF, fmt.Sprint(err))
 				continue
 			}
-			if mmf.FlowId != flowid || mmf.MstId != mstid || mmf.RoutineId != routineid {
-				glog.Glog(LogF, fmt.Sprintf("%v!=%v or %v!=%v.", mmf.FlowId, flowid, mmf.MstId, mstid))
+			if mmf.FlowId != flowid || mmf.LeaderId != Leaderid || mmf.RoutineId != routineid {
+				glog.Glog(LogF, fmt.Sprintf("%v!=%v or %v!=%v.", mmf.FlowId, flowid, mmf.LeaderId, Leaderid))
 				continue
 			}
 			timeStr := time.Now().Format("2006-01-02 15:04:05")
 			ise, _ := util.IsExpired(mmf.UpdateTime, timeStr, 300)
 			if ise {
-				glog.Glog(LogF, fmt.Sprintf("%v timeout %v:%v.", mmf.MstId, mmf.Ip, mmf.Port))
+				glog.Glog(LogF, fmt.Sprintf("%v timeout %v:%v.", mmf.LeaderId, mmf.Ip, mmf.Port))
 				bt.Remove(k1)
 				continue
 			}
@@ -1624,8 +1625,8 @@ var (
 	ringPendingSpool = db.NewMemDB()
 	ringGoSpool      = db.NewMemDB()
 	LogF             string
-	//mstMap  map[string]interface{}
-	mstMap                = db.NewMemDB()
+	//LeaderMap  map[string]interface{}
+	LeaderMap             = db.NewMemDB()
 	statusPendingOffset   int
 	statusGoOffset        int
 	statusPendingHashRing *util.Consistent
@@ -1665,18 +1666,18 @@ func NewApiServer(cfg string) {
 	}
 	statusPendingOffset = 0
 	statusGoOffset = 0
-	nmp := NewMgrPool()
+	nmp := NewMgrPool(conf)
 	go func() {
 		nmp.JobPool()
 	}()
-	rru = NewResponseResourceUser()
-	rri = NewResponseResourceImage()
-	rrf = NewResponseResourceFlow()
-	rrt = NewResponseResourceSystem()
-	rrl = NewResponseResourceLeader()
-	rrw = NewResponseResourceWorker()
-	rrj = NewResponseResourceJob()
-	rra = NewResponseResourceStat()
+	rru = NewResponseResourceUser(conf)
+	rri = NewResponseResourceImage(conf)
+	rrf = NewResponseResourceFlow(conf)
+	rrt = NewResponseResourceSystem(conf)
+	rrl = NewResponseResourceLeader(conf)
+	rrw = NewResponseResourceWorker(conf)
+	rrj = NewResponseResourceJob(conf)
+	rra = NewResponseResourceStat(conf)
 	HttpServer()
 }
 
@@ -1717,11 +1718,9 @@ func enrichSwaggerObject(swo *spec.Swagger) {
 		InfoProps: spec.InfoProps{
 			Title:       "Autoflow",
 			Description: "Resource for managing Api",
-			Contact: &spec.ContactInfo{
-			},
-			License: &spec.License{
-			},
-			Version: "1.0.0",
+			Contact:     &spec.ContactInfo{},
+			License:     &spec.License{},
+			Version:     "1.0.0",
 		},
 	}
 	swo.Tags = []spec.Tag{spec.Tag{TagProps: spec.TagProps{
@@ -1833,7 +1832,7 @@ func globalOauth(req *restful.Request, resp *restful.Response, chain *restful.Fi
 	}
 	tokenstring := fmt.Sprint(reqParams["accesstoken"][0])
 	var claimsDecoded map[string]interface{}
-      
+	log.Println(u.Path + "->" + tokenstring)
 	decodeErr := jwt.Decode([]byte(tokenstring), &claimsDecoded, []byte(conf.JwtKey))
 	if decodeErr != nil {
 		glog.Glog(LogF, fmt.Sprintf("Failed to decode: %s ,accesstoken=%s", decodeErr, tokenstring))
@@ -1845,7 +1844,7 @@ func globalOauth(req *restful.Request, resp *restful.Response, chain *restful.Fi
 	exp1, _ := strconv.ParseFloat(fmt.Sprintf("%v", time.Now().Unix()+0), 64)
 
 	if (exp - exp1) < 0 {
-		glog.Glog(LogF, fmt.Sprintf("Failed to decode: %v %v %v,accesstoken=%s", exp, exp1, (exp-exp1),tokenstring))
+		glog.Glog(LogF, fmt.Sprintf("Failed to decode: %v %v %v,accesstoken=%s", exp, exp1, (exp-exp1), tokenstring))
 		util.ApiResponse(resp.ResponseWriter, 700, "Not Authorized AccessToken Expired ,Please login", nil)
 		return
 	}

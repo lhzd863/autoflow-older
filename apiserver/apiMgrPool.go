@@ -19,10 +19,11 @@ import (
 
 type MgrPool struct {
 	sync.Mutex
+	Conf *module.MetaApiServerBean
 }
 
-func NewMgrPool() *MgrPool {
-	return &MgrPool{}
+func NewMgrPool(conf *module.MetaApiServerBean) *MgrPool {
+	return &MgrPool{Conf: conf}
 }
 
 func (mp *MgrPool) JobPool() {
@@ -83,8 +84,8 @@ func (mp *MgrPool) JobPool() {
 	}
 }
 
-func (mp *MgrPool) SubmitJob(jobstr interface{}, slvstr interface{}) bool {
-	s := slvstr.(map[string]interface{})
+func (mp *MgrPool) SubmitJob(jobstr interface{}, workerstr interface{}) bool {
+	s := workerstr.(map[string]interface{})
 	jp := jobstr.(map[string]interface{})
 	glog.Glog(LogF, fmt.Sprintf("%v update %v.%v job status %v.", jp["flowid"], jp["sys"], jp["job"], util.STATUS_AUTO_GO))
 	url0 := fmt.Sprintf("http://%v:%v/api/v1/flow/job/status/update/go?accesstoken=%v", conf.ApiServerIp, conf.ApiServerPort, conf.AccessToken)
@@ -93,9 +94,9 @@ func (mp *MgrPool) SubmitJob(jobstr interface{}, slvstr interface{}) bool {
 	m.Sys = jp["sys"].(string)
 	m.Job = jp["job"].(string)
 	m.Status = util.STATUS_AUTO_GO
-	m.SServer = s["workerid"].(string)
-	m.Ip = s["ip"].(string)
-	m.Port = s["port"].(string)
+	m.WServer = s["workerid"].(string)
+	m.WIp = s["ip"].(string)
+	m.WPort = s["port"].(string)
 	jsonstr0, err := json.Marshal(m)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprint(err))
@@ -252,7 +253,7 @@ func (mp *MgrPool) ObtJobServer(arr []interface{}, dynamicserver string, workeri
 
 func (mp *MgrPool) ServerRoutineStatus() {
 	for {
-		url := fmt.Sprintf("http://%v:%v/api/v1/mst/heart/ls?accesstoken=%v", conf.ApiServerIp, conf.ApiServerPort, conf.AccessToken)
+		url := fmt.Sprintf("http://%v:%v/api/v1/leader/heart/ls?accesstoken=%v", conf.ApiServerIp, conf.ApiServerPort, conf.AccessToken)
 		jsonstr, err := util.Api_RequestPost(url, "{}")
 		if err != nil {
 			glog.Glog(LogF, fmt.Sprint(err))
@@ -276,7 +277,7 @@ func (mp *MgrPool) ServerRoutineStatus() {
 			time.Sleep(time.Duration(10) * time.Second)
 			continue
 		}
-		mharr := (retbn.Data).([]module.MetaMstHeartBean)
+		mharr := (retbn.Data).([]module.MetaLeaderHeartBean)
 		for _, mh := range mharr {
 			// 建立连接到gRPC服务
 			conn, err := grpc.Dial(mh.Ip+":"+mh.Port, grpc.WithInsecure())

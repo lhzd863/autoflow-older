@@ -16,10 +16,11 @@ import (
 
 type ResponseResourceJob struct {
 	sync.Mutex
+	Conf *module.MetaApiServerBean
 }
 
-func NewResponseResourceJob() *ResponseResourceJob {
-	return &ResponseResourceJob{}
+func NewResponseResourceJob(conf *module.MetaApiServerBean) *ResponseResourceJob {
+	return &ResponseResourceJob{Conf: conf}
 }
 
 func (rrs *ResponseResourceJob) FlowJobListHandle(request *restful.Request, response *restful.Response) {
@@ -35,7 +36,7 @@ func (rrs *ResponseResourceJob) FlowJobListHandle(request *restful.Request, resp
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(p.FlowId)
+	dbf, err := rrs.flowDbFile(p.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -74,7 +75,7 @@ func (rrs *ResponseResourceJob) FlowJobGetHandle(request *restful.Request, respo
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(p.FlowId)
+	dbf, err := rrs.flowDbFile(p.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -109,7 +110,7 @@ func (rrs *ResponseResourceJob) FlowJobAddHandle(request *restful.Request, respo
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(p.FlowId)
+	dbf, err := rrs.flowDbFile(p.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -127,12 +128,12 @@ func (rrs *ResponseResourceJob) FlowJobAddHandle(request *restful.Request, respo
 	mj := new(module.MetaJobBean)
 	mj.Sys = p.Sys
 	mj.Job = p.Job
-	mj.SServer = p.SServer
-	mj.Sip = p.Sip
-	mj.Sport = p.Sport
+	mj.WServer = p.WServer
+	mj.Wip = p.Wip
+	mj.Wport = p.Wport
 	mj.Enable = p.Enable
 	mj.TimeWindow = p.TimeWindow
-	mj.RetryCnt = p.RetryCnt
+	mj.Retry = p.Retry
 	mj.Alert = p.Alert
 	mj.TimeTrigger = p.TimeTrigger
 	mj.DynamicServer = p.DynamicServer
@@ -142,9 +143,9 @@ func (rrs *ResponseResourceJob) FlowJobAddHandle(request *restful.Request, respo
 	mj.Priority = p.Priority
 	mj.Server = make([]interface{}, 0)
 	s := new(module.MetaJobServerBean)
-	s.Server = p.SServer
-	s.Ip = p.Sip
-	s.Port = p.Sport
+	s.Server = p.WServer
+	s.Ip = p.Wip
+	s.Port = p.Wport
 	s.Type = ""
 	mj.Server = append(mj.Server, s)
 
@@ -172,12 +173,14 @@ func (rrs *ResponseResourceJob) FlowJobUpdateHandle(request *restful.Request, re
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(p.FlowId)
+
+	dbf, err := rrs.flowDbFile(p.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
 		return
 	}
+
 	bt := db.NewBoltDB(dbf, util.TABLE_AUTO_JOB)
 	defer bt.Close()
 
@@ -188,12 +191,12 @@ func (rrs *ResponseResourceJob) FlowJobUpdateHandle(request *restful.Request, re
 		if err != nil {
 			glog.Glog(LogF, fmt.Sprint(err))
 		}
-		mj.SServer = p.SServer
-		mj.Sip = p.Sip
-		mj.Sport = p.Sport
+		mj.WServer = p.WServer
+		mj.Wip = p.Wip
+		mj.Wport = p.Wport
 		mj.Enable = p.Enable
 		mj.TimeWindow = p.TimeWindow
-		mj.RetryCnt = p.RetryCnt
+		mj.Retry = p.Retry
 		mj.Alert = p.Alert
 		mj.TimeTrigger = p.TimeTrigger
 		mj.DynamicServer = p.DynamicServer
@@ -205,28 +208,34 @@ func (rrs *ResponseResourceJob) FlowJobUpdateHandle(request *restful.Request, re
 		if mj.Server == nil {
 			mj.Server = make([]interface{}, 0)
 		}
+
 		flag := 0
-		for k, v := range mj.Server {
-			v1 := v.(module.MetaJobServerBean)
-			if v1.Server != p.SServer {
-				continue
-			}
-			flag = 1
-			v1.Ip = p.Sip
-			v1.Port = p.Sport
-			v1.Type = ""
-			mj.Server[k] = v1
-		}
+		// for k, v := range mj.Server {
+		// 	v1 := v.(module.MetaJobServerBean)
+		// 	if v1.Server != p.WServer {
+		// 		continue
+		// 	}
+		// 	flag = 1
+		// 	v1.Ip = p.Sip
+		// 	v1.Port = p.Sport
+		// 	v1.Type = ""
+		// 	mj.Server[k] = v1
+		// }
+
 		if flag == 0 {
 			s := new(module.MetaJobServerBean)
-			s.Server = p.SServer
-			s.Ip = p.Sip
-			s.Port = p.Sport
+			s.Server = p.WServer
+			s.Ip = p.Wip
+			s.Port = p.Wport
 			s.Type = ""
+			mj.Server = make([]interface{}, 0)
 			mj.Server = append(mj.Server, s)
 		}
+
 		jsonstr, _ := json.Marshal(mj)
+
 		err = bt.Set(mj.Sys+"."+mj.Job, string(jsonstr))
+
 		if err != nil {
 			glog.Glog(LogF, fmt.Sprintf("data in db update error.%v", err))
 			util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("data in db update error.%v", err), nil)
@@ -237,8 +246,10 @@ func (rrs *ResponseResourceJob) FlowJobUpdateHandle(request *restful.Request, re
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("flow %v job %v %v no store data.", p.FlowId, p.Sys, p.Job), nil)
 		return
 	}
+
 	retlst := make([]interface{}, 0)
 	util.ApiResponse(response.ResponseWriter, 200, "", retlst)
+
 }
 
 func (rrs *ResponseResourceJob) FlowJobRemoveHandle(request *restful.Request, response *restful.Response) {
@@ -254,7 +265,7 @@ func (rrs *ResponseResourceJob) FlowJobRemoveHandle(request *restful.Request, re
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(p.FlowId)
+	dbf, err := rrs.flowDbFile(p.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -269,19 +280,20 @@ func (rrs *ResponseResourceJob) FlowJobRemoveHandle(request *restful.Request, re
 }
 
 func (rrs *ResponseResourceJob) FlowJobStatusGetPendingHandle(request *restful.Request, response *restful.Response) {
-	jobpara := new(module.MetaParaFlowJobStatusGetPendingBean)
-	err := request.ReadEntity(&jobpara)
+	p := new(module.MetaParaFlowJobStatusGetPendingBean)
+	err := request.ReadEntity(&p)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprint(err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("Parse json error.%v", err), nil)
 		return
 	}
-	if len(jobpara.FlowId) == 0 {
+
+	if len(p.FlowId) == 0 {
 		glog.Glog(LogF, fmt.Sprintf("parameter missed."))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(jobpara.FlowId)
+	dbf, err := rrs.flowDbFile(p.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -300,12 +312,13 @@ func (rrs *ResponseResourceJob) FlowJobStatusGetPendingHandle(request *restful.R
 		return
 	} else {
 		r := new(module.MetaRingPendingOffsetBean)
-		r.Id = jobpara.Id
+		r.Id = p.Id
 		r.RingId = fmt.Sprint(bid)
 		timeStr := time.Now().Format("2006-01-02 15:04:05")
 		r.CreateTime = timeStr
-		ringPendingSpool.Add(jobpara.Id, r)
+		ringPendingSpool.Add(p.Id, r)
 	}
+
 	for _, v := range strlist {
 		for _, v1 := range v.(map[string]interface{}) {
 			jobbn := new(module.MetaJobBean)
@@ -314,10 +327,10 @@ func (rrs *ResponseResourceJob) FlowJobStatusGetPendingHandle(request *restful.R
 				glog.Glog(LogF, fmt.Sprint(err))
 				continue
 			}
-			if jobbn.Status != jobpara.Status && jobpara.Status != "ALL" {
+			if jobbn.Status != p.Status && p.Status != "ALL" {
 				continue
 			}
-			if (c && jobpara.IsHash == "0") || jobpara.IsHash == "1" {
+			if (c && p.IsHash == "0") || p.IsHash == "1" {
 				jobnodeid := statusPendingHashRing.Get(jobbn.Job).Id
 				glog.Glog(LogF, fmt.Sprintf("job hash info:%v %v", jobbn.Job, jobnodeid))
 				if jobnodeid != bid {
@@ -328,8 +341,9 @@ func (rrs *ResponseResourceJob) FlowJobStatusGetPendingHandle(request *restful.R
 			retlst = append(retlst, jobbn)
 		}
 	}
+
 	if len(retlst) == 0 {
-		ringPendingSpool.Remove(jobpara.Id)
+		ringPendingSpool.Remove(p.Id)
 	}
 	util.ApiResponse(response.ResponseWriter, 200, "", retlst)
 }
@@ -347,7 +361,7 @@ func (rrs *ResponseResourceJob) FlowJobStatusGetGoHandle(request *restful.Reques
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(jobpara.FlowId)
+	dbf, err := rrs.flowDbFile(jobpara.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -412,7 +426,7 @@ func (rrs *ResponseResourceJob) FlowJobDependencyHandler(request *restful.Reques
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(jobpara.FlowId)
+	dbf, err := rrs.flowDbFile(jobpara.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -470,7 +484,7 @@ func (rrs *ResponseResourceJob) FlowJobDependencyListHandler(request *restful.Re
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(p.FlowId)
+	dbf, err := rrs.flowDbFile(p.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -508,7 +522,7 @@ func (rrs *ResponseResourceJob) FlowJobDependencyGetHandler(request *restful.Req
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(p.FlowId)
+	dbf, err := rrs.flowDbFile(p.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -543,7 +557,7 @@ func (rrs *ResponseResourceJob) FlowJobDependencyUpdateHandler(request *restful.
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(p.FlowId)
+	dbf, err := rrs.flowDbFile(p.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -586,7 +600,7 @@ func (rrs *ResponseResourceJob) FlowJobDependencyRemoveHandler(request *restful.
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(p.FlowId)
+	dbf, err := rrs.flowDbFile(p.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -618,7 +632,7 @@ func (rrs *ResponseResourceJob) FlowJobDependencyAddHandler(request *restful.Req
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(p.FlowId)
+	dbf, err := rrs.flowDbFile(p.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -651,7 +665,7 @@ func (rrs *ResponseResourceJob) FlowJobStreamJobHandler(request *restful.Request
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(p.FlowId)
+	dbf, err := rrs.flowDbFile(p.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -708,7 +722,7 @@ func (rrs *ResponseResourceJob) FlowJobStreamJobGetHandler(request *restful.Requ
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(p.FlowId)
+	dbf, err := rrs.flowDbFile(p.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -748,7 +762,7 @@ func (rrs *ResponseResourceJob) FlowJobStreamListHandler(request *restful.Reques
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(p.FlowId)
+	dbf, err := rrs.flowDbFile(p.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -786,7 +800,7 @@ func (rrs *ResponseResourceJob) FlowJobStreamGetHandler(request *restful.Request
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(p.FlowId)
+	dbf, err := rrs.flowDbFile(p.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -821,7 +835,7 @@ func (rrs *ResponseResourceJob) FlowJobStreamUpdateHandler(request *restful.Requ
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(p.FlowId)
+	dbf, err := rrs.flowDbFile(p.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -864,7 +878,7 @@ func (rrs *ResponseResourceJob) FlowJobStreamRemoveHandler(request *restful.Requ
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(p.FlowId)
+	dbf, err := rrs.flowDbFile(p.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -896,7 +910,7 @@ func (rrs *ResponseResourceJob) FlowJobStreamAddHandler(request *restful.Request
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(p.FlowId)
+	dbf, err := rrs.flowDbFile(p.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -936,7 +950,7 @@ func (rrs *ResponseResourceJob) FlowJobTimeWindowListHandler(request *restful.Re
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(p.FlowId)
+	dbf, err := rrs.flowDbFile(p.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -974,7 +988,7 @@ func (rrs *ResponseResourceJob) FlowJobTimeWindowGetHandler(request *restful.Req
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(p.FlowId)
+	dbf, err := rrs.flowDbFile(p.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -1009,7 +1023,7 @@ func (rrs *ResponseResourceJob) FlowJobTimeWindowUpdateHandler(request *restful.
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(p.FlowId)
+	dbf, err := rrs.flowDbFile(p.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -1055,7 +1069,7 @@ func (rrs *ResponseResourceJob) FlowJobTimeWindowRemoveHandler(request *restful.
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(p.FlowId)
+	dbf, err := rrs.flowDbFile(p.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -1087,7 +1101,7 @@ func (rrs *ResponseResourceJob) FlowJobTimeWindowAddHandler(request *restful.Req
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(p.FlowId)
+	dbf, err := rrs.flowDbFile(p.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -1128,7 +1142,7 @@ func (rrs *ResponseResourceJob) FlowJobTimeWindowHandler(request *restful.Reques
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(p.FlowId)
+	dbf, err := rrs.flowDbFile(p.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -1175,7 +1189,7 @@ func (rrs *ResponseResourceJob) FlowJobCmdGetAllHandler(request *restful.Request
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(jobpara.FlowId)
+	dbf, err := rrs.flowDbFile(jobpara.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -1213,7 +1227,7 @@ func (rrs *ResponseResourceJob) FlowJobCmdGetHandler(request *restful.Request, r
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parse json error.%v", err), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(p.FlowId)
+	dbf, err := rrs.flowDbFile(p.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -1248,7 +1262,7 @@ func (rrs *ResponseResourceJob) FlowJobCmdRemoveHandler(request *restful.Request
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(jobpara.FlowId)
+	dbf, err := rrs.flowDbFile(jobpara.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -1275,7 +1289,7 @@ func (rrs *ResponseResourceJob) FlowJobCmdListHandler(request *restful.Request, 
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(p.FlowId)
+	dbf, err := rrs.flowDbFile(p.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -1314,7 +1328,7 @@ func (rrs *ResponseResourceJob) FlowJobCmdAddHandler(request *restful.Request, r
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(p.FlowId)
+	dbf, err := rrs.flowDbFile(p.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -1355,7 +1369,7 @@ func (rrs *ResponseResourceJob) FlowJobCmdUpdateHandler(request *restful.Request
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(jobpara.FlowId)
+	dbf, err := rrs.flowDbFile(jobpara.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -1402,7 +1416,7 @@ func (rrs *ResponseResourceJob) FlowJobStatusUpdateSubmitHandler(request *restfu
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(jobpara.FlowId)
+	dbf, err := rrs.flowDbFile(jobpara.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -1448,7 +1462,7 @@ func (rrs *ResponseResourceJob) FlowJobStatusUpdateGoHandler(request *restful.Re
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(p.FlowId)
+	dbf, err := rrs.flowDbFile(p.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -1468,40 +1482,40 @@ func (rrs *ResponseResourceJob) FlowJobStatusUpdateGoHandler(request *restful.Re
 		}
 	}
 	jobbn.Status = p.Status
-	jobbn.SServer = p.SServer
-	jobbn.Sip = p.Ip
-	jobbn.Sport = p.Port
+	jobbn.WServer = p.WServer
+	jobbn.Wip = p.WIp
+	jobbn.Wport = p.WPort
 	if jobbn.Server == nil {
 		jobbn.Server = make([]interface{}, 0)
 	}
 	flag := 0
-	for k, v := range jobbn.Server {
-		v1 := v.(module.MetaJobServerBean)
-                if v1.Type == "main" {
-                       v1.Type = ""
-                       jobbn.Server[k] = v1
-                }
-		if v1.Server != p.SServer {
-			continue
-		}
-		flag = 1
-		v1.Ip = p.Ip
-		v1.Port = p.Port
-		v1.Type = "main"
-		jobbn.Server[k] = v1
-	}
+	// for k, v := range jobbn.Server {
+	// 	v1 := v.(module.MetaJobServerBean)
+	// 	if v1.Type == "main" {
+	// 		v1.Type = ""
+	// 		jobbn.Server[k] = v1
+	// 	}
+	// 	if v1.Server != p.WServer {
+	// 		continue
+	// 	}
+	// 	flag = 1
+	// 	v1.Ip = p.Ip
+	// 	v1.Port = p.Port
+	// 	v1.Type = "main"
+	// 	jobbn.Server[k] = v1
+	// }
 	if flag == 0 {
 		s := new(module.MetaJobServerBean)
-		s.Server = p.SServer
-		s.Ip = p.Ip
-		s.Port = p.Port
+		s.Server = p.WServer
+		s.Ip = p.WIp
+		s.Port = p.WPort
 		s.Type = "main"
 		jobbn.Server = append(jobbn.Server, s)
 	}
 	s := new(module.MetaJobServerBean)
-	s.Server = p.SServer
-	s.Ip = p.Ip
-	s.Port = p.Port
+	s.Server = p.WServer
+	s.Ip = p.WIp
+	s.Port = p.WPort
 	s.Type = "main"
 	jsonstr, _ := json.Marshal(jobbn)
 	err = bt.Set(jobbn.Sys+"."+jobbn.Job, string(jsonstr))
@@ -1529,7 +1543,7 @@ func (rrs *ResponseResourceJob) FlowJobStatusUpdatePendingHandler(request *restf
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(jobpara.FlowId)
+	dbf, err := rrs.flowDbFile(jobpara.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -1575,7 +1589,7 @@ func (rrs *ResponseResourceJob) FlowJobStatusUpdateEndHandler(request *restful.R
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(jobpara.FlowId)
+	dbf, err := rrs.flowDbFile(jobpara.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -1622,7 +1636,7 @@ func (rrs *ResponseResourceJob) FlowJobStatusUpdateStartHandler(request *restful
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(jobpara.FlowId)
+	dbf, err := rrs.flowDbFile(jobpara.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -1676,7 +1690,7 @@ func (rrs *ResponseResourceJob) FlowJobParameterRemoveHandler(request *restful.R
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(jobpara.FlowId)
+	dbf, err := rrs.flowDbFile(jobpara.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -1703,7 +1717,7 @@ func (rrs *ResponseResourceJob) FlowJobParameterGetHandler(request *restful.Requ
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(jobpara.FlowId)
+	dbf, err := rrs.flowDbFile(jobpara.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -1805,7 +1819,7 @@ func (rrs *ResponseResourceJob) FlowJobParameterGetAllHandler(request *restful.R
 	retmap[util.CONST_FLOW_RCT] = *p
 
 	//job
-	dbf, err := rrf.flowDbFile(jobpara.FlowId)
+	dbf, err := rrs.flowDbFile(jobpara.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -1873,7 +1887,7 @@ func (rrs *ResponseResourceJob) FlowJobParameterListHandler(request *restful.Req
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(jobpara.FlowId)
+	dbf, err := rrs.flowDbFile(jobpara.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -1912,7 +1926,7 @@ func (rrs *ResponseResourceJob) FlowJobParameterAddHandler(request *restful.Requ
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(p.FlowId)
+	dbf, err := rrs.flowDbFile(p.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -1955,7 +1969,7 @@ func (rrs *ResponseResourceJob) FlowJobParameterUpdateHandler(request *restful.R
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(jobpara.FlowId)
+	dbf, err := rrs.flowDbFile(jobpara.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -2092,7 +2106,7 @@ func (rrs *ResponseResourceJob) FlowJobLogListHandler(request *restful.Request, 
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(p.FlowId)
+	dbf, err := rrs.flowDbFile(p.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -2133,7 +2147,7 @@ func (rrs *ResponseResourceJob) FlowJobLogGetHandler(request *restful.Request, r
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(p.FlowId)
+	dbf, err := rrs.flowDbFile(p.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -2168,7 +2182,7 @@ func (rrs *ResponseResourceJob) FlowJobLogRemoveHandler(request *restful.Request
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(p.FlowId)
+	dbf, err := rrs.flowDbFile(p.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -2200,7 +2214,7 @@ func (rrs *ResponseResourceJob) FlowJobLogAddHandler(request *restful.Request, r
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(p.FlowId)
+	dbf, err := rrs.flowDbFile(p.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -2215,9 +2229,9 @@ func (rrs *ResponseResourceJob) FlowJobLogAddHandler(request *restful.Request, r
 	m.Job = p.Job
 	m.StartTime = p.StartTime
 	m.EndTime = p.EndTime
-	m.SServer = p.SServer
-	m.Sip = p.Sip
-	m.Sport = p.Sport
+	m.WServer = p.WServer
+	m.WIp = p.Wip
+	m.WPort = p.Wport
 	m.Step = p.Step
 	m.Content = make([]string, 0)
 	m.ExitCode = p.ExitCode
@@ -2249,7 +2263,7 @@ func (rrs *ResponseResourceJob) FlowJobLogAppendHandler(request *restful.Request
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(p.FlowId)
+	dbf, err := rrs.flowDbFile(p.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -2272,9 +2286,9 @@ func (rrs *ResponseResourceJob) FlowJobLogAppendHandler(request *restful.Request
 		m.Sys = p.Sys
 		m.Job = p.Job
 		m.StartTime = p.StartTime
-		m.SServer = p.SServer
-		m.Sip = p.Sip
-		m.Sport = p.Sport
+		m.WServer = p.WServer
+		m.WIp = p.Wip
+		m.WPort = p.Wport
 		m.Step = p.Step
 		m.Cmd = p.Cmd
 		m.Content = make([]string, 0)
@@ -2308,7 +2322,7 @@ func (rrs *ResponseResourceJob) FlowJobStatusAllUpdateHandler(request *restful.R
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(p.FlowId)
+	dbf, err := rrs.flowDbFile(p.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -2357,7 +2371,7 @@ func (rrs *ResponseResourceJob) FlowJobStatusUpdate2ServerHandler(request *restf
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parameter missed."), nil)
 		return
 	}
-	dbf, err := rrf.flowDbFile(p.FlowId)
+	dbf, err := rrs.flowDbFile(p.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow db file error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get flow db file error.%v", err), nil)
@@ -2382,9 +2396,9 @@ func (rrs *ResponseResourceJob) FlowJobStatusUpdate2ServerHandler(request *restf
 	if m.Server == nil {
 		m.Server = make([]interface{}, 0)
 	}
-        s := new(module.MetaJobServerBean)
-        s.Server = p.Server
-        s.Type = "F"
+	s := new(module.MetaJobServerBean)
+	s.Server = p.Server
+	s.Type = "F"
 	m.Server = append(m.Server, s.Server)
 	jsonstr, _ := json.Marshal(m)
 	err = bt.Set(m.Sys+"."+m.Job, string(jsonstr))
@@ -2396,4 +2410,9 @@ func (rrs *ResponseResourceJob) FlowJobStatusUpdate2ServerHandler(request *restf
 	jobpool.Remove(p.FlowId + "," + p.Sys + "," + p.Job)
 	retlst := make([]interface{}, 0)
 	util.ApiResponse(response.ResponseWriter, 200, "", retlst)
+}
+
+func (rrs *ResponseResourceJob) flowDbFile(flowid string) (string, error) {
+	f := rrs.Conf.HomeDir + "/" + flowid + "/" + flowid + ".db"
+	return f, nil
 }

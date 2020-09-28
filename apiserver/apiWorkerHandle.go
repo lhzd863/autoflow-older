@@ -17,10 +17,11 @@ import (
 
 type ResponseResourceWorker struct {
 	sync.Mutex
+	Conf *module.MetaApiServerBean
 }
 
-func NewResponseResourceWorker() *ResponseResourceWorker {
-	return &ResponseResourceWorker{}
+func NewResponseResourceWorker(conf *module.MetaApiServerBean) *ResponseResourceWorker {
+	return &ResponseResourceWorker{Conf: conf}
 }
 
 func (rrs *ResponseResourceWorker) WorkerHeartAddHandler(request *restful.Request, response *restful.Response) {
@@ -269,7 +270,7 @@ func (rrs *ResponseResourceWorker) WorkerMgrExecHandler(request *restful.Request
 
 func (rrs *ResponseResourceWorker) WorkerRoutineJobRunningHeartListHandler(request *restful.Request, response *restful.Response) {
 
-	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_SLAVE_JOB_RUNNING_HEART)
+	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_WORKER_JOB_RUNNING_HEART)
 	defer bt.Close()
 
 	strlist := bt.Scan()
@@ -296,13 +297,13 @@ func (rrs *ResponseResourceWorker) WorkerRoutineJobRunningHeartGetHandler(reques
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parse json error.%v", err), nil)
 		return
 	}
-	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_SLAVE_JOB_RUNNING_HEART)
+	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_WORKER_JOB_RUNNING_HEART)
 	defer bt.Close()
 
 	retlst := make([]interface{}, 0)
 	ib := bt.Get(p.Id)
 	if ib != nil {
-		m := new(module.MetaSystemMstFlowRoutineJobRunningHeartBean)
+		m := new(module.MetaSystemLeaderFlowRoutineJobRunningHeartBean)
 		err := json.Unmarshal([]byte(ib.(string)), &m)
 		if err != nil {
 			glog.Glog(LogF, fmt.Sprint(err))
@@ -320,7 +321,7 @@ func (rrs *ResponseResourceWorker) WorkerRoutineJobRunningHeartRemoveHandler(req
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("Parse json error.%v", err), nil)
 		return
 	}
-	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_SLAVE_JOB_RUNNING_HEART)
+	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_WORKER_JOB_RUNNING_HEART)
 	defer bt.Close()
 
 	err = bt.Remove(p.Id)
@@ -341,7 +342,7 @@ func (rrs *ResponseResourceWorker) WorkerRoutineJobRunningHeartAddHandler(reques
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("Parse json error.%v", err), nil)
 		return
 	}
-	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_SLAVE_JOB_RUNNING_HEART)
+	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_WORKER_JOB_RUNNING_HEART)
 	defer bt.Close()
 
 	m := new(module.MetaSystemWorkerRoutineJobRunningHeartBean)

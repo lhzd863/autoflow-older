@@ -11,7 +11,7 @@ type MetaConf struct {
 	HomeDir       string `yaml:"homedir"`
 	ApiServerIp   string `yaml:"apiserverip"`
 	ApiServerPort string `yaml:"apiserverport"`
-	MstIp         string `yaml:"mstip"`
-	MstMaxPort    int64  `yaml:"mstmaxport"`
-	MstMinPort    int64  `yaml:"mstminport"`
+	LeaderIp      string `yaml:"leaderip"`
+	LeaderMaxPort int64  `yaml:"leadermaxport"`
+	LeaderMinPort int64  `yaml:"leaderminport"`
 }

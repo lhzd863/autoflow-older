@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"sync"
 	"time"
 
 	"github.com/emicklei/go-restful"
@@ -13,14 +14,16 @@ import (
 	"github.com/lhzd863/autoflow/module"
 	"github.com/lhzd863/autoflow/util"
 
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 )
 
 type ResponseResourceImage struct {
+	sync.Mutex
+	Conf *module.MetaApiServerBean
 }
 
-func NewResponseResourceImage() *ResponseResourceImage {
-	return &ResponseResourceImage{}
+func NewResponseResourceImage(conf *module.MetaApiServerBean) *ResponseResourceImage {
+	return &ResponseResourceImage{Conf: conf}
 }
 
 func (rrs *ResponseResourceImage) ImageAddHandler(request *restful.Request, response *restful.Response) {
@@ -61,7 +64,7 @@ func (rrs *ResponseResourceImage) ImageAddHandler(request *restful.Request, resp
 	m.CreateTime = timeStr
 	m.User = username
 
-	u1 := uuid.Must(uuid.NewV4(),nil)
+	u1 := uuid.Must(uuid.NewV4(), nil)
 	imageid := fmt.Sprint(u1)
 	m.ImageId = imageid
 	m.Tag = p.Tag

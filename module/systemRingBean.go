@@ -2,7 +2,7 @@ package module
 
 type MetaSystemRingBean struct {
 	Id         string `json:"id"`
-	MstId      string `json:"mstid"`
+	LeaderId   string `json:"leaderid"`
 	FlowId     string `json:"flowid"`
 	RoutineId  string `json:"routineid"`
 	CreateTime string `json:"createtime"`

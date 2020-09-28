@@ -13,8 +13,7 @@ Sub job()
  Status = "Ready"
  JobType = "D"
  Enable = 1
- RetryCnt = 0
- RetryCnt = 0
+ Retry = 0
  Alert = "N"
  TimeTrigger = "N"
  Frequency = "N"
@@ -51,7 +50,7 @@ For i = FirstLine To UBound(arr)
    Print #1, "    jobtype: """ & JobType & """"
    Print #1, "    description: """ & Trim(arr(i, Firstcol + 3)) & """"
    Print #1, "    enable: """ & Enable & """"
-   Print #1, "    sserver: """""
+   Print #1, "    wserver: """""
    Print #1, "    sip: """""
    Print #1, "    sport: """""
    Print #1, "    mserver: """""
@@ -59,7 +58,7 @@ For i = FirstLine To UBound(arr)
    Print #1, "    mport: """""
    Print #1, "    routineid: """""
    Print #1, "    timewindow: """""
-   Print #1, "    retrycnt: """ & RetryCnt & """"
+   Print #1, "    retry: """ & Retry & """"
    Print #1, "    alert: """ & Alert & """"
    Print #1, "    timetrigger: """ & TimeTrigger & """"
    Print #1, "    frequency: """ & Frequency & """"

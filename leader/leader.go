@@ -1,11 +1,8 @@
-package mst
+package leader
 
 import (
 	"encoding/json"
 	"fmt"
-	"golang.org/x/net/context"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 	"math/rand"
 	"net"
 	"os"
@@ -16,7 +13,11 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/satori/go.uuid"
+	"golang.org/x/net/context"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
+
+	uuid "github.com/satori/go.uuid"
 
 	"github.com/lhzd863/autoflow/db"
 	"github.com/lhzd863/autoflow/glog"
@@ -38,19 +39,19 @@ var (
 	ProcessNum          int
 	Ip                  string
 	Port                string
-	MstId               string
+	LeaderId            string
 	shutdownFlowChannel = make(chan interface{})
 	flowChannel         = make(chan interface{})
 )
 
 // 业务实现方法的容器
-type MServer struct {
+type LServer struct {
 	sync.RWMutex
 	waitGroup util.WaitGroupWrapper
 }
 
-func NewMServer(paraMap map[string]interface{}) *MServer {
-	MstId = paraMap["mstid"].(string)
+func NewLServer(paraMap map[string]interface{}) *LServer {
+	LeaderId = paraMap["leaderid"].(string)
 	Ip = paraMap["ip"].(string)
 	Port = paraMap["port"].(string)
 	HomeDir = paraMap["homedir"].(string)
@@ -59,29 +60,29 @@ func NewMServer(paraMap map[string]interface{}) *MServer {
 	ApiServerPort = paraMap["apiserverport"].(string)
 	NumStr := paraMap["processnum"].(string)
 	ProcessNum, _ = strconv.Atoi(NumStr)
-	LogF = HomeDir + "/mst_${" + util.ENV_VAR_DATE + "}.log"
-	m := &MServer{}
+	LogF = HomeDir + "/leader_${" + util.ENV_VAR_DATE + "}.log"
+	m := &LServer{}
 	return m
 
 }
 
-func (ms *MServer) DoCmd(ctx context.Context, in *gproto.Req) (*gproto.Res, error) {
+func (ms *LServer) DoCmd(ctx context.Context, in *gproto.Req) (*gproto.Res, error) {
 	return &gproto.Res{Status_Txt: "", Status_Code: 200, Data: "{}"}, nil
 }
 
-func (ms *MServer) Ping(ctx context.Context, in *gproto.Req) (*gproto.Res, error) {
+func (ms *LServer) Ping(ctx context.Context, in *gproto.Req) (*gproto.Res, error) {
 	return &gproto.Res{Status_Txt: "", Status_Code: 200, Data: "{}"}, nil
 }
 
-func (ms *MServer) JobStart(ctx context.Context, in *gproto.Req) (*gproto.Res, error) {
+func (ms *LServer) JobStart(ctx context.Context, in *gproto.Req) (*gproto.Res, error) {
 	return &gproto.Res{Status_Txt: "", Status_Code: 200, Data: "{}"}, nil
 }
 
-func (ms *MServer) JobExecuter(ctx context.Context, in *gproto.Req) (*gproto.Res, error) {
+func (ms *LServer) JobExecuter(ctx context.Context, in *gproto.Req) (*gproto.Res, error) {
 	return &gproto.Res{Status_Txt: "", Status_Code: 200, Data: "{}"}, nil
 }
 
-func (ms *MServer) FlowStart(ctx context.Context, in *gproto.Req) (*gproto.Res, error) {
+func (ms *LServer) FlowStart(ctx context.Context, in *gproto.Req) (*gproto.Res, error) {
 	mifb := new(module.MetaInstanceFlowBean)
 	err := json.Unmarshal([]byte(in.JsonStr), &mifb)
 	if err != nil {
@@ -105,23 +106,23 @@ func (ms *MServer) FlowStart(ctx context.Context, in *gproto.Req) (*gproto.Res, 
 	wp := make([]interface{}, 0)
 	mp["workpool"] = workPool
 	cnt := 0
-	glog.Glog(LogF, fmt.Sprintf("flowid %v run %v %v", mifb.FlowId))
+	glog.Glog(LogF, fmt.Sprintf("flowid %s run ", mifb.FlowId))
 	for j := 0; j < pnum; j++ {
 		mw := new(MetaMyWork)
 		mw.FlowId = mifb.FlowId
-		mw.MstIp = Ip
-		mw.MstPort = Port
+		mw.LeaderIp = Ip
+		mw.LeaderPort = Port
 		mw.ApiServerIp = ApiServerIp
 		mw.ApiServerPort = ApiServerPort
 		mw.HomeDir = HomeDir
 		mw.AccessToken = AccessToken
 		work := &MyWork{
-			Id:     fmt.Sprint(j),
-			Name:   "A-" + fmt.Sprint(j),
-			MstId:  MstId,
-			FlowId: mifb.FlowId,
-			WP:     workPool,
-			Mmw:    mw,
+			Id:       fmt.Sprint(j),
+			Name:     "A-" + fmt.Sprint(j),
+			LeaderId: LeaderId,
+			FlowId:   mifb.FlowId,
+			WP:       workPool,
+			Mmw:      mw,
 		}
 		err := workPool.PostWork(fmt.Sprintf("name_routine_%v", j), work)
 		if err != nil {
@@ -142,11 +143,11 @@ func (ms *MServer) FlowStart(ctx context.Context, in *gproto.Req) (*gproto.Res, 
 	return &gproto.Res{Status_Txt: msg, Status_Code: 700, Data: "{}"}, nil
 }
 
-func (ms *MServer) FlowCreate(ctx context.Context, in *gproto.Req) (*gproto.Res, error) {
+func (ms *LServer) FlowCreate(ctx context.Context, in *gproto.Req) (*gproto.Res, error) {
 	return &gproto.Res{Status_Txt: "", Status_Code: 700, Data: "{}"}, nil
 }
 
-func (ms *MServer) FlowStop(ctx context.Context, in *gproto.Req) (*gproto.Res, error) {
+func (ms *LServer) FlowStop(ctx context.Context, in *gproto.Req) (*gproto.Res, error) {
 	mifb := new(module.MetaInstanceFlowBean)
 	err := json.Unmarshal([]byte(in.JsonStr), &mifb)
 	if err != nil {
@@ -172,7 +173,7 @@ func (ms *MServer) FlowStop(ctx context.Context, in *gproto.Req) (*gproto.Res, e
 	return &gproto.Res{Status_Txt: "", Status_Code: 200, Data: "{}"}, nil
 }
 
-func (ms *MServer) FlowStatus(ctx context.Context, in *gproto.Req) (*gproto.Res, error) {
+func (ms *LServer) FlowStatus(ctx context.Context, in *gproto.Req) (*gproto.Res, error) {
 	retlst := make([]interface{}, 0)
 	for k := range flowspool.MemMap {
 		mfsb := new(module.MetaFlowStatusBean)
@@ -192,7 +193,7 @@ func (ms *MServer) FlowStatus(ctx context.Context, in *gproto.Req) (*gproto.Res,
 		}
 		mfsb.Ip = Ip
 		mfsb.Port = Port
-		mfsb.MstId = MstId
+		mfsb.LeaderId = LeaderId
 		mfsb.FlowId = k
 		retlst = append(retlst, mfsb)
 	}
@@ -204,7 +205,7 @@ func (ms *MServer) FlowStatus(ctx context.Context, in *gproto.Req) (*gproto.Res,
 	return &gproto.Res{Status_Txt: "", Status_Code: 200, Data: string(jsonstr)}, nil
 }
 
-func (ms *MServer) FlowRoutineAdd(ctx context.Context, in *gproto.Req) (*gproto.Res, error) {
+func (ms *LServer) FlowRoutineAdd(ctx context.Context, in *gproto.Req) (*gproto.Res, error) {
 	mifb := new(module.MetaInstanceFlowBean)
 	err := json.Unmarshal([]byte(in.JsonStr), &mifb)
 	if err != nil {
@@ -251,19 +252,19 @@ func (ms *MServer) FlowRoutineAdd(ctx context.Context, in *gproto.Req) (*gproto.
 		wp.AddRoutine(ri)
 		mw1 := new(MetaMyWork)
 		mw1.FlowId = mifb.FlowId
-		mw1.MstIp = Ip
-		mw1.MstPort = Port
+		mw1.LeaderIp = Ip
+		mw1.LeaderPort = Port
 		mw1.ApiServerIp = ApiServerIp
 		mw1.ApiServerPort = ApiServerPort
 		mw1.HomeDir = HomeDir
 		mw1.AccessToken = AccessToken
 		work := &MyWork{
-			Id:     ii,
-			Name:   "A-" + ii,
-			MstId:  MstId,
-			FlowId: mifb.FlowId,
-			WP:     wp,
-			Mmw:    mw1,
+			Id:       ii,
+			Name:     "A-" + ii,
+			LeaderId: LeaderId,
+			FlowId:   mifb.FlowId,
+			WP:       wp,
+			Mmw:      mw1,
 		}
 		err = wp.PostWork(fmt.Sprintf("name_routine_%v", ii), work)
 		if err != nil {
@@ -285,7 +286,7 @@ func (ms *MServer) FlowRoutineAdd(ctx context.Context, in *gproto.Req) (*gproto.
 	return &gproto.Res{Status_Txt: msg, Status_Code: 700, Data: "{}"}, nil
 }
 
-func (ms *MServer) FlowRoutineSub(ctx context.Context, in *gproto.Req) (*gproto.Res, error) {
+func (ms *LServer) FlowRoutineSub(ctx context.Context, in *gproto.Req) (*gproto.Res, error) {
 	mifb := new(module.MetaInstanceFlowBean)
 	err := json.Unmarshal([]byte(in.JsonStr), &mifb)
 	if err != nil {
@@ -322,7 +323,7 @@ func (ms *MServer) FlowRoutineSub(ctx context.Context, in *gproto.Req) (*gproto.
 	return &gproto.Res{Status_Txt: "", Status_Code: 200, Data: "{}"}, nil
 }
 
-func (ms *MServer) FlowRoutineList(ctx context.Context, in *gproto.Req) (*gproto.Res, error) {
+func (ms *LServer) FlowRoutineList(ctx context.Context, in *gproto.Req) (*gproto.Res, error) {
 	mifb := new(module.MetaInstanceFlowBean)
 	err := json.Unmarshal([]byte(in.JsonStr), &mifb)
 	if err != nil {
@@ -346,7 +347,7 @@ func (ms *MServer) FlowRoutineList(ctx context.Context, in *gproto.Req) (*gproto
 		mfsb.Ip = Ip
 		mfsb.Port = Port
 		mfsb.FlowId = k
-		mfsb.MstId = MstId
+		mfsb.LeaderId = LeaderId
 		if wp != nil {
 			mfsb.WorkPoolStatus = "Running"
 		}
@@ -362,15 +363,15 @@ func (ms *MServer) FlowRoutineList(ctx context.Context, in *gproto.Req) (*gproto
 	return &gproto.Res{Status_Txt: "", Status_Code: 200, Data: string(jsonstr)}, nil
 }
 
-func (ms *MServer) JobStop(ctx context.Context, in *gproto.Req) (*gproto.Res, error) {
+func (ms *LServer) JobStop(ctx context.Context, in *gproto.Req) (*gproto.Res, error) {
 	return &gproto.Res{Status_Txt: "", Status_Code: 200, Data: "{}"}, nil
 }
 
-func (ms *MServer) JobStatus(ctx context.Context, in *gproto.Req) (*gproto.Res, error) {
+func (ms *LServer) JobStatus(ctx context.Context, in *gproto.Req) (*gproto.Res, error) {
 	return &gproto.Res{Status_Txt: "", Status_Code: 200, Data: "{}"}, nil
 }
 
-func (ms *MServer) MstFlowRoutineStop(ctx context.Context, in *gproto.Req) (*gproto.Res, error) {
+func (ms *LServer) LeaderFlowRoutineStop(ctx context.Context, in *gproto.Req) (*gproto.Res, error) {
 	p := new(module.MetaInstanceFlowBean)
 	err := json.Unmarshal([]byte(in.JsonStr), &p)
 	if err != nil {
@@ -387,7 +388,7 @@ func (ms *MServer) MstFlowRoutineStop(ctx context.Context, in *gproto.Req) (*gpr
 			wk1 := (mw[k1]).(*MyWork)
 			if wk1.Id == p.RoutineId {
 				wk1.StopFlag = "1"
-				glog.Glog(LogF, fmt.Sprintf("flow %v stop routine %v.", p.MstId, p.FlowId, wk1.Id))
+				glog.Glog(LogF, fmt.Sprintf("flow %v %v stop routine %v.", p.LeaderId, p.FlowId, wk1.Id))
 				continue
 			}
 			nmw = append(nmw, mw[k1])
@@ -398,7 +399,7 @@ func (ms *MServer) MstFlowRoutineStop(ctx context.Context, in *gproto.Req) (*gpr
 	return &gproto.Res{Status_Txt: "", Status_Code: 200, Data: "{}"}, nil
 }
 
-func (ms *MServer) MstFlowRoutineStart(ctx context.Context, in *gproto.Req) (*gproto.Res, error) {
+func (ms *LServer) LeaderFlowRoutineStart(ctx context.Context, in *gproto.Req) (*gproto.Res, error) {
 	p := new(module.MetaInstanceFlowBean)
 	err := json.Unmarshal([]byte(in.JsonStr), &p)
 	if err != nil {
@@ -416,30 +417,30 @@ func (ms *MServer) MstFlowRoutineStart(ctx context.Context, in *gproto.Req) (*gp
 	for k := range mw {
 		wk0 := mw[k].(*MyWork)
 		if p.RoutineId == wk0.Id {
-			glog.Glog(LogF, fmt.Sprintf("%v mst %v flow %v routine has exists.", p.MstId, p.FlowId, p.RoutineId))
-			return &gproto.Res{Status_Txt: fmt.Sprintf("%v mst %v flow %v routine has exists.", p.MstId, p.FlowId, p.RoutineId), Status_Code: 700, Data: "{}"}, nil
+			glog.Glog(LogF, fmt.Sprintf("%v leader %v flow %v routine has exists.", p.LeaderId, p.FlowId, p.RoutineId))
+			return &gproto.Res{Status_Txt: fmt.Sprintf("%v leader %v flow %v routine has exists.", p.LeaderId, p.FlowId, p.RoutineId), Status_Code: 700, Data: "{}"}, nil
 		}
 	}
 
-	glog.Glog(LogF, fmt.Sprintf("%v %v need run runtine %v.", p.MstId, p.FlowId, p.RoutineId))
+	glog.Glog(LogF, fmt.Sprintf("%v %v need run runtine %v.", p.LeaderId, p.FlowId, p.RoutineId))
 
 	ri, _ := strconv.Atoi(p.RoutineId)
 	wp.AddRoutine(ri)
 	mw1 := new(MetaMyWork)
 	mw1.FlowId = p.FlowId
-	mw1.MstIp = Ip
-	mw1.MstPort = Port
+	mw1.LeaderIp = Ip
+	mw1.LeaderPort = Port
 	mw1.ApiServerIp = ApiServerIp
 	mw1.ApiServerPort = ApiServerPort
 	mw1.HomeDir = HomeDir
 	mw1.AccessToken = AccessToken
 	work := &MyWork{
-		Id:     p.RoutineId,
-		Name:   "A-" + p.RoutineId,
-		MstId:  MstId,
-		FlowId: p.FlowId,
-		WP:     wp,
-		Mmw:    mw1,
+		Id:       p.RoutineId,
+		Name:     "A-" + p.RoutineId,
+		LeaderId: LeaderId,
+		FlowId:   p.FlowId,
+		WP:       wp,
+		Mmw:      mw1,
 	}
 	err = wp.PostWork(fmt.Sprintf("name_routine_%v", p.RoutineId), work)
 	if err != nil {
@@ -457,16 +458,16 @@ func (ms *MServer) MstFlowRoutineStart(ctx context.Context, in *gproto.Req) (*gp
 	return &gproto.Res{Status_Txt: "", Status_Code: 200, Data: "{}"}, nil
 }
 
-func (ms *MServer) Main() bool {
+func (ms *LServer) Main() bool {
 	var wg util.WaitGroupWrapper
 	StopFlag := 0
 
 	exitChan := make(chan int)
 	signalChan := make(chan os.Signal, 1)
-	m := new(module.MetaParaMstHeartAddBean)
-	u1 := uuid.Must(uuid.NewV4(),nil)
+	m := new(module.MetaParaLeaderHeartAddBean)
+	u1 := uuid.Must(uuid.NewV4(), nil)
 	m.Id = fmt.Sprint(u1)
-	m.MstId = MstId
+	m.LeaderId = LeaderId
 	m.Ip = Ip
 	m.Port = Port
 	timeStr0 := time.Now().Format("2006-01-02 15:04:05")
@@ -491,7 +492,7 @@ func (ms *MServer) Main() bool {
 			if et-st > 30 {
 				ret := ms.Register(m)
 				if !ret {
-					glog.Glog(LogF, "register mst fail.")
+					glog.Glog(LogF, "register leader fail.")
 				}
 				st = time.Now().Unix()
 			}
@@ -513,7 +514,7 @@ func (ms *MServer) Main() bool {
 	 * (proto编译时会为每个service生成Register***Server方法)
 	 * 包.注册服务方法(gRpc服务实例，包含接口方法的结构体[指针])
 	 */
-	gproto.RegisterFlowMasterServer(ss, &MServer{})
+	gproto.RegisterLeaderServer(ss, &LServer{})
 	/**如果有可以注册多个接口服务,结构体要实现对应的接口方法
 	 * user.RegisterLoginServer(s, &server{})
 	 * minMovie.RegisterFbiServer(s, &server{})
@@ -536,9 +537,9 @@ func (ms *MServer) Main() bool {
 	return true
 }
 
-func (ms *MServer) Register(m *module.MetaParaMstHeartAddBean) bool {
-	glog.Glog(LogF, fmt.Sprintf("Register node %v %v:%v", MstId, Ip, Port))
-	url := fmt.Sprintf("http://%v:%v/api/v1/mst/heart/add?accesstoken=%v", ApiServerIp, ApiServerPort, AccessToken)
+func (ms *LServer) Register(m *module.MetaParaLeaderHeartAddBean) bool {
+	glog.Glog(LogF, fmt.Sprintf("Register node %v %v:%v", LeaderId, Ip, Port))
+	url := fmt.Sprintf("http://%v:%v/api/v1/leader/heart/add?accesstoken=%v", ApiServerIp, ApiServerPort, AccessToken)
 
 	loc, _ := time.LoadLocation("Local")
 	timeLayout := "2006-01-02 15:04:05"
@@ -580,9 +581,9 @@ func (ms *MServer) Register(m *module.MetaParaMstHeartAddBean) bool {
 	return true
 }
 
-func (ms *MServer) RegisterRemove(m *module.MetaParaMstHeartAddBean) bool {
-	glog.Glog(LogF, fmt.Sprintf("Register remove node %v %v:%v", MstId, Ip, Port))
-	url := fmt.Sprintf("http://%v:%v/api/v1/mst/heart/rm?accesstoken=%v", ApiServerIp, ApiServerPort, AccessToken)
+func (ms *LServer) RegisterRemove(m *module.MetaParaLeaderHeartAddBean) bool {
+	glog.Glog(LogF, fmt.Sprintf("Register remove node %v %v:%v", LeaderId, Ip, Port))
+	url := fmt.Sprintf("http://%v:%v/api/v1/leader/heart/rm?accesstoken=%v", ApiServerIp, ApiServerPort, AccessToken)
 	jsonstr0, err := json.Marshal(m)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("json marshal %v", err))
@@ -607,10 +608,10 @@ func (ms *MServer) RegisterRemove(m *module.MetaParaMstHeartAddBean) bool {
 }
 
 type MyWork struct {
-	Id       string "id"
-	MstId    string "mstid"
-	FlowId   string "flowid"
-	Name     string "The Name of a process"
+	Id       string `json:"id"`
+	LeaderId string `json:"leaderid"`
+	FlowId   string `json:"flowid"`
+	Name     string `json:"name"`
 	WP       *workpool.WorkPool
 	Mmw      *MetaMyWork
 	StopFlag string
@@ -619,11 +620,11 @@ type MyWork struct {
 
 func (workPool *MyWork) DoWork(workRoutine int) {
 	var waitGroup util.WaitGroupWrapper
-	m := new(module.MetaMstFlowRoutineHeartBean)
-	u1 := uuid.Must(uuid.NewV4(),nil)
+	m := new(module.MetaLeaderFlowRoutineHeartBean)
+	u1 := uuid.Must(uuid.NewV4(), nil)
 	m.Id = fmt.Sprint(u1)
 	m.FlowId = workPool.Mmw.FlowId
-	m.MstId = MstId
+	m.LeaderId = LeaderId
 	m.RoutineId = workPool.Id
 	m.Ip = Ip
 	m.Port = Port
@@ -651,7 +652,7 @@ func (workPool *MyWork) DoWork(workRoutine int) {
 				if et-st > 30 {
 					ret := workPool.RoutineRegister(m)
 					if !ret {
-						glog.Glog(LogF, fmt.Sprintf("register mst % routine %v fail.", MstId, workPool.Id))
+						glog.Glog(LogF, fmt.Sprintf("register leader %v routine %v fail.", LeaderId, workPool.Id))
 					}
 					st = time.Now().Unix()
 				}
@@ -678,11 +679,11 @@ func (workPool *MyWork) DoWork(workRoutine int) {
 	glog.Glog(LogF, fmt.Sprintf("%s", workPool.Name))
 	glog.Glog(LogF, fmt.Sprintf("*******> WR: %d  QW: %d  AR: %d", workRoutine, workPool.WP.QueuedWork(), workPool.WP.ActiveRoutines()))
 
-	nmq := NewFlowMgr(workPool.Mmw.FlowId, workPool.Mmw.ApiServerIp, workPool.Mmw.ApiServerPort, MstId, workPool.Mmw.HomeDir, workPool.Mmw.MstIp, workPool.Mmw.MstPort, workPool.Mmw.AccessToken, workPool.Id)
+	nmq := NewFlowMgr(workPool.Mmw.FlowId, workPool.Mmw.ApiServerIp, workPool.Mmw.ApiServerPort, LeaderId, workPool.Mmw.HomeDir, workPool.Mmw.LeaderIp, workPool.Mmw.LeaderPort, workPool.Mmw.AccessToken, workPool.Id)
 	for {
-		glog.Glog(LogF, "workRoutine:"+workPool.Name+",flowid:"+workPool.Mmw.FlowId+",mst:"+MstId+" working...")
+		glog.Glog(LogF, "workRoutine:"+workPool.Name+",flowid:"+workPool.Mmw.FlowId+",leader:"+LeaderId+" working...")
 		if workPool.StopFlag == "1" {
-			glog.Glog(LogF, "workRoutine:"+workPool.Name+",flowid:"+workPool.Mmw.FlowId+",mst:"+MstId+" exit.")
+			glog.Glog(LogF, "workRoutine:"+workPool.Name+",flowid:"+workPool.Mmw.FlowId+",leader:"+LeaderId+" exit.")
 			break
 		}
 		var wg util.WaitGroupWrapper
@@ -701,9 +702,9 @@ func (workPool *MyWork) DoWork(workRoutine int) {
 	workPool.RoutineRegisterRemove(m)
 }
 
-func (workPool *MyWork) RoutineRegister(m *module.MetaMstFlowRoutineHeartBean) bool {
-	glog.Glog(LogF, fmt.Sprintf("Register %v %v routine %v:%v", MstId, workPool.Id, Ip, Port))
-	url := fmt.Sprintf("http://%v:%v/api/v1/mst/flow/routine/heart/add?accesstoken=%v", ApiServerIp, ApiServerPort, AccessToken)
+func (workPool *MyWork) RoutineRegister(m *module.MetaLeaderFlowRoutineHeartBean) bool {
+	glog.Glog(LogF, fmt.Sprintf("Register %v %v routine %v:%v", LeaderId, workPool.Id, Ip, Port))
+	url := fmt.Sprintf("http://%v:%v/api/v1/leader/flow/routine/heart/add?accesstoken=%v", ApiServerIp, ApiServerPort, AccessToken)
 	m.Lst = workPool.JobList
 	m.JobNum = fmt.Sprint(len(workPool.JobList))
 
@@ -746,9 +747,9 @@ func (workPool *MyWork) RoutineRegister(m *module.MetaMstFlowRoutineHeartBean) b
 	return true
 }
 
-func (workPool *MyWork) RoutineRegisterRemove(m *module.MetaMstFlowRoutineHeartBean) bool {
-	glog.Glog(LogF, fmt.Sprintf("Register remove %v %v %v routine %v:%v", MstId, workPool.Id, Ip, Port))
-	url := fmt.Sprintf("http://%v:%v/api/v1/mst/flow/routine/heart/rm?accesstoken=%v", ApiServerIp, ApiServerPort, AccessToken)
+func (workPool *MyWork) RoutineRegisterRemove(m *module.MetaLeaderFlowRoutineHeartBean) bool {
+	glog.Glog(LogF, fmt.Sprintf("Register remove %v %v routine %v:%v", LeaderId, workPool.Id, Ip, Port))
+	url := fmt.Sprintf("http://%v:%v/api/v1/leader/flow/routine/heart/rm?accesstoken=%v", ApiServerIp, ApiServerPort, AccessToken)
 	jsonstr0, err := json.Marshal(m)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprint(err))

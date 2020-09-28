@@ -10,16 +10,16 @@ type MetaJobBean struct {
 	JobType        string        `json:"jobtype"`
 	Description    string        `json:"description"`
 	Enable         string        `json:"enable"`
-	SServer        string        `json:"sserver"`
-	Sip            string        `json:"sip"`
-	Sport          string        `json:"sport"`
-	MServer        string        `json:"mserver"`
+	WServer        string        `json:"wserver"` //worker server
+	Wip            string        `json:"wip"`
+	Wport          string        `json:"wport"`
+	Mserver        string        `json:"mserver"` //main server
 	Mip            string        `json:"mip"`
 	Mport          string        `json:"mport"`
 	RoutineId      string        `json:"routineid"`
 	TimeWindow     string        `json:"timewindow"`
 	DynamicServer  string        `json:"dynamicserver"` //N:don't dynamic allocate server,other: Dynamic allocate server
-	RetryCnt       string        `json:"retrycnt"`
+	Retry          string        `json:"retry"`
 	Alert          string        `json:"alert"`
 	TimeTrigger    string        `json:"timetrigger"`
 	Frequency      string        `json:"frequency"`
@@ -33,9 +33,9 @@ type MetaParaFlowJobAddBean struct {
 	FlowId         string `json:"flowid"`
 	Sys            string `json:"sys"`
 	Job            string `json:"job"`
-	SServer        string `json:"sserver"`
-	Sip            string `json:"sip"`
-	Sport          string `json:"sport"`
+	WServer        string `json:"wserver"` //worker server
+	Wip            string `json:"wip"`
+	Wport          string `json:"wport"`
 	RunContext     string `json:"runcontext"`
 	Status         string `json:"status"`
 	JobType        string `json:"jobtype"`
@@ -43,7 +43,7 @@ type MetaParaFlowJobAddBean struct {
 	Enable         string `json:"enable"`
 	TimeWindow     string `json:"timewindow"`
 	DynamicServer  string `json:"dynamicserver"`
-	RetryCnt       string `json:"retrycnt"`
+	Retry          string `json:"retry"`
 	Alert          string `json:"alert"`
 	TimeTrigger    string `json:"timetrigger"`
 	Frequency      string `json:"frequency"`
@@ -71,9 +71,9 @@ type MetaParaFlowJobUpdateBean struct {
 	FlowId         string `json:"flowid"`
 	Sys            string `json:"sys"`
 	Job            string `json:"job"`
-	SServer        string `json:"sserver"`
-	Sip            string `json:"sip"`
-	Sport          string `json:"sport"`
+	WServer        string `json:"wserver"`
+	Wip            string `json:"wip"`
+	Wport          string `json:"wport"`
 	RunContext     string `json:"runcontext"`
 	Status         string `json:"status"`
 	JobType        string `json:"jobtype"`
@@ -81,7 +81,7 @@ type MetaParaFlowJobUpdateBean struct {
 	Enable         string `json:"enable"`
 	TimeWindow     string `json:"timewindow"`
 	DynamicServer  string `json:"dynamicserver"`
-	RetryCnt       string `json:"retrycnt"`
+	Retry       string `json:"retry"`
 	Alert          string `json:"alert"`
 	TimeTrigger    string `json:"timetrigger"`
 	Frequency      string `json:"frequency"`

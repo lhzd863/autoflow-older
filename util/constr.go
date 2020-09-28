@@ -28,13 +28,10 @@ const (
 	JOB_STATUS_PENDING = "job.status.pending"
 	JOB_STATUS_CURRENT = "job.status.current"
 	//
-	SLV_NODE_NAME         = "slv.node.name"
-	SLV_NODE_MAX_PARALLEL = "slv.node.max.parallel"
-	SLV_NODE_SLEEP_TIME   = "slv.node.sleep.time"
+	WORKER_NODE_NAME         = "worker.node.name"
+	WORKER_NODE_MAX_PARALLEL = "worker.node.max.parallel"
+	WORKER_NODE_SLEEP_TIME   = "worker.node.sleep.time"
 	//
 	BATCH_HOME = "batch.home"
 	BATCH_LOG  = "batch.log"
-	//
-	SLV_SLEEP_TIME = "slv.sleep.time"
-	MST_SLEEP_TIME = "mst.sleep.time"
 )

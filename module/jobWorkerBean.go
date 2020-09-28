@@ -5,7 +5,7 @@ type MetaJobWorkerBean struct {
 	FlowId      string        `json:"flowid"`
 	Sys         string        `json:"sys"`
 	Job         string        `json:"job"`
-	RetryCnt    string        `json:"retrycnt"`
+	Retry       int           `json:"retry"`
 	Alert       string        `json:"alert"`
 	Status      string        `json:"status"`
 	StartTime   string        `json:"stt"`
@@ -13,9 +13,9 @@ type MetaJobWorkerBean struct {
 	RunningTime string        `json:"rt"`
 	RunningCmd  []interface{} `json:"rc"`
 	Parameter   []interface{} `json:"parameter"`
-	MasterIp    string        `json:"mip"`
-	MasterPort  string        `json:"mport"`
-	SlaveIp     string        `json:"sip"`
-	SlavePort   string        `json:"sport"`
+	LeaderIp    string        `json:"lip"`
+	LeaderPort  string        `json:"lport"`
+	WorkerIp    string        `json:"wip"`
+	WorkerPort  string        `json:"wport"`
 	Cmd         []interface{} `json:"cmd"`
 }

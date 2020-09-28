@@ -15,10 +15,11 @@ import (
 
 type ResponseResourceStat struct {
 	sync.Mutex
+	Conf *module.MetaApiServerBean
 }
 
-func NewResponseResourceStat() *ResponseResourceStat {
-	return &ResponseResourceStat{}
+func NewResponseResourceStat(conf *module.MetaApiServerBean) *ResponseResourceStat {
+	return &ResponseResourceStat{Conf: conf}
 }
 
 func (rrs *ResponseResourceStat) SystemStatJobStatusCntHandler(request *restful.Request, response *restful.Response) {
@@ -82,4 +83,9 @@ func (rrs *ResponseResourceStat) SystemStatJobStatusCntHandler(request *restful.
 	n.Running = fmt.Sprint(retmap["Running"])
 	retlst = append(retlst, n)
 	util.ApiResponse(response.ResponseWriter, 200, "", retlst)
+}
+
+func (rrs *ResponseResourceStat) flowDbFile(flowid string) (string, error) {
+	f := rrs.Conf.HomeDir + "/" + flowid + "/" + flowid + ".db"
+	return f, nil
 }

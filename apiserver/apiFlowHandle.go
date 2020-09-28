@@ -24,10 +24,11 @@ import (
 
 type ResponseResourceFlow struct {
 	sync.Mutex
+	Conf *module.MetaApiServerBean
 }
 
-func NewResponseResourceFlow() *ResponseResourceFlow {
-	return &ResponseResourceFlow{}
+func NewResponseResourceFlow(conf *module.MetaApiServerBean) *ResponseResourceFlow {
+	return &ResponseResourceFlow{Conf: conf}
 }
 
 func (rrs *ResponseResourceFlow) InstanceCreateHandler(request *restful.Request, response *restful.Response) {
@@ -57,10 +58,10 @@ func (rrs *ResponseResourceFlow) InstanceCreateHandler(request *restful.Request,
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("para conv processnum int error.%v", err), nil)
 		return
 	}
-	mparr := rrs.getMstPort(pn)
+	mparr := rrs.getLeaderPort(pn)
 	if len(mparr) == 0 {
-		glog.Glog(LogF, fmt.Sprintf("no mst start flow."))
-		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("no mst start flow."), nil)
+		glog.Glog(LogF, fmt.Sprintf("no Leader start flow."))
+		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("no Leader start flow."), nil)
 		return
 	}
 
@@ -162,14 +163,14 @@ func (rrs *ResponseResourceFlow) InstanceCreateHandler(request *restful.Request,
 			return
 		}
 
-		mmfb := new(module.MetaMstFlowBean)
+		mmfb := new(module.MetaLeaderFlowBean)
 		mmfb.FlowId = fid
-		mmfb.MstId = mh.MstId
+		mmfb.LeaderId = mh.LeaderId
 		mmfb.Ip = mh.Ip
 		mmfb.Port = mh.Port
 		mmfb.UpdateTime = timeStr
 		mmfb.ProcessNum = flowinstbean.ProcessNum
-		err = rrs.saveMstFlow(mmfb)
+		err = rrs.saveLeaderFlow(mmfb)
 		if err != nil {
 			glog.Glog(LogF, fmt.Sprintf("could not save: %v", err))
 			util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("%v:%v could not save: %v", mh.Ip, mh.Port, err), nil)
@@ -181,33 +182,33 @@ func (rrs *ResponseResourceFlow) InstanceCreateHandler(request *restful.Request,
 }
 
 func (rrs *ResponseResourceFlow) InstanceStartHandler(request *restful.Request, response *restful.Response) {
-	mjfbean := new(module.MetaInstanceFlowBean)
-	err := request.ReadEntity(&mjfbean)
+	p := new(module.MetaInstanceFlowBean)
+	err := request.ReadEntity(&p)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("parse json error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("parse json error.%v", err), nil)
 		return
 	}
-	pn, err := strconv.Atoi(mjfbean.ProcessNum)
+	pn, err := strconv.Atoi(p.ProcessNum)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("para conv processnum int error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("para conv processnum int error.%v", err), nil)
 		return
 	}
 
-	mparr := rrs.getMstPort(pn)
+	mparr := rrs.getLeaderPort(pn)
 	if len(mparr) == 0 {
-		glog.Glog(LogF, fmt.Sprintf("no mst start flow."))
-		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("no mst start flow."), nil)
+		glog.Glog(LogF, fmt.Sprintf("no Leader start flow."))
+		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("no Leader start flow."), nil)
 		return
 	}
 
 	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_FLOW)
 	defer bt.Close()
-	fb0 := bt.Get(mjfbean.FlowId)
+	fb0 := bt.Get(p.FlowId)
 	if fb0 == nil {
-		glog.Glog(LogF, fmt.Sprintf("flow %v not exists,start flow fail.", mjfbean.FlowId))
-		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("flow %v not exists,start flow fail.", mjfbean.FlowId), nil)
+		glog.Glog(LogF, fmt.Sprintf("flow %v not exists,start flow fail.", p.FlowId))
+		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("flow %v not exists,start flow fail.", p.FlowId), nil)
 		return
 	}
 	fb := new(module.MetaJobFlowBean)
@@ -256,8 +257,8 @@ func (rrs *ResponseResourceFlow) InstanceStartHandler(request *restful.Request, 
 		t := gproto.NewLeaderClient(conn)
 
 		mifb := new(module.MetaInstanceFlowBean)
-		mifb.ProcessNum = mjfbean.ProcessNum
-		mifb.FlowId = mjfbean.FlowId
+		mifb.ProcessNum = p.ProcessNum
+		mifb.FlowId = p.FlowId
 
 		jsonstr, err := json.Marshal(mifb)
 		if err != nil {
@@ -279,14 +280,14 @@ func (rrs *ResponseResourceFlow) InstanceStartHandler(request *restful.Request, 
 			return
 		}
 
-		mmfb := new(module.MetaMstFlowBean)
+		mmfb := new(module.MetaLeaderFlowBean)
 		mmfb.FlowId = fb.FlowId
-		mmfb.MstId = mh.MstId
+		mmfb.LeaderId = mh.LeaderId
 		mmfb.Ip = mh.Ip
 		mmfb.Port = mh.Port
 		mmfb.UpdateTime = timeStr
-		mmfb.ProcessNum = mjfbean.ProcessNum
-		err = rrs.saveMstFlow(mmfb)
+		mmfb.ProcessNum = p.ProcessNum
+		err = rrs.saveLeaderFlow(mmfb)
 		if err != nil {
 			glog.Glog(LogF, fmt.Sprintf("could not save: %v", err))
 			util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("%v:%v could not save: %v", mh.Ip, mh.Port, err), nil)
@@ -298,7 +299,7 @@ func (rrs *ResponseResourceFlow) InstanceStartHandler(request *restful.Request, 
 }
 
 func (rrs *ResponseResourceFlow) FlowListHandler(request *restful.Request, response *restful.Response) {
-	mharr := rrs.getMstHeart()
+	mharr := rrs.getLeaderHeart()
 	if len(mharr) == 0 {
 		glog.Glog(LogF, fmt.Sprintf("no flow port error."))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("no flow port error."), nil)
@@ -440,8 +441,8 @@ func (rrs *ResponseResourceFlow) FlowUpdateHandler(request *restful.Request, res
 	util.ApiResponse(response.ResponseWriter, 200, "", retlst)
 }
 
-func (rrs *ResponseResourceFlow) MstInstanceStartHandler(request *restful.Request, response *restful.Response) {
-	p := new(module.MetaParaMstFlowStartBean)
+func (rrs *ResponseResourceFlow) LeaderInstanceStartHandler(request *restful.Request, response *restful.Response) {
+	p := new(module.MetaParaLeaderFlowStartBean)
 	err := request.ReadEntity(&p)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("parse json error.%v", err))
@@ -455,10 +456,10 @@ func (rrs *ResponseResourceFlow) MstInstanceStartHandler(request *restful.Reques
 		return
 	}
 
-	m, err := rrs.getMstInfo(p.MstId, pn)
+	m, err := rrs.getLeaderInfo(p.LeaderId, pn)
 	if err != nil {
-		glog.Glog(LogF, fmt.Sprintf("get mst info err.%v", err))
-		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get mst info err.%v", err), nil)
+		glog.Glog(LogF, fmt.Sprintf("get Leader info err.%v", err))
+		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get Leader info err.%v", err), nil)
 		return
 	}
 
@@ -562,7 +563,7 @@ func (rrs *ResponseResourceFlow) InstanceStopHandler(request *restful.Request, r
 	fparr, err := rrs.getFlowPort(flowbean.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("get flow port error.%v", err))
-		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get mst port error.%v", err), nil)
+		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get Leader port error.%v", err), nil)
 		return
 	}
 
@@ -629,8 +630,8 @@ func (rrs *ResponseResourceFlow) InstanceStopHandler(request *restful.Request, r
 	util.ApiResponse(response.ResponseWriter, 200, "", retlst)
 }
 
-func (rrs *ResponseResourceFlow) MstInstanceStopHandler(request *restful.Request, response *restful.Response) {
-	p := new(module.MetaParaMstFlowStopBean)
+func (rrs *ResponseResourceFlow) LeaderInstanceStopHandler(request *restful.Request, response *restful.Response) {
+	p := new(module.MetaParaLeaderFlowStopBean)
 	err := request.ReadEntity(&p)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("parse json error.%v", err))
@@ -638,10 +639,10 @@ func (rrs *ResponseResourceFlow) MstInstanceStopHandler(request *restful.Request
 		return
 	}
 
-	m, err := rrs.getMstInfo(p.MstId, 1)
+	m, err := rrs.getLeaderInfo(p.LeaderId, 1)
 	if err != nil {
-		glog.Glog(LogF, fmt.Sprintf("get mst info error.%v", err))
-		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get mst info error.%v", err), nil)
+		glog.Glog(LogF, fmt.Sprintf("get Leader info error.%v", err))
+		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get Leader info error.%v", err), nil)
 		return
 	}
 
@@ -706,8 +707,8 @@ func (rrs *ResponseResourceFlow) MstInstanceStopHandler(request *restful.Request
 	util.ApiResponse(response.ResponseWriter, 200, "", retlst)
 }
 
-func (rrs *ResponseResourceFlow) MstFlowRoutineStartHandler(request *restful.Request, response *restful.Response) {
-	p := new(module.MetaParaMstFlowStartBean)
+func (rrs *ResponseResourceFlow) LeaderFlowRoutineStartHandler(request *restful.Request, response *restful.Response) {
+	p := new(module.MetaParaLeaderFlowStartBean)
 	err := request.ReadEntity(&p)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("parse json error.%v", err))
@@ -715,10 +716,10 @@ func (rrs *ResponseResourceFlow) MstFlowRoutineStartHandler(request *restful.Req
 		return
 	}
 
-	m, err := rrs.getMstInfo(p.MstId, 1)
+	m, err := rrs.getLeaderInfo(p.LeaderId, 1)
 	if err != nil {
-		glog.Glog(LogF, fmt.Sprintf("get mst info err.%v", err))
-		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get mst info err.%v", err), nil)
+		glog.Glog(LogF, fmt.Sprintf("get Leader info err.%v", err))
+		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get Leader info err.%v", err), nil)
 		return
 	}
 
@@ -811,8 +812,8 @@ func (rrs *ResponseResourceFlow) MstFlowRoutineStartHandler(request *restful.Req
 	util.ApiResponse(response.ResponseWriter, 200, "", retlst)
 }
 
-func (rrs *ResponseResourceFlow) MstFlowRoutineStopHandler(request *restful.Request, response *restful.Response) {
-	p := new(module.MetaParaMstFlowStartBean)
+func (rrs *ResponseResourceFlow) LeaderFlowRoutineStopHandler(request *restful.Request, response *restful.Response) {
+	p := new(module.MetaParaLeaderFlowStartBean)
 	err := request.ReadEntity(&p)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("parse json error.%v", err))
@@ -820,10 +821,10 @@ func (rrs *ResponseResourceFlow) MstFlowRoutineStopHandler(request *restful.Requ
 		return
 	}
 
-	m, err := rrs.getMstInfo(p.MstId, 1)
+	m, err := rrs.getLeaderInfo(p.LeaderId, 1)
 	if err != nil {
-		glog.Glog(LogF, fmt.Sprintf("get mst info err.%v", err))
-		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get mst info err.%v", err), nil)
+		glog.Glog(LogF, fmt.Sprintf("get Leader info err.%v", err))
+		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("get Leader info err.%v", err), nil)
 		return
 	}
 
@@ -891,14 +892,14 @@ func (rrs *ResponseResourceFlow) InstanceListHandler(request *restful.Request, r
 
 func (rrs *ResponseResourceFlow) InstanceListStatusHandler(request *restful.Request, response *restful.Response) {
 
-	bt0 := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_MASTER_ROUTINE_HEART)
+	bt0 := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_LEADER_ROUTINE_HEART)
 	defer bt0.Close()
 
 	strlist0 := bt0.Scan()
-	retlst0 := make([]*module.MetaMstFlowRoutineHeartBean, 0)
+	retlst0 := make([]*module.MetaLeaderFlowRoutineHeartBean, 0)
 	for _, v := range strlist0 {
 		for k1, v1 := range v.(map[string]interface{}) {
-			mmhb := new(module.MetaMstFlowRoutineHeartBean)
+			mmhb := new(module.MetaLeaderFlowRoutineHeartBean)
 			err := json.Unmarshal([]byte(v1.(string)), &mmhb)
 			if err != nil {
 				glog.Glog(LogF, fmt.Sprint(err))
@@ -907,7 +908,7 @@ func (rrs *ResponseResourceFlow) InstanceListStatusHandler(request *restful.Requ
 			timeStr := time.Now().Format("2006-01-02 15:04:05")
 			ise, _ := util.IsExpired(mmhb.UpdateTime, timeStr, 300)
 			if ise {
-				glog.Glog(LogF, fmt.Sprintf("%v timeout %v,%v.", mmhb.MstId, mmhb.Ip, mmhb.Port))
+				glog.Glog(LogF, fmt.Sprintf("%v timeout %v,%v.", mmhb.LeaderId, mmhb.Ip, mmhb.Port))
 				bt0.Remove(k1)
 				continue
 			}
@@ -994,18 +995,18 @@ func (rrs *ResponseResourceFlow) InstanceRemoveHandler(request *restful.Request,
 	util.ApiResponse(response.ResponseWriter, 200, "", retlst)
 }
 
-func (rrs *ResponseResourceFlow) MstFlowRemoveHandler(request *restful.Request, response *restful.Response) {
-	p := new(module.MetaParaMstFlowRemoveBean)
+func (rrs *ResponseResourceFlow) LeaderFlowRemoveHandler(request *restful.Request, response *restful.Response) {
+	p := new(module.MetaParaLeaderFlowRemoveBean)
 	err := request.ReadEntity(&p)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("Parse json error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("Parse json error.%v", err), nil)
 		return
 	}
-	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_FLOW_MASTER)
+	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_FLOW_LEADER)
 	defer bt.Close()
 
-	err = bt.Remove(p.MstId + "," + p.FlowId)
+	err = bt.Remove(p.LeaderId + "," + p.FlowId)
 	if err != nil {
 		glog.Glog(LogF, fmt.Sprintf("data in db remove error.%v", err))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("data in db remove error.%v", err), nil)
@@ -1016,7 +1017,7 @@ func (rrs *ResponseResourceFlow) MstFlowRemoveHandler(request *restful.Request, 
 }
 
 func (rrs *ResponseResourceFlow) FlowRoutineStatusHandler(request *restful.Request, response *restful.Response) {
-	mharr := rrs.getMstHeart()
+	mharr := rrs.getLeaderHeart()
 	if len(mharr) == 0 {
 		glog.Glog(LogF, fmt.Sprintf("no flow port error."))
 		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("no flow port error."), nil)
@@ -1116,10 +1117,10 @@ func (rrs *ResponseResourceFlow) FlowRoutineAddHandler(request *restful.Request,
 		return
 	}
 	glog.Glog(LogF, fmt.Sprint(p))
-	fparr := rrs.getMstFlowPort(p.FlowId, p.MstId)
+	fparr := rrs.getLeaderFlowPort(p.FlowId, p.LeaderId)
 	if len(fparr) == 0 {
-		glog.Glog(LogF, fmt.Sprintf("no mst flow routine error."))
-		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("no mst flow routine error."), nil)
+		glog.Glog(LogF, fmt.Sprintf("no Leader flow routine error."))
+		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("no Leader flow routine error."), nil)
 		return
 	}
 
@@ -1174,10 +1175,10 @@ func (rrs *ResponseResourceFlow) FlowRoutineSubHandler(request *restful.Request,
 		return
 	}
 
-	fparr := rrs.getMstFlowPort(p.FlowId, p.MstId)
+	fparr := rrs.getLeaderFlowPort(p.FlowId, p.LeaderId)
 	if len(fparr) == 0 {
-		glog.Glog(LogF, fmt.Sprintf("no mst flow routine error."))
-		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("no mst flow routine error."), nil)
+		glog.Glog(LogF, fmt.Sprintf("no Leader flow routine error."))
+		util.ApiResponse(response.ResponseWriter, 700, fmt.Sprintf("no Leader flow routine error."), nil)
 		return
 	}
 
@@ -1352,15 +1353,15 @@ func (rrs *ResponseResourceFlow) FlowParameterAddHandler(request *restful.Reques
 	util.ApiResponse(response.ResponseWriter, 200, "", retlst)
 }
 
-func (rrs *ResponseResourceFlow) getMstPort(pnum int) []*module.MetaMstHeartBean {
-	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_MASTER_HEART)
+func (rrs *ResponseResourceFlow) getLeaderPort(pnum int) []*module.MetaLeaderHeartBean {
+	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_LEADER_HEART)
 	defer bt.Close()
 
 	strlist := bt.Scan()
 	bt.Close()
-	retlst := make([]*module.MetaMstHeartBean, 0)
+	retlst := make([]*module.MetaLeaderHeartBean, 0)
 	cnt := 1
-	tmap := make(map[string]*module.MetaMstHeartBean)
+	tmap := make(map[string]*module.MetaLeaderHeartBean)
 	for j := 0; j < pnum && cnt <= pnum; j++ {
 		for _, v := range strlist {
 			if cnt > pnum {
@@ -1370,7 +1371,7 @@ func (rrs *ResponseResourceFlow) getMstPort(pnum int) []*module.MetaMstHeartBean
 				if cnt > pnum {
 					break
 				}
-				mmhb := new(module.MetaMstHeartBean)
+				mmhb := new(module.MetaLeaderHeartBean)
 				err := json.Unmarshal([]byte(v1.(string)), &mmhb)
 				if err != nil {
 					glog.Glog(LogF, fmt.Sprint(err))
@@ -1379,18 +1380,18 @@ func (rrs *ResponseResourceFlow) getMstPort(pnum int) []*module.MetaMstHeartBean
 				timeStr := time.Now().Format("2006-01-02 15:04:05")
 				ise, _ := util.IsExpired(mmhb.UpdateTime, timeStr, 300)
 				if ise {
-					glog.Glog(LogF, fmt.Sprintf("%v timeout %v,%v.", mmhb.MstId, mmhb.Ip, mmhb.Port))
+					glog.Glog(LogF, fmt.Sprintf("%v timeout %v,%v.", mmhb.LeaderId, mmhb.Ip, mmhb.Port))
 					continue
 				}
-				_, ok := tmap[mmhb.MstId]
+				_, ok := tmap[mmhb.LeaderId]
 				if ok {
-					v2 := tmap[mmhb.MstId]
+					v2 := tmap[mmhb.LeaderId]
 					pn, _ := strconv.Atoi(v2.ProcessNum)
 					v2.ProcessNum = fmt.Sprint(pn + 1)
-					tmap[v2.MstId] = v2
+					tmap[v2.LeaderId] = v2
 				} else {
 					mmhb.ProcessNum = fmt.Sprint(1)
-					tmap[mmhb.MstId] = mmhb
+					tmap[mmhb.LeaderId] = mmhb
 				}
 				cnt += 1
 			}
@@ -1403,27 +1404,27 @@ func (rrs *ResponseResourceFlow) getMstPort(pnum int) []*module.MetaMstHeartBean
 	return retlst
 }
 
-func (rrs *ResponseResourceFlow) saveMstFlow(mmfb *module.MetaMstFlowBean) error {
-	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_FLOW_MASTER)
+func (rrs *ResponseResourceFlow) saveLeaderFlow(mmfb *module.MetaLeaderFlowBean) error {
+	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_FLOW_LEADER)
 	defer bt.Close()
 
 	jsonstr, _ := json.Marshal(mmfb)
-	err := bt.Set(mmfb.MstId+"."+mmfb.FlowId, string(jsonstr))
+	err := bt.Set(mmfb.LeaderId+"."+mmfb.FlowId, string(jsonstr))
 	if err != nil {
 		return errors.New(fmt.Sprintf("data in db update error.%v", err))
 	}
 	return nil
 }
 
-func (rrs *ResponseResourceFlow) getMstHeart() []*module.MetaMstHeartBean {
-	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_MASTER_HEART)
+func (rrs *ResponseResourceFlow) getLeaderHeart() []*module.MetaLeaderHeartBean {
+	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_LEADER_HEART)
 	defer bt.Close()
 
 	strlist := bt.Scan()
-	retlst := make([]*module.MetaMstHeartBean, 0)
+	retlst := make([]*module.MetaLeaderHeartBean, 0)
 	for _, v := range strlist {
 		for k1, v1 := range v.(map[string]interface{}) {
-			m := new(module.MetaMstHeartBean)
+			m := new(module.MetaLeaderHeartBean)
 			err := json.Unmarshal([]byte(v1.(string)), &m)
 			if err != nil {
 				glog.Glog(LogF, fmt.Sprint(err))
@@ -1432,7 +1433,7 @@ func (rrs *ResponseResourceFlow) getMstHeart() []*module.MetaMstHeartBean {
 			timeStr := time.Now().Format("2006-01-02 15:04:05")
 			ise, _ := util.IsExpired(m.UpdateTime, timeStr, 300)
 			if ise {
-				glog.Glog(LogF, fmt.Sprintf("%v timeout %v,%v.", m.MstId, m.Ip, m.Port))
+				glog.Glog(LogF, fmt.Sprintf("%v timeout %v,%v.", m.LeaderId, m.Ip, m.Port))
 				bt.Remove(k1)
 				continue
 			}
@@ -1442,17 +1443,17 @@ func (rrs *ResponseResourceFlow) getMstHeart() []*module.MetaMstHeartBean {
 	return retlst
 }
 
-func (rrs *ResponseResourceFlow) getMstInfo(mstid string, pnum int) (*module.MetaMstHeartBean, error) {
-	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_MASTER_HEART)
+func (rrs *ResponseResourceFlow) getLeaderInfo(leaderid string, pnum int) (*module.MetaLeaderHeartBean, error) {
+	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_LEADER_HEART)
 	defer bt.Close()
 
 	strlist := bt.Scan()
 	bt.Close()
 	flag := 0
-	var ret *module.MetaMstHeartBean
+	var ret *module.MetaLeaderHeartBean
 	for _, v := range strlist {
 		for _, v1 := range v.(map[string]interface{}) {
-			m := new(module.MetaMstHeartBean)
+			m := new(module.MetaLeaderHeartBean)
 			err := json.Unmarshal([]byte(v1.(string)), &m)
 			if err != nil {
 				glog.Glog(LogF, fmt.Sprint(err))
@@ -1461,10 +1462,10 @@ func (rrs *ResponseResourceFlow) getMstInfo(mstid string, pnum int) (*module.Met
 			timeStr := time.Now().Format("2006-01-02 15:04:05")
 			ise, _ := util.IsExpired(m.UpdateTime, timeStr, 300)
 			if ise {
-				glog.Glog(LogF, fmt.Sprintf("%v timeout %v:%v.", m.MstId, m.Ip, m.Port))
+				glog.Glog(LogF, fmt.Sprintf("%v timeout %v:%v.", m.LeaderId, m.Ip, m.Port))
 				continue
 			}
-			if m.MstId != mstid {
+			if m.LeaderId != leaderid {
 				continue
 			}
 			ret = m
@@ -1473,22 +1474,22 @@ func (rrs *ResponseResourceFlow) getMstInfo(mstid string, pnum int) (*module.Met
 		}
 	}
 	for flag == 0 {
-		return nil, errors.New("no mst obtain.")
+		return nil, errors.New("no Leader obtain.")
 	}
 	return ret, nil
 }
 
-func (rrs *ResponseResourceFlow) getFlowPort(flowid string) ([]module.MetaMstFlowBean, error) {
-	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_FLOW_MASTER)
+func (rrs *ResponseResourceFlow) getFlowPort(flowid string) ([]module.MetaLeaderFlowBean, error) {
+	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_FLOW_LEADER)
 	defer bt.Close()
 
 	strlist := bt.Scan()
 	bt.Close()
 	flag := 0
-	retlst := make([]module.MetaMstFlowBean, 0)
+	retlst := make([]module.MetaLeaderFlowBean, 0)
 	for _, v := range strlist {
 		for k1, v1 := range v.(map[string]interface{}) {
-			mmf := new(module.MetaMstFlowBean)
+			mmf := new(module.MetaLeaderFlowBean)
 			err := json.Unmarshal([]byte(v1.(string)), &mmf)
 			if err != nil {
 				glog.Glog(LogF, fmt.Sprint(err))
@@ -1498,10 +1499,10 @@ func (rrs *ResponseResourceFlow) getFlowPort(flowid string) ([]module.MetaMstFlo
 				glog.Glog(LogF, fmt.Sprintf("%v != %v", mmf.FlowId, flowid))
 				continue
 			}
-			ism, _ := rrs.IsExpiredMst(mmf.MstId)
+			ism, _ := rrs.IsExpiredLeader(mmf.LeaderId)
 			if ism {
-				glog.Glog(LogF, fmt.Sprintf("%v timeout %v,%v.", mmf.MstId, mmf.Ip, mmf.Port))
-				bt0 := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_FLOW_MASTER)
+				glog.Glog(LogF, fmt.Sprintf("%v timeout %v,%v.", mmf.LeaderId, mmf.Ip, mmf.Port))
+				bt0 := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_FLOW_LEADER)
 				defer bt0.Close()
 				bt0.Remove(k1)
 				bt0.Close()
@@ -1518,30 +1519,30 @@ func (rrs *ResponseResourceFlow) getFlowPort(flowid string) ([]module.MetaMstFlo
 	return retlst, nil
 }
 
-func (rrs *ResponseResourceFlow) getMstFlowPort(flowid string, mstid string) []*module.MetaMstFlowRoutineHeartBean {
+func (rrs *ResponseResourceFlow) getLeaderFlowPort(flowid string, leaderid string) []*module.MetaLeaderFlowRoutineHeartBean {
 	rrs.Lock()
 	rrs.Unlock()
-	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_MASTER_ROUTINE_HEART)
+	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_LEADER_ROUTINE_HEART)
 	defer bt.Close()
 
 	strlist := bt.Scan()
-	retlst := make([]*module.MetaMstFlowRoutineHeartBean, 0)
+	retlst := make([]*module.MetaLeaderFlowRoutineHeartBean, 0)
 	for _, v := range strlist {
 		for k1, v1 := range v.(map[string]interface{}) {
-			mmf := new(module.MetaMstFlowRoutineHeartBean)
+			mmf := new(module.MetaLeaderFlowRoutineHeartBean)
 			err := json.Unmarshal([]byte(v1.(string)), &mmf)
 			if err != nil {
 				glog.Glog(LogF, fmt.Sprint(err))
 				continue
 			}
-			if mmf.FlowId != flowid || mmf.MstId != mstid {
-				glog.Glog(LogF, fmt.Sprintf("%v!=%v or %v!=%v.", mmf.FlowId, flowid, mmf.MstId, mstid))
+			if mmf.FlowId != flowid || mmf.LeaderId != leaderid {
+				glog.Glog(LogF, fmt.Sprintf("%v!=%v or %v!=%v.", mmf.FlowId, flowid, mmf.LeaderId, leaderid))
 				continue
 			}
 			timeStr := time.Now().Format("2006-01-02 15:04:05")
 			ise, _ := util.IsExpired(mmf.UpdateTime, timeStr, 300)
 			if ise {
-				glog.Glog(LogF, fmt.Sprintf("%v timeout %v:%v.", mmf.MstId, mmf.Ip, mmf.Port))
+				glog.Glog(LogF, fmt.Sprintf("%v timeout %v:%v.", mmf.LeaderId, mmf.Ip, mmf.Port))
 				bt.Remove(k1)
 				continue
 			}
@@ -1552,8 +1553,8 @@ func (rrs *ResponseResourceFlow) getMstFlowPort(flowid string, mstid string) []*
 	return retlst
 }
 
-func (rrs *ResponseResourceFlow) IsExpiredMst(mstid string) (bool, error) {
-	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_MASTER_HEART)
+func (rrs *ResponseResourceFlow) IsExpiredLeader(leaderid string) (bool, error) {
+	bt := db.NewBoltDB(conf.BboltDBPath+"/"+util.FILE_AUTO_SYS_DBSTORE, util.TABLE_AUTO_SYS_LEADER_HEART)
 	defer bt.Close()
 
 	strlist := bt.Scan()
@@ -1561,20 +1562,20 @@ func (rrs *ResponseResourceFlow) IsExpiredMst(mstid string) (bool, error) {
 	flag := 1
 	for _, v := range strlist {
 		for _, v1 := range v.(map[string]interface{}) {
-			mmh := new(module.MetaMstHeartBean)
+			mmh := new(module.MetaLeaderHeartBean)
 			err := json.Unmarshal([]byte(v1.(string)), &mmh)
 			if err != nil {
 				glog.Glog(LogF, fmt.Sprint(err))
 				continue
 			}
-			if mmh.MstId != mstid {
-				glog.Glog(LogF, fmt.Sprintf("%v!=%v.", mmh.MstId, mstid))
+			if mmh.LeaderId != leaderid {
+				glog.Glog(LogF, fmt.Sprintf("%v!=%v.", mmh.LeaderId, leaderid))
 				continue
 			}
 			timeStr := time.Now().Format("2006-01-02 15:04:05")
 			ise, _ := util.IsExpired(mmh.UpdateTime, timeStr, 300)
 			if ise {
-				glog.Glog(LogF, fmt.Sprintf("%v timeout %v:%v.", mmh.MstId, mmh.Ip, mmh.Port))
+				glog.Glog(LogF, fmt.Sprintf("%v timeout %v:%v.", mmh.LeaderId, mmh.Ip, mmh.Port))
 				flag = 1
 				continue
 			}

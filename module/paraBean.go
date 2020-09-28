@@ -6,16 +6,16 @@ type MetaParaBean struct {
 	Job            string        `json:"job"`
 	RunContext     string        `json:"runcontext"`
 	Enable         string        `json:"enable"`
-	SServer        string        `json:"sserver"`
-	MServer        string        `json:"mstid"`
+	WServer        string        `json:"wserver"` //worker server
+	MServer        string        `json:"mserver"` //main server
 	Ip             string        `json:"ip"`
 	Port           string        `json:"port"`
-	Sip            string        `json:"sip"`
-	Sport          string        `json:"sport"`
+	Wip            string        `json:"wip"`
+	Wport          string        `json:"wport"`
 	Mip            string        `json:"mip"`
 	Mport          string        `json:"mport"`
 	TimeWindow     string        `json:"timewindow"`
-	RetryCnt       string        `json:"retrycnt"`
+	Retry          string        `json:"retry"`
 	Alert          string        `json:"alert"`
 	TimeTrigger    string        `json:"timetrigger"`
 	JobType        string        `json:"jobtype"`
@@ -38,7 +38,7 @@ type MetaParaBean struct {
 	Description    string        `json:"description"`
 	DbStore        string        `json:"dbstore"`
 	HomeDir        string        `json:"homedir"`
-	MstId          string        `json:"mstid"`
+	LeaderId       string        `json:"leaderid"`
 	ProcessNum     string        `json:"processnum"`
 	RoutineId      string        `json:"routineid"`
 	JobList        []interface{} `json:"joblist"`

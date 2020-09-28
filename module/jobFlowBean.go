@@ -16,7 +16,7 @@ type MetaJobFlowBean struct {
 	Ip         string                 `json:"ip"`
 	Port       string                 `json:"port"`
 	HomeDir    string                 `json:"homedir"`
-	MstId      string                 `json:"mstid"`
+	LeaderId   string                 `json:"leaderid"`
 	Enable     string                 `json:"enable"`
 	ProcessNum string                 `json:"processnum"`
 }
