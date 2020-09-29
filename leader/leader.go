@@ -25,6 +25,8 @@ import (
 	"github.com/lhzd863/autoflow/module"
 	"github.com/lhzd863/autoflow/util"
 	"github.com/lhzd863/autoflow/workpool"
+
+	_ "net/http/pprof"
 )
 
 var (
@@ -662,6 +664,9 @@ func (workPool *MyWork) DoWork(workRoutine int) {
 				workPool.RoutineRegisterRemove(m)
 				return
 			default:
+				rand.Seed(time.Now().UnixNano())
+				ri := rand.Intn(2)
+				time.Sleep(time.Duration(ri) * time.Second)
 			}
 		}
 	})

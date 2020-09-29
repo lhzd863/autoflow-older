@@ -27,6 +27,7 @@ type MetaJobBean struct {
 	Priority       string        `json:"priority"`
 	RunningCmd     string        `json:"runningcmd"`
 	Server         []interface{} `json:"server"`
+	Timeout        string        `json:"timeout"`
 }
 
 type MetaParaFlowJobAddBean struct {
@@ -81,7 +82,7 @@ type MetaParaFlowJobUpdateBean struct {
 	Enable         string `json:"enable"`
 	TimeWindow     string `json:"timewindow"`
 	DynamicServer  string `json:"dynamicserver"`
-	Retry       string `json:"retry"`
+	Retry          string `json:"retry"`
 	Alert          string `json:"alert"`
 	TimeTrigger    string `json:"timetrigger"`
 	Frequency      string `json:"frequency"`

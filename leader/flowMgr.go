@@ -20,6 +20,8 @@ import (
 	"github.com/lhzd863/autoflow/module"
 	"github.com/lhzd863/autoflow/util"
 	uuid "github.com/satori/go.uuid"
+
+	_ "net/http/pprof"
 )
 
 type FlowMgr struct {
@@ -315,8 +317,8 @@ func (m *FlowMgr) jobStreamJob(sys string, job string) error {
 	return nil
 }
 
-func (m *FlowMgr) invokeRealJob(job map[string]interface{}) {
-	glog.Glog(m.LogF, fmt.Sprintf("exec %v.%v on slave %v [%v:%v].", job["sys"], job["job"], job["wserver"], job["wip"], job["wport"]))
+func (m *FlowMgr) invokeRealJob(job map[string]interface{}) error {
+	glog.Glog(m.LogF, fmt.Sprintf("exec %v.%v on worker %v [%v:%v].", job["sys"], job["job"], job["wserver"], job["wip"], job["wport"]))
 	SFlag := 0
 	timeStr := time.Now().Format("2006-01-02 15:04:05")
 	var waitGroup util.WaitGroupWrapper
@@ -327,35 +329,35 @@ func (m *FlowMgr) invokeRealJob(job map[string]interface{}) {
 	_, ok := job["sys"]
 	if !ok {
 		glog.Glog(m.LogF, fmt.Sprintf("job sys att is null"))
-		return
+		return errors.New("job sys att is null")
 	}
 	mf.Sys = job["sys"].(string)
 
 	_, ok = job["job"]
 	if !ok {
 		glog.Glog(m.LogF, fmt.Sprintf("job job att is null"))
-		return
+		return errors.New("job att is null")
 	}
 	mf.Job = job["job"].(string)
 
 	_, ok = job["wip"]
 	if !ok {
 		glog.Glog(m.LogF, fmt.Sprintf("job wip att is null"))
-		return
+		return errors.New("job wip att is null")
 	}
 	mf.Wip = job["wip"].(string)
 
 	_, ok = job["wport"]
 	if !ok {
 		glog.Glog(m.LogF, fmt.Sprintf("job wport att is null"))
-		return
+		return errors.New("job wport att is null")
 	}
 	mf.Wport = job["wport"].(string)
 
 	_, ok = job["wserver"]
 	if !ok {
 		glog.Glog(m.LogF, fmt.Sprintf("job wserver att is null"))
-		return
+		return errors.New("job wserver att is null")
 	}
 	mf.WorkerId = job["wserver"].(string)
 	mf.StartTime = timeStr
@@ -397,7 +399,7 @@ func (m *FlowMgr) invokeRealJob(job map[string]interface{}) {
 	_, ok = job["retry"]
 	if !ok {
 		glog.Glog(m.LogF, fmt.Sprintf("job retry att is null"))
-		return
+		return errors.New("job retry att is null")
 	}
 	retry, err := strconv.Atoi(job["retry"].(string))
 	if err != nil {
@@ -409,7 +411,7 @@ func (m *FlowMgr) invokeRealJob(job map[string]interface{}) {
 	_, ok = job["alert"]
 	if !ok {
 		glog.Glog(m.LogF, fmt.Sprintf("job alert att is null"))
-		return
+		return errors.New("job alert att is null")
 	}
 	mjwb.Alert = job["alert"].(string)
 	mjwb.Status = util.STATUS_AUTO_RUNNING
@@ -424,7 +426,7 @@ func (m *FlowMgr) invokeRealJob(job map[string]interface{}) {
 		_, ok = ast["cmd"]
 		if !ok {
 			glog.Glog(m.LogF, fmt.Sprintf("job step cmd att is null"))
-			return
+			return errors.New("job step cmd att is null")
 		}
 		mjwb.Cmd = append(mjwb.Cmd, ast["cmd"].(string))
 	}
@@ -436,14 +438,14 @@ func (m *FlowMgr) invokeRealJob(job map[string]interface{}) {
 		_, ok = ast["key"]
 		if !ok {
 			glog.Glog(m.LogF, fmt.Sprintf("key att is null"))
-			return
+			continue
 		}
 		b.K = ast["key"].(string)
 
 		_, ok = ast["val"]
 		if !ok {
 			glog.Glog(m.LogF, fmt.Sprintf("val att is null"))
-			return
+			continue
 		}
 		b.V = ast["val"].(string)
 		jsonstr0, err := json.Marshal(b)
@@ -459,7 +461,7 @@ func (m *FlowMgr) invokeRealJob(job map[string]interface{}) {
 		glog.Glog(m.LogF, fmt.Sprintf("%v %v %v", cfile, cline, err))
 		exitChan <- 1
 		waitGroup.Wait()
-		return
+		return err
 	}
 	//m.jobStatusUpdate(job,util.STATUS_AUTO_RUNNING,"st",fmt.Sprint(u1))
 
@@ -468,7 +470,7 @@ func (m *FlowMgr) invokeRealJob(job map[string]interface{}) {
 		glog.Glog(m.LogF, fmt.Sprintf("could not update status: %v", err))
 		exitChan <- 1
 		waitGroup.Wait()
-		return
+		return err
 	}
 	// 建立连接到gRPC服务
 	conn, err := grpc.Dial(job["wip"].(string)+":"+job["wport"].(string), grpc.WithInsecure())
@@ -478,7 +480,7 @@ func (m *FlowMgr) invokeRealJob(job map[string]interface{}) {
 		err = m.updateStatusEnd(job["sys"].(string), job["job"].(string), util.STATUS_AUTO_FAIL)
 		exitChan <- 1
 		waitGroup.Wait()
-		return
+		return err
 	}
 	// 函数结束时关闭连接
 	defer conn.Close()
@@ -486,36 +488,60 @@ func (m *FlowMgr) invokeRealJob(job map[string]interface{}) {
 	// 创建Waiter服务的客户端
 	t := gproto.NewWorkerClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
-	defer cancel()
-
-	// 调用gRPC接口
-	tr, err := t.JobStart(ctx, &gproto.Req{JsonStr: string(jsonstr)})
+	timeoutstr := "0"
+	_, ok = job["timeout"]
+	if !ok {
+		glog.Glog(m.LogF, fmt.Sprintf("timeout att is null"))
+		return errors.New("job timeout att is null")
+	} else if len(job["timeout"].(string)) > 0 {
+		timeoutstr = job["timeout"].(string)
+	} else {
+		timeoutstr = "0"
+	}
+	timeout, err := strconv.ParseInt(timeoutstr, 10, 64)
 	if err != nil {
+		glog.Glog(m.LogF, fmt.Sprint(err))
+		return err
+	}
+
+	var tr *gproto.Res
+	// 调用gRPC接口
+	if timeout > 0 {
+		glog.Glog(m.LogF, "exec job with timeout.")
+		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
+		defer cancel()
+		tr, err = t.JobStart(ctx, &gproto.Req{JsonStr: string(jsonstr)})
+	} else {
+		glog.Glog(m.LogF, "exec job no timeout.")
+		tr, err = t.JobStart(context.Background(), &gproto.Req{JsonStr: string(jsonstr)})
+	}
+
+	if err != nil {
+		err1 := err
 		_, cfile, cline, _ := runtime.Caller(1)
 		glog.Glog(m.LogF, fmt.Sprintf("%v %v could not greet: %v", cfile, cline, err))
 		err = m.updateStatusEnd(job["sys"].(string), job["job"].(string), util.STATUS_AUTO_FAIL)
 		exitChan <- 1
 		waitGroup.Wait()
-		return
+		return err1
 	}
-	//change job status
-	if tr.Status_Code == 200 {
+	//change job status,Status_Code is script execute return cod
+	if tr.Status_Code == 0 {
 		err = m.updateStatusEnd(job["sys"].(string), job["job"].(string), util.STATUS_AUTO_SUCC)
 	} else {
 		glog.Glog(LogF, fmt.Sprint(tr.Status_Txt))
 		err = m.updateStatusEnd(job["sys"].(string), job["job"].(string), util.STATUS_AUTO_FAIL)
 		exitChan <- 1
 		waitGroup.Wait()
-		return
+		return errors.New(tr.Status_Txt)
 	}
 	//stream job
-	if err != nil {
-		glog.Glog(m.LogF, fmt.Sprint(err))
-		exitChan <- 1
-		waitGroup.Wait()
-		return
-	}
+	// if err != nil {
+	// 	glog.Glog(m.LogF, fmt.Sprint(err))
+	// 	exitChan <- 1
+	// 	waitGroup.Wait()
+	// 	return
+	// }
 	err = m.workerExecApplicationLogout(job["wserver"].(string))
 	if err != nil {
 		glog.Glog(m.LogF, fmt.Sprint(err))
@@ -523,6 +549,7 @@ func (m *FlowMgr) invokeRealJob(job map[string]interface{}) {
 	exitChan <- 1
 	waitGroup.Wait()
 	m.streamJob(job)
+	return nil
 }
 
 func (m *FlowMgr) Register(mf *module.MetaParaSystemLeaderFlowRoutineJobRunningHeartAddBean) bool {

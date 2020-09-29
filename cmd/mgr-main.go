@@ -10,6 +10,9 @@ import (
 
 	"github.com/lhzd863/autoflow/leader"
 	"github.com/lhzd863/autoflow/util"
+
+	"net/http"
+	_ "net/http/pprof"
 )
 
 var (
@@ -20,6 +23,11 @@ var (
 
 func main() {
 	flag.Parse()
+
+	go func() {
+		log.Println(http.ListenAndServe("0.0.0.0:6060", nil))
+	}()
+
 	conf = new(leader.MetaConf)
 	yamlFile, err := ioutil.ReadFile(*cfg1)
 	if err != nil {
